@@ -27,7 +27,6 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 	int posx = (screenWidth - iWidth) * 0.5;
 	int posy = (screenHeight - iHeight) * 0.5;
 	this->setGeometry(posx, posy, iWidth, iHeight);
-	isqr = false;
 	
 	// 金额
 	QRegExp rx("^([0-9]{0,5}\.[0-9]{1,2})$");
@@ -113,41 +112,6 @@ void PayDialog::moneyChanged(const QString &newMoney)
 	ui.labMoneyTag->move(moneyPos.x() + (moneyPos.width() - fontsz) - 20, moneyTagOriPos.y());
 }
 
-void PayDialog::ToQRFrame()
-{
-	isqr = true;
-	QRect dlgRect = this->geometry();
-	int ipWidth = dlgRect.width() * 1.2;
-	int iHeight = dlgRect.height() * 0.8;
-	QDesktopWidget *desktop = QApplication::desktop();
-	QRect screen = desktop->screenGeometry();
-	int screenWidth = screen.width();
-	int screenHeight = screen.height();
-	int posx = (screenWidth - ipWidth) * 0.5;
-	int posy = (screenHeight - iHeight) * 0.5;
-	this->setGeometry(posx, posy, ipWidth, iHeight);
-
-	ui.payBtnWidget->hide();
-	ui.labPayTip->hide();
-	// 金额位置移动
-	QRect moneyOriRect = ui.moneyWid->frameGeometry();
-	int iWidth = moneyOriRect.width();
-	iHeight = moneyOriRect.height();
-	posx = (ipWidth - moneyOriRect.width()) * 0.5;
-	posy = moneyOriRect.y() + 55;
-	ui.moneyWid->setGeometry(posx, posy, iWidth, iHeight);
-
-	QLabel *tipLab = new QLabel(this);
-	tipLab->setText(QString::fromLocal8Bit("出示给客户使用微信/支付宝扫码支付"));
-	tipLab->setAlignment(Qt::AlignHCenter);
-	iWidth += 50;
-	posx = (ipWidth - iWidth) * 0.5;
-	tipLab->setGeometry(posx, posy + 50, iWidth, iHeight);
-	tipLab->setStyleSheet("font: bold 16px \"Arial Black\";");
-
-	setWindowTitle(QString::fromLocal8Bit("支付二维码"));
-}
-
 void PayDialog::resizeEvent(QResizeEvent *event)
 {
 	QSize parsz = event->size();
@@ -157,65 +121,33 @@ void PayDialog::resizeEvent(QResizeEvent *event)
 	qworkPath += pngPath;
 	QPixmap img(qworkPath);
 	QSize imgsz = img.size();
-	if (!isqr)
-	{
-		ui.labIcon->setPixmap(img);
-		int posx = (parsz.width() - imgsz.width()) * 0.5;
-		int posy = 70;
-		ui.labIcon->setGeometry(posx, posy, imgsz.width(), imgsz.height());
-	}
-	else
-	{
-		int imgwidth = parsz.width() * 0.7;
-		float widper = (float )imgwidth / (float )imgsz.width();
-		int imgheight = imgsz.height() * widper;
-		img = img.scaled(imgwidth, imgheight, Qt::KeepAspectRatio);
-		ui.labIcon->setPixmap(img);
-		int posx = (parsz.width() - imgwidth) * 0.5;
-		int posy = 10;
-		ui.labIcon->setGeometry(posx, posy, imgwidth, imgheight);
-	}
-}
-
-void PayDialog::closeEvent(QCloseEvent * e)
-{
-	if (isSelfClose)
-	{
-		//bbqpay *parWid = (bbqpay *)parWidget;
-		//parWid->toShowFloat();
-	}
+	ui.labIcon->setPixmap(img);
+	int posx = (parsz.width() - imgsz.width()) * 0.5;
+	int posy = 70;
+	ui.labIcon->setGeometry(posx, posy, imgsz.width(), imgsz.height());
 }
 
 void PayDialog::ClickPay()
 {
-	//bbqpay *parWid = (bbqpay *)parWidget;
-	//if (parWid->execingTipDlg)
-	//	return;
-	//QString pricestr = ui.ledtPrice->text();
-	//codeSetIO::HOTKEYS &hotKeys = parWid->GetSetting().hotKeys;
-	//if (pricestr.isEmpty())
-	//{
-	//	if (hotKeys.hTradeInfo.qtkey != -1)
-	//		parWid->ShowTipString(QString::fromLocal8Bit("价格不能为空"));
-	//	else
-	//		parWid->ShowTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("价格不能为空"), this);
-	//	return;
-	//}
-	//if (ui.ledtScancode->text().isEmpty())
-	//{
-	//	if (hotKeys.hTradeInfo.qtkey != -1)
-	//		parWid->ShowTipString(QString::fromLocal8Bit("支付码不能为空"));
-	//	else
-	//		parWid->ShowTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("支付码不能为空"), this);
-	//	return;
-	//}
+	bbqshop *parWid = (bbqshop *)parWidget;
+	QString pricestr = ui.ledtPrice->text();
+	if (pricestr.isEmpty())
+	{
+		parWid->ShowTipString(QString::fromLocal8Bit("价格不能为空"));
+		return;
+	}
+	if (ui.ledtScancode->text().isEmpty())
+	{
+		parWid->ShowTipString(QString::fromLocal8Bit("支付码不能为空"));
+		return;
+	}
 
-	//if (parWid->IsImportentOperateNow())
-	//	return;
+	if (parWid->IsImportentOperateNow())
+		return;
 
-	//bool requestSuc = parWid->CreateGoodBillRequest(pricestr.toDouble(), 0.00, URL_SWIP_CARD_DLG);
-	//if (requestSuc)
-	//	emit enablePaySig(false);
+	bool requestSuc = parWid->CreateGoodBillRequest(pricestr.toDouble(), 0.00, URL_SWIP_CARD_DLG);
+	if (requestSuc)
+		emit enablePaySig(false);
 }
 
 void PayDialog::EnablePay(bool enablePay)

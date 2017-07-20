@@ -25,8 +25,8 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	// 读取配置
 	ZHSettingRW settingRW(mZHSetting);
 	settingRW.ReadZHSetting();
-	//if (strlen(mZHSetting.shopCashdestInfo.account) == 0)
-	//	ZHFuncLib::NativeLog("", "mZHSetting.shopCashdestInfo.account == NULL", "a");
+	// url
+	urlServer = new BbqUrlServer(this, &mZHSetting);
 	// 启动钩子
 	startHook();
 
@@ -41,6 +41,83 @@ bbqshop::~bbqshop()
 {
 	stopHook();
 }
+
+void bbqshop::SendToURLRecord(const char *logLevel, const char *logModule, const char *logMessage, int urlTag)
+{
+	urlServer->SendToURLRecord(logLevel, logModule, logMessage, urlTag);
+}
+
+void bbqshop::GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag)
+{
+	urlServer->GetDataFromServer(inSecondAddr, inApi, inData, urlTag);
+}
+
+void bbqshop::GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag)
+{
+	urlServer->GetDataFromServer1(inUrl, inSecondAddr, inApi, ioRootVal, urlTag);
+}
+
+std::string bbqshop::GetPayTool(int inType)
+{
+	return urlServer->GetPayTool(inType);
+}
+
+bool bbqshop::IsImportentOperateNow()
+{
+	return urlServer->IsImportentOperateNow();
+}
+
+void bbqshop::CurlError(std::string url, int res, int urlTag)
+{
+	ShowTipString(QString::fromLocal8Bit("网络异常，请检查网络！"));
+}
+
+
+bool bbqshop::CreateGoodBillRequest(double inOriPrice, double inFavoPrice, int dlgTag)
+{
+	double curPrice = inOriPrice - inFavoPrice;
+	if (curPrice <= 0.0)
+	{
+		ShowTipString(QString::fromLocal8Bit("价格必须大于0，请重新输入"));
+		return false;
+	}
+
+	codeSetIO::ShopCashdeskInfo &shopInfo = GetSetting().shopCashdestInfo;
+	if (shopInfo.isBind != 1)
+	{
+		ShowTipString(QString::fromLocal8Bit("软件未进行初始化配置，请先进行设置。"));
+		return false;
+	}
+	Json::Value root;
+	root["shop_code"] = shopInfo.shopCode;  // 门店代码
+	root["cashdesk_id"] = shopInfo.cashdeskId;
+	root["cashdesk_name"] = shopInfo.cashdeskName;
+	char str[25];
+	itoa(shopInfo.id, str, 10);
+	root["cashier_id"] = str;  // 收银员编号
+	root["cashier_nickname"] = shopInfo.userName;  // 收银员昵称
+
+	char moneychar[15];
+	memset(moneychar, 0, 15);
+	sprintf(moneychar, "%.2f", inOriPrice);
+	root["orig_fee"] = moneychar;
+	memset(moneychar, 0, 15);
+	sprintf(moneychar, "%.2f", inFavoPrice);
+	root["favo_fee"] = moneychar;
+	memset(moneychar, 0, 15);
+	sprintf(moneychar, "%.2f", curPrice);
+	root["total_fee"] = moneychar;
+	root["dcdev_no"] = "";
+	root["dcdev_mac"] = "";
+	root["out_tradeno"] = "";
+	root["m_ticketno"] = "";
+
+	urlServer->GetDataFromServer1(URLTRADE, CARDPAYUNIFIEDORDER, "", root, dlgTag);
+	urlServer->SendToURLRecord(LOG_DEBUG, (dlgTag == URL_SWIP_CARD_DLG) ? LOG_PAY1 : LOG_PAY2, root.toStyledString().c_str());
+
+	return true;
+}
+
 
 inline void bbqshop::startHook()
 {
@@ -318,7 +395,12 @@ void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 	}
 }
 
+codeSetIO::ZHIHUISETTING &bbqshop::GetSetting()
+{
+	return mZHSetting;
+}
+
 void bbqshop::showPayDialog()
 {
 
-};
+}

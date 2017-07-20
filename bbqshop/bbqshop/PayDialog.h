@@ -15,13 +15,11 @@ public:
 	~PayDialog();
 	static PayDialog *InitInstance(bool mustCreate, QWidget *parent = NULL, QString imagePath = "/res/scan_code.png");
 	static void CloseInstance(bool selfclose = false);
-	void ToQRFrame();
 	void SetScanCode(QString inCode);
 	void SetMoney(QString inMoney);
 
 protected:
 	virtual void resizeEvent(QResizeEvent *event);
-	virtual void closeEvent(QCloseEvent * e);
 
 private:
 	Ui::PayDialog ui;
@@ -30,8 +28,6 @@ private:
 	bool isPaying;
 	std::string mcurtradeNo;
 	bool isSelfClose;
-	//std::string qrContent;
-	bool isqr;
 	
 	PayDialog(QString imgPath, QWidget *parent = 0);
 	static PayDialog* instance;
