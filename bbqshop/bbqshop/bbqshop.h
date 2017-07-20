@@ -1,4 +1,4 @@
-#ifndef BBQSHOP_H
+﻿#ifndef BBQSHOP_H
 #define BBQSHOP_H
 
 #ifndef _DEBUG
@@ -26,7 +26,8 @@ public:
 	bbqshop(QApplication *pApp, QWidget *parent = 0);
 	~bbqshop();
 
-	void ShowTipString(QString inTip, QString inTitle = QString::fromLocal8Bit("��ʾ"));
+	void ShowTipString(QString inTip, QString inTitle = QString::fromLocal8Bit("提示"));
+
 private:
 	QApplication *mainApp;
 	bool isShowingPayResult;
@@ -41,6 +42,8 @@ private:
 	void processJsonSaveLoginInfo(const Json::Value &value);
 	inline void startHook();
 	inline void stopHook();
+	inline void hookCodeMsg(MSG* msg);
+	void showPayDialog();
 
 signals:
 	void showTipStringSig(const QString &, const QString &);

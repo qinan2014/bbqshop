@@ -60,7 +60,6 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 		// Terminate the library before destructors are called
 		AfxTermExtensionModule(KeyHookDLL);
 	}
-	memset(hookChars, 0, sizeof(bool) * HOOKCHARSNUM);
 	return 1;   // ok
 }
 
@@ -97,17 +96,15 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 {
 	PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)lparam;
 	//char tmpbuf[150];
-	//sprintf(tmpbuf, "KeyProc keyboard code:[%04d] ,scan code: [%04d], char : %c, flag: %d, time: %d", p->vkCode, 
+	//sprintf(tmpbuf, "KeyProc keyboard code:[%04d] ,scan code: [%04d], char : %c, flag: %d, time: %d. ", p->vkCode, 
 	//	p->scanCode, p->vkCode, p->flags, p->time);
 	//ZHFuncLib::NativeLog("", tmpbuf, "a");
 
 	if (hookChars[START_HOOK] && nCode>=0 && IsWindow(glhDisplayWnd)) 
 	{
-		static int ctlKeyFlag = 500;
-		static int shiftKeyFlag = 500;
 		switch (p->vkCode)
 		{
-		case VK_F1:
+		case HOOK_KEY_WX:
 			{
 				if (hookChars[HOOK_WXKEY])
 				{
@@ -123,6 +120,7 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 			break;
 		}
 	}
+
 
 	return CallNextHookEx(glhHook,nCode,wparam,lparam); //继续传递消息 
 } 

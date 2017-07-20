@@ -10,4 +10,6 @@ enum HookChars
 
 #define HOOKCHARSNUM 2
 
+#define HOOK_KEY_WX VK_F1
+
 #endif

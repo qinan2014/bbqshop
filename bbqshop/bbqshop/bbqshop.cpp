@@ -39,6 +39,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 
 bbqshop::~bbqshop()
 {
+	stopHook();
 }
 
 inline void bbqshop::startHook()
@@ -119,6 +120,10 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 				return true;
 			}
 		}
+		break;
+	case ZHIHUI_CODE_MSG:
+		hookCodeMsg(msg);
+		break;
 	}
 	return false;
 }
@@ -221,6 +226,17 @@ void bbqshop::parseProcessJsonData(QString inJson)
 	}
 }
 
+inline void bbqshop::hookCodeMsg(MSG* msg)
+{
+	PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)msg->lParam;
+	switch (p->vkCode)
+	{
+	case HOOK_KEY_WX:
+		showPayDialog();
+		break;
+	}
+}
+
 void bbqshop::ShowTipString(QString inTip, QString inTitle)
 {
 	emit showTipStringSig(inTip, inTitle);
@@ -301,3 +317,8 @@ void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 		deskInfo.exitTime[strlen(extTime)] = 0;
 	}
 }
+
+void bbqshop::showPayDialog()
+{
+
+};
