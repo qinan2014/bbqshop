@@ -1,0 +1,21 @@
+#ifndef BBQ_ALL_WINDOW_TITLE_H
+#define BBQ_ALL_WINDOW_TITLE_H
+
+#define FLOATWINTITLE "FloatWindow"
+#define FLOATWINTITLEW L"FloatWindow"
+#define MAINDLGTITLE "MainDlg"
+#define MAINDLGTITLEW L"MainDlg"
+#define OCRDLGTITLE "OCRDlg"
+#define OCRDLGTITLEW L"OCRDlg"
+#define UPGRADEDLGTITLE "UpgradeDlg"
+#define UPGRADEDLGTITLEW L"UpgradeDlg"
+#define UPGRADEICONTITLE "UpgradeClientIcon"
+#define UPGRADEICONTITLEW L"UpgradeClientIcon"
+
+#define VERSIONBIGOLD 4
+#define VERSIONBIGNEW 5
+
+#define ZHCLIENTVERSION "v5.2.3"
+#define VERSIONINT VERSIONBIGNEW
+
+#endif

@@ -1,0 +1,256 @@
+﻿// dllmain.cpp : Defines the initialization routines for the DLL.
+//
+
+#include "stdafx.h"
+#include <afxwin.h>
+#include <afxdllx.h>
+#include "KeyHook.h"
+#include "ZhuiHuiMsg.h"
+#include "zhfunclib.h"
+#include <stdio.h>
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+static AFX_EXTENSION_MODULE KeyHookDLL = { NULL, NULL };
+
+#pragma data_seg("shareddata")
+HWND glhDisplayWnd = NULL;
+HHOOK glhHook = NULL;
+HINSTANCE glhInstance = NULL;//DLL实例句柄 
+bool needInterception = true;
+#pragma data_seg()
+
+extern "C" int APIENTRY
+DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
+{
+	// Remove this if you use lpReserved
+	UNREFERENCED_PARAMETER(lpReserved);
+
+	if (dwReason == DLL_PROCESS_ATTACH)
+	{
+		TRACE0("KeyHook.DLL Initializing!\n");
+		
+		// Extension DLL one-time initialization
+		if (!AfxInitExtensionModule(KeyHookDLL, hInstance))
+			return 0;
+
+		// Insert this DLL into the resource chain
+		// NOTE: If this Extension DLL is being implicitly linked to by
+		//  an MFC Regular DLL (such as an ActiveX Control)
+		//  instead of an MFC application, then you will want to
+		//  remove this line from DllMain and put it in a separate
+		//  function exported from this Extension DLL.  The Regular DLL
+		//  that uses this Extension DLL should then explicitly call that
+		//  function to initialize this Extension DLL.  Otherwise,
+		//  the CDynLinkLibrary object will not be attached to the
+		//  Regular DLL's resource chain, and serious problems will
+		//  result.
+
+		new CDynLinkLibrary(KeyHookDLL);
+		glhInstance = hInstance;//插入保存DLL实例句柄
+	}
+	else if (dwReason == DLL_PROCESS_DETACH)
+	{
+		TRACE0("KeyHook.DLL Terminating!\n");
+
+		// Terminate the library before destructors are called
+		AfxTermExtensionModule(KeyHookDLL);
+	}
+	return 1;   // ok
+}
+
+LRESULT keyNumProc(PKBDLLHOOKSTRUCT p, int nCode,WPARAM wparam,LPARAM lparam)
+{
+	static KBDLLHOOKSTRUCT hookCode1;
+	switch (p->flags)
+	{
+	case 0:
+		hookCode1 = *p;
+		break;
+	case 128:
+		{
+			if (p->time - hookCode1.time > 35) // 说明这是一个手动按键消息 将这两个键盘消息全都转发出去
+			{
+				needInterception = false;
+				keybd_event((BYTE)hookCode1.vkCode,0,0,0);
+				needInterception = true;
+				return CallNextHookEx(glhHook,nCode,wparam,lparam); 
+			}
+			else{
+				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG, wparam, lparam); 
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	return 1;
+}
+
+//键盘钩子函数的实现
+LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam) 
+{
+	PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)lparam;
+	//char tmpbuf[150];
+	//sprintf(tmpbuf, "KeyProc keyboard code:[%04d] ,scan code: [%04d], char : %c, flag: %d, time: %d", p->vkCode, 
+	//	p->scanCode, p->vkCode, p->flags, p->time);
+	//ZHFuncLib::NativeLog("", tmpbuf, "a");
+
+	if (needInterception && nCode>=0 && IsWindow(glhDisplayWnd)) 
+	{
+		static int ctlKeyFlag = 500;
+		static int shiftKeyFlag = 500;
+		switch (p->vkCode)
+		{
+		case VK_ESCAPE:
+			{
+				if (shiftKeyFlag < 128 && p->flags >= 128)
+				{
+					::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
+					return 1;
+				}
+			}
+			break;
+		case VK_LSHIFT:
+		case VK_RSHIFT:
+			{
+				shiftKeyFlag = p->flags;
+				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
+				return CallNextHookEx(glhHook,nCode,wparam,lparam);
+			}
+			break;
+		case VK_RETURN:
+			{
+				if (p->flags >= 128){
+					::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG, wparam, lparam); 
+				}
+				return 1;
+			}
+		case VK_LCONTROL: 
+		case VK_RCONTROL:
+			{
+				ctlKeyFlag = p->flags;
+				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
+				return CallNextHookEx(glhHook,nCode,wparam,lparam);
+			}
+		case 48:
+		case 49:
+		case 50:
+		case 51:
+		case 52:
+		case 53:
+		case 54:
+		case 55:
+		case 56:
+		case 57:
+			{
+				if (ctlKeyFlag < 128)
+				{
+					::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
+					return 1;
+				}
+				else
+					return keyNumProc(p,nCode,wparam,lparam);
+			}
+		case 'A':
+		case 'B':
+		case 'C':
+		case 'D':
+		case 'E':
+		case 'F':
+		case 'G':
+		case 'H':
+		case 'I':
+		case 'J':
+		case 'K':
+		case 'L':
+		case 'M':
+		case 'N':
+		case 'O':
+		case 'P':
+		case 'Q':
+		case 'R':
+		case 'S':
+		case 'T':
+		case 'U':
+		case 'V':
+		case 'W':
+		case 'X':
+		case 'Y':
+		case 'Z':
+		case VK_LEFT:
+		case VK_UP:
+		case VK_RIGHT:
+		case VK_DOWN:
+			if (ctlKeyFlag < 128)
+			{
+				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
+				return 1;
+			}
+			break;
+		case 96:  // 小键盘
+		case 97:
+		case 98:
+		case 99:
+		case 100:
+		case 101:
+		case 102:
+		case 103:
+		case 104:
+		case 105:
+			if (ctlKeyFlag < 128)
+			{
+				p->vkCode = p->vkCode - 48;
+				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
+				return 1;
+			}
+		default:
+			break;
+		}
+	}
+
+	return CallNextHookEx(glhHook,nCode,wparam,lparam); //继续传递消息 
+} 
+
+CKeyHook::CKeyHook(){}
+
+CKeyHook::~CKeyHook()
+{
+	StopHook();
+}
+
+BOOL CKeyHook::StartHook(HWND hWnd)
+{
+	BOOL bReslt = FALSE;
+	if (glhHook == NULL)
+		glhHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyProc, glhInstance, 0);
+	if (glhHook != NULL)
+	{
+		bReslt = TRUE;
+	}
+	glhDisplayWnd = hWnd;
+	return bReslt;
+}
+
+void CKeyHook::EnableInterception(bool isNeedInterception)
+{
+	needInterception = isNeedInterception;
+}
+
+BOOL CKeyHook::StopHook()
+{
+	BOOL bResult = FALSE;
+	if (glhHook)
+	{
+		bResult = UnhookWindowsHookEx(glhHook);
+		if (bResult)
+		{
+			glhDisplayWnd = NULL;
+		}
+
+		glhHook = NULL;
+	}
+	return bResult;
+}
