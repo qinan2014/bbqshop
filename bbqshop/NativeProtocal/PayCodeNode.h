@@ -90,6 +90,10 @@ namespace codeSetIO
 		short restartType;  // 定时重启类型
 		short isUsePayGun;  // 是否使用支付扫码枪
 		short isGetPriceActualTime;  // 是否需要实时截图 1标识实时，0标识不截图
+		ShopCashdeskInfo()
+		{
+			account[0] = 0;
+		}
 	};
 
 	struct HOTKEY 

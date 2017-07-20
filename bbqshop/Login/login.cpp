@@ -185,6 +185,11 @@ void Login::CurlError(std::string url, int res, int urlTag)
 
 void Login::loginInfoStore(const Json::Value &value)
 {
+	Json::Value mValData = value;
+	mValData[PRO_HEAD] = TO_FLOATWIN_LOGININFO;
+	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+
 	/*const char *shopCode = value["SHOP_CODE"].asCString();
 	int role = value["ROLE"].asInt();
 	const char *userName = value["USER_NAME"].asCString();
@@ -220,6 +225,6 @@ void Login::loginInfoStore(const Json::Value &value)
 		memcpy(deskInfo.exitTime, extTime, strlen(extTime));
 		deskInfo.exitTime[strlen(extTime)] = 0;
 	}
-
-	urlServer->RecordMemoryInfo("Login success", LOG_DEBUG, LOG_LOGIN, URL_RECORE_LOGIN_MEMORY);*/
+	*/
+	urlServer->RecordMemoryInfo("Login success", LOG_DEBUG, LOG_LOGIN, URL_RECORE_LOGIN_MEMORY);
 }

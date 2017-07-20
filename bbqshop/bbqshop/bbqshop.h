@@ -24,6 +24,7 @@ private:
 	void createTray();
 	void showLoginDialog();
 	void parseProcessJsonData(QString inJson);
+	void processJsonSaveLoginInfo(const Json::Value &value);
 
 signals:
 	void showTipStringSig(const QString &, const QString &);
@@ -37,6 +38,7 @@ private slots:
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);
+	
 };
 
 #endif // BBQSHOP_H

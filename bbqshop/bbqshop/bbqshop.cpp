@@ -24,6 +24,9 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	// 读取配置
 	ZHSettingRW settingRW(mZHSetting);
 	settingRW.ReadZHSetting();
+	//if (strlen(mZHSetting.shopCashdestInfo.account) == 0)
+	//	ZHFuncLib::NativeLog("", "mZHSetting.shopCashdestInfo.account == NULL", "a");
+
 	// 信号
 	connect(this, SIGNAL(showTipStringSig(const QString &, const QString &)), this, SLOT(showTipStringSlot(const QString &, const QString &)));
 	connect(this, SIGNAL(returnFocusToCashier()), this, SLOT(setFocusOnCashier()));
@@ -57,6 +60,7 @@ inline void bbqshop::createTray()
 
 void bbqshop::programQuit()
 {
+	ZHFuncLib::TerminateProcessExceptCurrentOne(LOGINEXE);
 	ZHFuncLib::TerminateProcessExceptCurrentOne(MAINDLGEXE);
 	ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
 	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADEEXE);
@@ -109,14 +113,15 @@ void bbqshop::parseProcessJsonData(QString inJson)
 	int header = value[PRO_HEAD].asInt();
 	switch (header)
 	{
-	case TO_FLOATWINHEADER:
-		//showFloat(value[PRO_DLG_STATUS].asInt() == 0);
-		break;
-	case TO_SHOWPAYDLG:
-		//setPayInfo(value);
-		break;
 	case TO_SHOWTIP:
 		ShowTipString(value[PRO_TIPSTR].asCString());
+		break;
+	case TO_FLOATWIN_LOGININFO:
+		processJsonSaveLoginInfo(value);
+		break;
+
+	case TO_SHOWPAYDLG:
+		//setPayInfo(value);
 		break;
 	case TO_SHOWTIP_NETERROR:
 		{
@@ -240,4 +245,43 @@ void bbqshop::setFocusOnCashier()
 	//::ShowWindow(hprocess,SW_SHOWNORMAL);
 	::BringWindowToTop(hwnd);
 	::SetFocus(hwnd);
+}
+
+void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
+{
+	const char *shopCode = value["SHOP_CODE"].asCString();
+	int role = value["ROLE"].asInt();
+	const char *userName = value["USER_NAME"].asCString();
+	int id = value["ID"].asInt();
+	const char *shopName = value["SHOP_NAME"].asCString();
+	const char *shopID = value["SHOP_ID"].asCString();
+	int shopType = value["SHOP_TYPE"].asInt();
+	int workStatus = value["WORK_STATUS"].asInt();
+	const char *account = value["ACCOUNT"].asCString();
+	const char *loginTime = value["LOGIN_TIME"].asCString();
+	const char *extTime = NULL;
+	if (value.isMember("EXIT_TIME"))
+		extTime = value["EXIT_TIME"].asCString();
+
+	codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+	memcpy(deskInfo.shopCode, shopCode, strlen(shopCode));
+	deskInfo.shopCode[strlen(shopCode)] = 0;
+	deskInfo.role = role;
+	memcpy(deskInfo.userName, userName, strlen(userName));
+	deskInfo.userName[strlen(userName)] = 0;
+	deskInfo.id = id;
+	memcpy(deskInfo.shopName, shopName, strlen(shopName));
+	deskInfo.shopName[strlen(shopName)] = 0;
+	deskInfo.shopid = atoi(shopID);
+	deskInfo.shoptype = shopType;
+	deskInfo.workStatus = workStatus;
+	memcpy(deskInfo.account, account, strlen(account));
+	deskInfo.account[strlen(account)] = 0;
+	memcpy(deskInfo.loginTime, loginTime, strlen(loginTime));
+	deskInfo.loginTime[strlen(loginTime)] = 0;
+	if (extTime != NULL)
+	{
+		memcpy(deskInfo.exitTime, extTime, strlen(extTime));
+		deskInfo.exitTime[strlen(extTime)] = 0;
+	}
 }
