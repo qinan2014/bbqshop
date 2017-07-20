@@ -4,6 +4,7 @@
 #include "zhfunclib.h"
 #include <QMenu>
 #include "AllExeName.h"
+#include <QProcess>
 
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
@@ -15,7 +16,8 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	QTimer::singleShot(100,this, SLOT(hide()) );  // 隐藏自己
 	// 创建托盘
 	createTray();
-	
+	// 登录
+
 }
 
 bbqshop::~bbqshop()
@@ -49,4 +51,19 @@ void bbqshop::programQuit()
 	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADEEXE);
 	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADECLIENTICONEXE);
 	mainApp->quit();
+}
+
+void bbqshop::showLoginDialog()
+{
+	QString program = ZHFuncLib::GetWorkPath().c_str();
+	program += "/";
+	program += MAINDLGEXE;
+	QStringList arguments;
+	QProcess *process = new QProcess(this);
+	QStringList args;
+	//codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+	//args << deskInfo.account;
+	//args << QString::number(curTab);
+
+	process->start(program, args);
 }

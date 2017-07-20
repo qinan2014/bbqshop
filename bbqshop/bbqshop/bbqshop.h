@@ -17,9 +17,11 @@ private:
 	QApplication *mainApp;
 
 	void createTray();
+	void showLoginDialog();
 
 private slots:
 	void programQuit();
+	
 };
 
 #endif // BBQSHOP_H

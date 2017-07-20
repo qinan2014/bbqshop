@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PosPrinterLPT", "PosPrinter
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZHSettingRW", "ZHSettingRW\ZHSettingRW.vcxproj", "{225A36DC-CA4E-40DE-A0B0-4807B455A2F8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Login", "Login\Login.vcxproj", "{008097A4-8A11-4CA0-85BF-F4D833E163AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -67,6 +69,10 @@ Global
 		{225A36DC-CA4E-40DE-A0B0-4807B455A2F8}.Debug|Win32.Build.0 = Debug|Win32
 		{225A36DC-CA4E-40DE-A0B0-4807B455A2F8}.Release|Win32.ActiveCfg = Release|Win32
 		{225A36DC-CA4E-40DE-A0B0-4807B455A2F8}.Release|Win32.Build.0 = Release|Win32
+		{008097A4-8A11-4CA0-85BF-F4D833E163AF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{008097A4-8A11-4CA0-85BF-F4D833E163AF}.Debug|Win32.Build.0 = Debug|Win32
+		{008097A4-8A11-4CA0-85BF-F4D833E163AF}.Release|Win32.ActiveCfg = Release|Win32
+		{008097A4-8A11-4CA0-85BF-F4D833E163AF}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
