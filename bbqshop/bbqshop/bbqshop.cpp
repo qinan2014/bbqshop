@@ -17,7 +17,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	// 创建托盘
 	createTray();
 	// 登录
-
+	showLoginDialog();
 }
 
 bbqshop::~bbqshop()
@@ -57,7 +57,7 @@ void bbqshop::showLoginDialog()
 {
 	QString program = ZHFuncLib::GetWorkPath().c_str();
 	program += "/";
-	program += MAINDLGEXE;
+	program += LOGINEXE;
 	QStringList arguments;
 	QProcess *process = new QProcess(this);
 	QStringList args;

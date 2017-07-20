@@ -3,6 +3,8 @@
 
 #define FLOATWINTITLE "FloatWindow"
 #define FLOATWINTITLEW L"FloatWindow"
+#define LOGINTITLE "Login"
+#define LOGINTITLEW L"Login"
 #define MAINDLGTITLE "MainDlg"
 #define MAINDLGTITLEW L"MainDlg"
 #define OCRDLGTITLE "OCRDlg"

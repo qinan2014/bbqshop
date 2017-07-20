@@ -3,8 +3,11 @@
 
 #include <QtWidgets/QDialog>
 #include "ui_login.h"
+#include "BbqUrlServer.h"
+#include "AccountNumber.h"
+#include "AccessServerResult.h"
 
-class Login : public QDialog
+class Login : public QDialog, public AccessServerResult
 {
 	Q_OBJECT
 
@@ -14,6 +17,24 @@ public:
 
 private:
 	Ui::LoginClass ui;
+	std::vector<AccountNumber::USERPWD *> mUsrs;
+	BbqUrlServer *urlServer;
+	bool isLogining;
+	QWidget *parWidget;
+
+	void initFrame();
+	void getLoginInfo();
+
+protected:
+	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
+	virtual void CurlError(std::string url, int res, int urlTag);
+
+signals:
+	void loginStatus(bool needShow);
+
+private slots:
+	void clickLogin();
+	void onLoginStatus(bool isLogined);
 };
 
 #endif // LOGIN_H
