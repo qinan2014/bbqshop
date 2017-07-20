@@ -129,6 +129,9 @@
     <ProjectReference Include="..\JSON\JSON.vcxproj">
       <Project>{51f4ef1c-46ed-4a96-82a3-f5b3d1d5ad4c}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\KeyHook\KeyHook.vcxproj">
+      <Project>{c14b371f-c6a3-40d2-b2dd-ff110f0b5f2b}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\LibCurl\LibCurl.vcxproj">
       <Project>{5525be67-ff8c-4feb-a47d-e0afc50ee590}</Project>
     </ProjectReference>
@@ -170,7 +173,15 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\NativeProtocal\AllExeName.h" />
+    <ClInclude Include="..\NativeProtocal\AllWindowTitle.h" />
+    <ClInclude Include="..\NativeProtocal\HookKeyChar.h" />
+    <ClInclude Include="..\NativeProtocal\PayCodeNode.h" />
+    <ClInclude Include="..\NativeProtocal\ProcessProtocal.h" />
+    <ClInclude Include="..\NativeProtocal\URLDefine.h" />
+    <ClInclude Include="..\NativeProtocal\ZhuiHuiMsg.h" />
     <ClInclude Include="GeneratedFiles\ui_TipWin.h" />
+    <ClInclude Include="HookKeyChar.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

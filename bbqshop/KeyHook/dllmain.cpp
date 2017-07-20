@@ -8,6 +8,7 @@
 #include "ZhuiHuiMsg.h"
 #include "zhfunclib.h"
 #include <stdio.h>
+#include "HookKeyChar.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,8 +20,9 @@ static AFX_EXTENSION_MODULE KeyHookDLL = { NULL, NULL };
 HWND glhDisplayWnd = NULL;
 HHOOK glhHook = NULL;
 HINSTANCE glhInstance = NULL;//DLL实例句柄 
-bool needInterception = true;
 #pragma data_seg()
+
+bool hookChars[HOOKCHARSNUM];
 
 extern "C" int APIENTRY
 DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
@@ -58,6 +60,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 		// Terminate the library before destructors are called
 		AfxTermExtensionModule(KeyHookDLL);
 	}
+	memset(hookChars, 0, sizeof(bool) * HOOKCHARSNUM);
 	return 1;   // ok
 }
 
@@ -73,9 +76,9 @@ LRESULT keyNumProc(PKBDLLHOOKSTRUCT p, int nCode,WPARAM wparam,LPARAM lparam)
 		{
 			if (p->time - hookCode1.time > 35) // 说明这是一个手动按键消息 将这两个键盘消息全都转发出去
 			{
-				needInterception = false;
+				hookChars[START_HOOK] = false;
 				keybd_event((BYTE)hookCode1.vkCode,0,0,0);
-				needInterception = true;
+				hookChars[START_HOOK] = true;
 				return CallNextHookEx(glhHook,nCode,wparam,lparam); 
 			}
 			else{
@@ -98,7 +101,7 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 	//	p->scanCode, p->vkCode, p->flags, p->time);
 	//ZHFuncLib::NativeLog("", tmpbuf, "a");
 
-	if (needInterception && nCode>=0 && IsWindow(glhDisplayWnd)) 
+	if (hookChars[START_HOOK] && nCode>=0 && IsWindow(glhDisplayWnd)) 
 	{
 		static int ctlKeyFlag = 500;
 		static int shiftKeyFlag = 500;
@@ -234,9 +237,9 @@ BOOL CKeyHook::StartHook(HWND hWnd)
 	return bReslt;
 }
 
-void CKeyHook::EnableInterception(bool isNeedInterception)
+void CKeyHook::EnableInterception(int keyIndex, bool isNeedInterception)
 {
-	needInterception = isNeedInterception;
+	hookChars[keyIndex] = isNeedInterception;
 }
 
 BOOL CKeyHook::StopHook()

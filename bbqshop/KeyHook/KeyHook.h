@@ -10,5 +10,5 @@ public:
 	~CKeyHook();
 	BOOL StartHook(HWND hWnd);
 	BOOL StopHook();
-	void EnableInterception(bool isNeedInterception);
+	void EnableInterception(int keyIndex, bool isNeedInterception);
 };

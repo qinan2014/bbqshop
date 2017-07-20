@@ -238,11 +238,7 @@ void bbqshop::setFocusOnCashier()
 	if (hwnd == NULL)
 		return;
 	BOOL suc = ::SetForegroundWindow(hwnd);//设置后能成功激活进程窗口，但是无法将输入焦点转移到进程窗口
-	//char tmpbuf[100];
-	//sprintf(tmpbuf, "setFocusOnCashier res: %d", suc);
-	//LogError(tmpbuf, "a");
 
-	//::ShowWindow(hprocess,SW_SHOWNORMAL);
 	::BringWindowToTop(hwnd);
 	::SetFocus(hwnd);
 }

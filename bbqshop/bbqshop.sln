@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZHSettingRW", "ZHSettingRW\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Login", "Login\Login.vcxproj", "{008097A4-8A11-4CA0-85BF-F4D833E163AF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KeyHook", "KeyHook\KeyHook.vcxproj", "{C14B371F-C6A3-40D2-B2DD-FF110F0B5F2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -73,6 +75,10 @@ Global
 		{008097A4-8A11-4CA0-85BF-F4D833E163AF}.Debug|Win32.Build.0 = Debug|Win32
 		{008097A4-8A11-4CA0-85BF-F4D833E163AF}.Release|Win32.ActiveCfg = Release|Win32
 		{008097A4-8A11-4CA0-85BF-F4D833E163AF}.Release|Win32.Build.0 = Release|Win32
+		{C14B371F-C6A3-40D2-B2DD-FF110F0B5F2B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C14B371F-C6A3-40D2-B2DD-FF110F0B5F2B}.Debug|Win32.Build.0 = Debug|Win32
+		{C14B371F-C6A3-40D2-B2DD-FF110F0B5F2B}.Release|Win32.ActiveCfg = Release|Win32
+		{C14B371F-C6A3-40D2-B2DD-FF110F0B5F2B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
