@@ -6,6 +6,7 @@
 #include "BbqUrlServer.h"
 #include "AccountNumber.h"
 #include "AccessServerResult.h"
+#include "json/json.h"
 
 class Login : public QDialog, public AccessServerResult
 {
@@ -24,6 +25,8 @@ private:
 
 	void initFrame();
 	void getLoginInfo();
+	void showTipString(const QString &inTip);
+	void loginInfoStore(const Json::Value &value);
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确

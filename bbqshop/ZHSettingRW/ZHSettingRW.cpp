@@ -23,12 +23,12 @@
 #define IMAGEBINARYZATION "ImageBinaryzation"
 // 收银台信息
 #define CDSHOPINFO "ShopCashDesk"
-#define CDSHOPID /*"shopid"*/ NULL
-#define CDID /*"id"*/  NULL
-#define CDROLE /*"role"*/  NULL
-#define CDSHOPTYPE /*"shoptype"*/ NULL
-#define CDSHOPNAME /*"shopname"*/  NULL
-#define CDSHOPCODE /*"shopcode"*/ NULL
+//#define CDSHOPID /*"shopid"*/ NULL
+//#define CDID /*"id"*/  NULL
+//#define CDROLE /*"role"*/  NULL
+//#define CDSHOPTYPE /*"shoptype"*/ NULL
+//#define CDSHOPNAME /*"shopname"*/  NULL
+//#define CDSHOPCODE /*"shopcode"*/ NULL
 #define CDCASHDESKID "cashdeskid"
 #define CDCASHDESKNAME "cashdeskname"
 #define CDDCDEVNO "dcdevno"
@@ -237,12 +237,6 @@ bool ZHSettingRW::readShopCashdeskSetting(TiXmlElement *deskEle, codeSetIO::Shop
 	readEleNum(deskEle->FirstChildElement(RESTARTTYPE), outSetting.restartType);
 	outSetting.isUsePayGun = 1;
 	readEleNum(deskEle->FirstChildElement(ISUSEPAYGUN), outSetting.isUsePayGun);
-	readEleNum(deskEle->FirstChildElement(CDSHOPID), outSetting.shopid);
-	readEleNum(deskEle->FirstChildElement(CDID), outSetting.id);
-	readEleNum(deskEle->FirstChildElement(CDROLE), outSetting.role);
-	readEleNum(deskEle->FirstChildElement(CDSHOPTYPE), outSetting.shoptype);
-	readEleVal(deskEle->FirstChildElement(CDSHOPNAME), outSetting.shopName);
-	readEleVal(deskEle->FirstChildElement(CDSHOPCODE), outSetting.shopCode);
 	readEleVal(deskEle->FirstChildElement(CDCASHDESKID), outSetting.cashdeskId);
 	readEleVal(deskEle->FirstChildElement(CDCASHDESKNAME), outSetting.cashdeskName);
 	readEleVal(deskEle->FirstChildElement(CDDCDEVNO), outSetting.dcdevNo);
@@ -410,18 +404,6 @@ TiXmlElement *ZHSettingRW::writeShopCashdeskSetting(codeSetIO::ShopCashdeskInfo 
 	createEleText(deskEle, RESTARTTYPE, numstring);
 	_itoa(inSetting.isUsePayGun, numstring, 10);
 	createEleText(deskEle, ISUSEPAYGUN, numstring);
-	_itoa(inSetting.shopid, numstring, 10);
-	createEleText(deskEle, CDSHOPID, numstring);
-	_itoa(inSetting.id, numstring, 10);
-	createEleText(deskEle, CDID, numstring);
-	_itoa(inSetting.role, numstring, 10);
-	createEleText(deskEle, CDROLE, numstring);
-	_itoa(inSetting.shoptype, numstring, 10);
-	createEleText(deskEle, CDSHOPTYPE, numstring);
-	createEleText(deskEle, CDSHOPNAME, inSetting.shopName);
-	createEleText(deskEle, CDSHOPCODE, inSetting.shopCode);
-	//_itoa(inSetting.cashdeskId, numstring, 10);
-	//createEleText(deskEle, CDCASHDESKID, numstring);
 	createEleText(deskEle, CDCASHDESKID, inSetting.cashdeskId);
 	createEleText(deskEle, CDCASHDESKNAME, inSetting.cashdeskName);
 	createEleText(deskEle, CDDCDEVNO, inSetting.dcdevNo);
