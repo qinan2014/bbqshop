@@ -107,108 +107,18 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 		static int shiftKeyFlag = 500;
 		switch (p->vkCode)
 		{
-		case VK_ESCAPE:
+		case VK_F1:
 			{
-				if (shiftKeyFlag < 128 && p->flags >= 128)
+				if (hookChars[HOOK_WXKEY])
 				{
-					::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
+					if (p->flags >= 128){
+						::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG, wparam, lparam); 
+					}
 					return 1;
 				}
-			}
-			break;
-		case VK_LSHIFT:
-		case VK_RSHIFT:
-			{
-				shiftKeyFlag = p->flags;
-				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
 				return CallNextHookEx(glhHook,nCode,wparam,lparam);
 			}
 			break;
-		case VK_RETURN:
-			{
-				if (p->flags >= 128){
-					::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG, wparam, lparam); 
-				}
-				return 1;
-			}
-		case VK_LCONTROL: 
-		case VK_RCONTROL:
-			{
-				ctlKeyFlag = p->flags;
-				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
-				return CallNextHookEx(glhHook,nCode,wparam,lparam);
-			}
-		case 48:
-		case 49:
-		case 50:
-		case 51:
-		case 52:
-		case 53:
-		case 54:
-		case 55:
-		case 56:
-		case 57:
-			{
-				if (ctlKeyFlag < 128)
-				{
-					::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
-					return 1;
-				}
-				else
-					return keyNumProc(p,nCode,wparam,lparam);
-			}
-		case 'A':
-		case 'B':
-		case 'C':
-		case 'D':
-		case 'E':
-		case 'F':
-		case 'G':
-		case 'H':
-		case 'I':
-		case 'J':
-		case 'K':
-		case 'L':
-		case 'M':
-		case 'N':
-		case 'O':
-		case 'P':
-		case 'Q':
-		case 'R':
-		case 'S':
-		case 'T':
-		case 'U':
-		case 'V':
-		case 'W':
-		case 'X':
-		case 'Y':
-		case 'Z':
-		case VK_LEFT:
-		case VK_UP:
-		case VK_RIGHT:
-		case VK_DOWN:
-			if (ctlKeyFlag < 128)
-			{
-				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
-				return 1;
-			}
-			break;
-		case 96:  // 小键盘
-		case 97:
-		case 98:
-		case 99:
-		case 100:
-		case 101:
-		case 102:
-		case 103:
-		case 104:
-		case 105:
-			if (ctlKeyFlag < 128)
-			{
-				p->vkCode = p->vkCode - 48;
-				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG_FN, wparam, lparam); 
-				return 1;
-			}
 		default:
 			break;
 		}

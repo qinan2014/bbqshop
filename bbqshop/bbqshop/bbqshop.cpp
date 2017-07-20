@@ -9,6 +9,7 @@
 #include "ProcessProtocal.h"
 #include "TipWin.h"
 #include "ZHSettingRW.h"
+#include "HookKeyChar.h"
 
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
@@ -26,6 +27,8 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	settingRW.ReadZHSetting();
 	//if (strlen(mZHSetting.shopCashdestInfo.account) == 0)
 	//	ZHFuncLib::NativeLog("", "mZHSetting.shopCashdestInfo.account == NULL", "a");
+	// 启动钩子
+	startHook();
 
 	// 信号
 	connect(this, SIGNAL(showTipStringSig(const QString &, const QString &)), this, SLOT(showTipStringSlot(const QString &, const QString &)));
@@ -36,7 +39,24 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 
 bbqshop::~bbqshop()
 {
+}
 
+inline void bbqshop::startHook()
+{
+#ifdef USEKEYHOOK
+	mKeyHook.StopHook();
+	//if (mZHSetting.shopCashdestInfo.isUsePayGun == 1)
+	mKeyHook.StartHook((HWND)this->winId());
+	mKeyHook.EnableInterception(START_HOOK, true);
+	mKeyHook.EnableInterception(HOOK_WXKEY, true);
+#endif
+}
+
+inline void bbqshop::stopHook()
+{
+#ifdef USEKEYHOOK
+	mKeyHook.StopHook();
+#endif
 }
 
 inline void bbqshop::createTray()

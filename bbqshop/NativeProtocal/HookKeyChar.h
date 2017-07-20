@@ -5,9 +5,9 @@
 enum HookChars
 {
 	START_HOOK,
-	
+	HOOK_WXKEY,
 };
 
-#define HOOKCHARSNUM 1
+#define HOOKCHARSNUM 2
 
 #endif

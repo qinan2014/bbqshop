@@ -181,7 +181,6 @@
     <ClInclude Include="..\NativeProtocal\URLDefine.h" />
     <ClInclude Include="..\NativeProtocal\ZhuiHuiMsg.h" />
     <ClInclude Include="GeneratedFiles\ui_TipWin.h" />
-    <ClInclude Include="HookKeyChar.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

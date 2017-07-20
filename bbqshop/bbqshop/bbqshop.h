@@ -1,11 +1,22 @@
 #ifndef BBQSHOP_H
 #define BBQSHOP_H
 
+#ifndef _DEBUG
+#define USEKEYHOOK
+#define ENABLE_PRINTER
+#endif
+
 #include <QtWidgets/QWidget>
 #include <QSystemTrayIcon>
 #include <QApplication>
 #include "json/json.h"
 #include "PayCodeNode.h"
+#ifdef USEKEYHOOK
+#include "KeyHook.h"
+#else
+#include <Windows.h>
+#pragma comment(lib ,"user32.lib")
+#endif
 
 class bbqshop : public QWidget
 {
@@ -20,11 +31,16 @@ private:
 	QApplication *mainApp;
 	bool isShowingPayResult;
 	codeSetIO::ZHIHUISETTING mZHSetting;
+#ifdef USEKEYHOOK
+	CKeyHook mKeyHook;
+#endif
 
 	void createTray();
 	void showLoginDialog();
 	void parseProcessJsonData(QString inJson);
 	void processJsonSaveLoginInfo(const Json::Value &value);
+	inline void startHook();
+	inline void stopHook();
 
 signals:
 	void showTipStringSig(const QString &, const QString &);
