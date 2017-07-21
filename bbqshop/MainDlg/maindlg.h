@@ -41,10 +41,14 @@ private:
 	bool checkSoft();
 	void SetActualTimeGetPrice(bool isActualTime);
 	void ShowTipDialogOK(int icon, const QString &inTitle, const QString &inTxt);
+	void catchScreenInfo();
+	inline void parseProcessJsonData(QString inJson);
+	inline void showPrice(const Json::Value &value);
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
 	virtual void hideEvent(QHideEvent * event);
+	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);
 
 private slots:
 	void closeMainDlg();
@@ -52,6 +56,7 @@ private slots:
 	void printerChanged(int newIndex);
 	void catchScreen();
 	void catchScreen(const QRect &inselect);
+	void checkPrice();
 };
 
 #endif // MAINDLG_H

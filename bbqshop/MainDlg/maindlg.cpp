@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <ScreenCatch.h>
 #include "AllExeName.h"
+#include "ZBase64.h"
 
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
@@ -456,4 +457,79 @@ void MainDlg::ShowTipDialogOK(int icon, const QString &inTitle, const QString &i
 	box.setGeometry(posx, posy, box.width(), box.height());
 
 	int typeBtn = box.exec();
+}
+
+void MainDlg::checkPrice()
+{
+	catchScreenInfo();
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_OCR_CASHINFO;
+	mValData[PRO_OCR_FROMDLG] = PRO_OCR_FROM_MAINDLG;
+	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
+	codeSetIO::SelectRange &curSelRange = carishInfo.selectRange;
+	ZBase64 base64;
+	mValData[PRO_OCR_CASHNAME] = base64.Encode(carishInfo.windowName, strlen(carishInfo.windowName));
+	mValData[PRO_OCR_REALITIVETYPE] = curSelRange.relitiveType;
+	mValData[PRO_OCR_SELX] = curSelRange.xCenterDistance;
+	mValData[PRO_OCR_SELY] = curSelRange.yCenterDistance;
+	mValData[PRO_OCR_SELW] = curSelRange.widImage;
+	mValData[PRO_OCR_SELH] = curSelRange.heightImage;
+	mValData[PRO_OCR_SCALETAG] = curSelRange.priceImageScaleTag;
+	mValData[PRO_OCR_BINA] = curSelRange.imageBinaryzation;
+
+	HWND hwnd = ::FindWindowW(NULL, OCRDLGTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+}
+
+void MainDlg::catchScreenInfo()
+{
+	codeSetIO::SelectRange &selectRange = mZHSetting.carishInfo.selectRange;
+	selectRange.imageBinaryzation = ui.chbBinarization->checkState();
+	selectRange.priceImageScaleTag = ui.cboImageScale->currentIndex();
+}
+
+bool MainDlg::nativeEvent(const QByteArray & eventType, void * message, long * result)
+{
+	MSG *param = static_cast<MSG *>(message);
+
+	switch (param->message)
+	{
+	case WM_COPYDATA:
+		{
+			COPYDATASTRUCT *cds = reinterpret_cast<COPYDATASTRUCT*>(param->lParam);
+			if (cds->dwData == ZHIHUI_CODE_MSG)
+			{
+				QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(cds->lpData), cds->cbData);
+				parseProcessJsonData(strMessage);
+				*result = 1;
+				return true;
+			}
+		}
+	}
+
+	return QWidget::nativeEvent(eventType, message, result);
+}
+
+inline void MainDlg::parseProcessJsonData(QString inJson)
+{
+	Json::Reader reader;
+	Json::Value value;
+	bool suc = reader.parse(inJson.toStdString(), value);
+	if (!suc)
+		return;
+	int header = value[PRO_HEAD].asInt();
+	switch (header)
+	{
+	case RETURN_PRICE:
+		showPrice(value);
+		break;
+	default:
+		break;
+	}
+}
+
+inline void MainDlg::showPrice(const Json::Value &inJson)
+{
+	QString pricestr = inJson[PRO_OCR_PRICE].asCString();
+	ui.txtPrice->setText(pricestr);
 }
