@@ -190,6 +190,8 @@ void bbqshop::showSettingDlg()
 	QStringList arguments;
 	QProcess *process = new QProcess(this);
 	QStringList args;
+	codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+	args << deskInfo.account;
 
 	process->start(program, args);
 }

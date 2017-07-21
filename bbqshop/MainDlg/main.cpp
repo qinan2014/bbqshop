@@ -9,7 +9,11 @@ int main(int argc, char *argv[])
 	ZHFuncLib::TerminateProcessExceptCurrentOne(MAINDLGEXE);
 	QApplication a(argc, argv);
 	a.setQuitOnLastWindowClosed(false);
-	MainDlg w(&a);
+#ifdef _DEBUG
+	MainDlg w(&a, "13111111111");
+#else
+	MainDlg w(&a, argv[1]);
+#endif
 	w.show();
 	return a.exec();
 }
