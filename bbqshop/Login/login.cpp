@@ -3,6 +3,7 @@
 #include "MD5.h"
 #include "ProcessProtocal.h"
 #include "ZhuiHuiMsg.h"
+#include "AllExeName.h"
 
 Login::Login(QApplication *pApp, QWidget *parent)
 	: QDialog(parent), mainApp(pApp)
@@ -190,7 +191,13 @@ void Login::loginInfoStore(const Json::Value &value)
 	urlServer->RecordMemoryInfo("Login success", LOG_DEBUG, LOG_LOGIN, URL_RECORE_LOGIN_MEMORY);
 }
 
-void Login::closeEvent(QCloseEvent * e)
+void Login::closeEvent(QCloseEvent * e) // 直接点的关闭按钮，此时未点登陆按钮
 {
+	ZHFuncLib::TerminateProcessExceptCurrentOne(BBQSHOPEXE);
+	ZHFuncLib::TerminateProcessExceptCurrentOne(MAINDLGEXE);
+	ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
+	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADEEXE);
+	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADECLIENTICONEXE);
+
 	mainApp->quit();
 }
