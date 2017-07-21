@@ -62,6 +62,8 @@ private:
 signals:
 	void showTipStringSig(const QString &, const QString &);
 	void returnFocusToCashier();
+	void manInputEnter();
+	void manInputESC();
 
 private slots:
 	void programQuit();

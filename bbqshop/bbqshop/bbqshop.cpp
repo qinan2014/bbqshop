@@ -263,6 +263,12 @@ inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 	case '.':
 		hookManInputNum(p->vkCode);
 		break;
+	case VK_ESCAPE:
+		emit manInputESC();
+		break;
+	case VK_RETURN:
+		emit manInputEnter();
+		break;
 	default:
 		break;
 	}
@@ -389,19 +395,17 @@ void bbqshop::showPayDialog()
 	if (dlg != NULL)
 	{
 		connect(dlg, SIGNAL(closeThisDlg()), this, SLOT(closeHookNum()));
+		connect(this, SIGNAL(manInputESC()), dlg, SLOT(closeSelf()));
+		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
 		hookNum(true);
-		//dlg->SetScanCode(inCode);
 		dlg->show();
-		//QString moneyStr = priceLab->text();
-		//if (moneyStr.isEmpty())
-		//	moneyStr = "0";
-		//dlg->SetMoney(moneyStr);
 	}
 }
 
 void bbqshop::closeHookNum()
 {
 	hookNum(false);
+	emit returnFocusToCashier();
 }
 
 inline void bbqshop::hookManInputNum(DWORD vkCode)

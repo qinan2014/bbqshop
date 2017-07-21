@@ -40,8 +40,9 @@ signals:
 		void moneyChanged(const QString &newMoney);
 		void EnablePay(bool enablePay);
 
-	public slots:
-		void ClickPay();
+public slots:
+	void ClickPay();
+	void closeSelf();
 public:
 	void CreatePayBillSucess(bool isReturnSuc, const Json::Value & value);
 	void CardPayInfo(bool isReturnSuc, const Json::Value & value);

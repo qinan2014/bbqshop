@@ -82,6 +82,11 @@ void PayDialog::CloseInstance(bool selfclose)
 	}
 }
 
+void PayDialog::closeSelf()
+{
+	CloseInstance();
+}
+
 void PayDialog::SetScanCode(QString inCode)
 {
 	ui.ledtScancode->setText(inCode);
