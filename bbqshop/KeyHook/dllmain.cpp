@@ -73,12 +73,9 @@ LRESULT keyNumProc(PKBDLLHOOKSTRUCT p, int nCode,WPARAM wparam,LPARAM lparam)
 		break;
 	case 128:
 		{
-			if (p->time - hookCode1.time > 35) // 说明这是一个手动按键消息 将这两个键盘消息全都转发出去
+			if (p->time - hookCode1.time > 35) 
 			{
-				hookChars[START_HOOK] = false;
-				keybd_event((BYTE)hookCode1.vkCode,0,0,0);
-				hookChars[START_HOOK] = true;
-				return CallNextHookEx(glhHook,nCode,wparam,lparam); 
+				::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
 			}
 			else{
 				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG, wparam, lparam); 
@@ -112,6 +109,25 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 						::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
 					}
 					return 1;
+				}
+				return CallNextHookEx(glhHook,nCode,wparam,lparam);
+			}
+			break;
+		case 48:
+		case 49:
+		case 50:
+		case 51:
+		case 52:
+		case 53:
+		case 54:
+		case 55:
+		case 56:
+		case 57:
+		case '.':
+			{
+				if (hookChars[HOOK_NUM])
+				{
+					return keyNumProc(p,nCode,wparam,lparam);
 				}
 				return CallNextHookEx(glhHook,nCode,wparam,lparam);
 			}
