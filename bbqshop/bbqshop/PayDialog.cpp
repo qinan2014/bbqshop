@@ -51,7 +51,6 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 
 PayDialog::~PayDialog()
 {
-	//ZHFuncLib::NativeLog("", "delete payDialog", "a");
 	instance = NULL;
 	emit closeThisDlg();
 }
@@ -164,8 +163,8 @@ void PayDialog::EnablePay(bool enablePay)
 
 void PayDialog::CreatePayBillSucess(bool isSuc, const Json::Value &inVal)
 {
-	//bbqpay *parWid = (bbqpay *)parWidget;
-	//parWid->SendToURLRecord(LOG_DEBUG, LOG_PAY1, inVal.toStyledString().c_str());
+	bbqshop *parWid = (bbqshop *)parWidget;
+	parWid->SendToURLRecord(LOG_DEBUG, LOG_PAY1, inVal.toStyledString().c_str());
 	if (!isSuc)
 	{
 		emit enablePaySig(true);
@@ -179,14 +178,14 @@ void PayDialog::CreatePayBillSucess(bool isSuc, const Json::Value &inVal)
 
 	root["dynamic_id"] = tmp;
 
-	//parWid->GetDataFromServer1(URLTRADE, CARDPAYMICROPAYAPI, "", root, URL_SWIP_CARD_DLG);
-	//parWid->SendToURLRecord(LOG_DEBUG, LOG_PAY1, root.toStyledString().c_str());
+	parWid->GetDataFromServer1(URLTRADE, CARDPAYMICROPAYAPI, "", root, URL_SWIP_CARD_DLG);
+	parWid->SendToURLRecord(LOG_DEBUG, LOG_PAY1, root.toStyledString().c_str());
 }
 
 void PayDialog::CardPayInfo(bool isPaySuc, const Json::Value &inVal)
 {
-	//bbqpay *parWid = (bbqpay *)parWidget;
-	//parWid->SendToURLRecord(LOG_DEBUG, LOG_PAY1, inVal.toStyledString().c_str());
+	bbqshop *parWid = (bbqshop *)parWidget;
+	parWid->SendToURLRecord(LOG_DEBUG, LOG_PAY1, inVal.toStyledString().c_str());
 	if (!isPaySuc)
 	{
 		EnablePay(TRUE);

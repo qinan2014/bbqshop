@@ -10,6 +10,8 @@
 #include "TipWin.h"
 #include "ZHSettingRW.h"
 #include "HookKeyChar.h"
+#include "PayDialog.h"
+#include <QDesktopWidget>
 
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
@@ -402,5 +404,18 @@ codeSetIO::ZHIHUISETTING &bbqshop::GetSetting()
 
 void bbqshop::showPayDialog()
 {
+	PayDialog *dlg = PayDialog::InitInstance(true, this);
 
+	QDesktopWidget *desktop = QApplication::desktop();
+	QRect screen = desktop->screenGeometry();
+	int screenWidth = screen.width();
+	if (dlg != NULL)
+	{
+		//dlg->SetScanCode(inCode);
+		dlg->show();
+		//QString moneyStr = priceLab->text();
+		//if (moneyStr.isEmpty())
+		//	moneyStr = "0";
+		//dlg->SetMoney(moneyStr);
+	}
 }
