@@ -9,11 +9,19 @@ class MainDlg : public QDialog
 	Q_OBJECT
 
 public:
-	MainDlg(QWidget *parent = 0);
+	MainDlg(QApplication *pApp, char *account = NULL, QWidget *parent = 0);
 	~MainDlg();
 
 private:
 	Ui::MainDlgClass ui;
+
+	QWidget *parWidget;
+	QApplication *mainApp;
+
+	inline void setTopBtn();
+
+public slots:
+	void closeMainDlg();
 };
 
 #endif // MAINDLG_H
