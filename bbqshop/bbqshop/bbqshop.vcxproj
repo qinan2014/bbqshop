@@ -148,6 +148,15 @@
     <ProjectReference Include="..\MainDlg\MainDlg.vcxproj">
       <Project>{a496c40a-a54d-4e4d-9ef3-768d7d57533a}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\OCRProcess\OCRProcess.vcxproj">
+      <Project>{0d9c001c-7885-4d59-9a3d-8df4a6327bf9}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\PosPrinterLPT\PosPrinterLPT.vcxproj">
+      <Project>{fd2377db-70e7-42bd-81de-56924b4368fb}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\PosPrinter\PosPrinter.vcxproj">
+      <Project>{facc87c2-5fc9-4247-bfa0-14c5acc4576c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ZHFuncLib\ZHFuncLib.vcxproj">
       <Project>{52ce0339-d370-4caa-919e-788c715d1b37}</Project>
     </ProjectReference>

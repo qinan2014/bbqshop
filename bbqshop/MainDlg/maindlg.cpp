@@ -8,6 +8,10 @@
 #include "ZhuiHuiMsg.h"
 #include "PosPrinterCls.h"
 #include "PosPrinterLptCls.h"
+#include <QMessageBox>
+#include <QTimer>
+#include <ScreenCatch.h>
+#include "AllExeName.h"
 
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
@@ -56,6 +60,17 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	settingRW.ReadZHSetting();
 	// 初始化数据
 	initFrame();
+	// 按钮控件的信号
+	connect(ui.btnGetScreen, SIGNAL(pressed()), this, SLOT(catchScreen()));
+	connect(ui.btnCheckPrice, SIGNAL(pressed()), this, SLOT(checkPrice()));
+	connect(ui.btnCommit, SIGNAL(pressed()), this, SLOT(commitSlot()));
+	connect(ui.btnBind, SIGNAL(pressed()), this, SLOT(bindSlot()));
+	connect(ui.pbtSave, SIGNAL(pressed()), this, SLOT(saveSetting()));
+	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int )), this, SLOT(cashNoChanged(int )));
+	connect(this, SIGNAL(showBindTipSig(bool )), this, SLOT(showTipSlot(bool )));
+	connect(ui.btnCheck, SIGNAL(pressed()), this, SLOT(checkCashSoftCorrect()));
+	connect(ui.btnPrinterTest, SIGNAL(pressed()), this, SLOT(printerTest()));
+	connect(ui.pbtClear, SIGNAL(pressed()), this, SLOT(clickClear()));
 }
 
 MainDlg::~MainDlg()
@@ -294,4 +309,151 @@ inline void MainDlg::asciiIntoIndex(QStringList &ioHotkeyLs, int tabNum, int *in
 		else if (inASCII[i] >= 37 && inASCII[i] <= 40)
 			outIndex[i] = inASCII[i];
 	}
+}
+
+void MainDlg::catchScreen()
+{
+	if (!checkSoft())
+		return;
+
+	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
+	carishInfo.selectRange.relitiveType = ui.cboMoneyPos->currentIndex();
+	ScreenCatch dlg(this);
+	connect(&dlg, SIGNAL(selectRectsig(const QRect &)), this, SLOT(catchScreen(const QRect &)));
+	dlg.exec();
+}
+
+void MainDlg::catchScreen(const QRect &inselect)
+{
+	int nIndex = ui.cboCashTool->currentIndex();
+	QString str = mWinWindowNames[nIndex];
+	const wchar_t * encodedName = reinterpret_cast<const wchar_t *>(str.utf16());   
+	HWND hwnd = ::FindWindow(NULL, encodedName);
+	if (hwnd == NULL)
+	{
+		QString str1 = mWinClassNames[nIndex];
+		encodedName = reinterpret_cast<const wchar_t *>(str1.utf16());  
+		hwnd = ::FindWindow(encodedName, NULL);
+	}
+	RECT mCarishtRect;
+	::GetWindowRect(hwnd, &mCarishtRect);
+
+	if (inselect.width() <= 0 || inselect.height() <= 0)
+		return;
+	codeSetIO::SelectRange &imageSel = mZHSetting.carishInfo.selectRange;
+	int selectCenterPosX = inselect.x() + inselect.width() * 0.5;
+	int selectCenterPosY = inselect.y() + inselect.height() * 0.5;
+	switch (imageSel.relitiveType)  // 选框右上角相对于收银软件的位置
+	{
+	case 0:
+		imageSel.xCenterDistance = selectCenterPosX - mCarishtRect.left;
+		imageSel.yCenterDistance = selectCenterPosY - mCarishtRect.top;
+		break;
+	case 1:
+		imageSel.xCenterDistance = mCarishtRect.right - selectCenterPosX;
+		imageSel.yCenterDistance = mCarishtRect.bottom - selectCenterPosY;
+		break;
+	case 2:
+		imageSel.xCenterDistance = selectCenterPosX -mCarishtRect.left;
+		imageSel.yCenterDistance = mCarishtRect.bottom - selectCenterPosY;
+		break;
+	case 3:
+		imageSel.xCenterDistance = mCarishtRect.right - selectCenterPosX;
+		imageSel.yCenterDistance = mCarishtRect.bottom - selectCenterPosY;
+		break;
+	case 4:
+		imageSel.xCenterDistance = selectCenterPosX - (mCarishtRect.right + mCarishtRect.left) * 0.5;
+		imageSel.yCenterDistance = selectCenterPosY - (mCarishtRect.bottom + mCarishtRect.top) * 0.5;
+		break;
+	default:
+		break;
+	}
+
+	imageSel.widImage = inselect.width();
+	imageSel.heightImage = inselect.height();
+
+	std::vector<int > ids;
+	ZHFuncLib::GetTargetProcessIds(OCREXE, ids);
+	if (ids.size() == 0)
+	{
+		Json::Value mValData;
+		mValData[PRO_HEAD] = TO_FLOATWIN_STARTOCR;
+
+		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+	}
+}
+
+bool MainDlg::checkSoft()
+{
+	int nIndex = ui.cboCashTool->currentIndex();
+	SetActualTimeGetPrice(nIndex != 0);
+	if (mZHSetting.shopCashdestInfo.isGetPriceActualTime == 1)
+	{
+		QString strWinName = mWinWindowNames[nIndex];
+		const wchar_t * encodedName = reinterpret_cast<const wchar_t *>(strWinName.utf16());   
+		HWND hwnd = ::FindWindow(NULL, encodedName);
+		if (hwnd == NULL)
+		{
+			QString str1 = mWinClassNames[nIndex];
+			encodedName = reinterpret_cast<const wchar_t *>(str1.utf16());   
+			hwnd = ::FindWindow(encodedName, NULL);
+		}
+		if (hwnd == NULL) 
+		{
+			//QMessageBox::about(this, QString::fromLocal8Bit("警告"), strWinName + QString::fromLocal8Bit("未打开"));
+			ShowTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("未打开"));
+
+			return false;
+		}
+		if (::IsWindowVisible(hwnd) == FALSE)
+		{
+			//QMessageBox::about(this, QString::fromLocal8Bit("警告"), strWinName + QString::fromLocal8Bit("窗口隐藏"));
+			ShowTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("窗口隐藏"));
+			return false;
+		}
+		ui.labSoftTag->setText(QString::fromLocal8Bit("正确"));
+		ui.labSoftTag->show();
+		codeSetIO::CarishDesk &deskInfo = mZHSetting.carishInfo;
+
+		std::string namcchar = ZHFuncLib::WstringToString(strWinName.toStdWString());
+		int namelen = namcchar.length();
+		memcpy(deskInfo.windowName, namcchar.c_str(), namelen);
+		deskInfo.windowName[namelen] = 0;
+		QTimer::singleShot(3000, ui.labSoftTag, SLOT(hide()) ); 
+	}
+
+	return true;
+}
+
+void MainDlg::SetActualTimeGetPrice(bool isActualTime)
+{
+	if (!isActualTime){
+		codeSetIO::CarishDesk &deskInfo = mZHSetting.carishInfo;
+		mZHSetting.shopCashdestInfo.isGetPriceActualTime = 0;
+		deskInfo.windowName[0] = 0;
+	}
+	else{
+		mZHSetting.shopCashdestInfo.isGetPriceActualTime = 1;
+	}
+}
+
+void MainDlg::ShowTipDialogOK(int icon, const QString &inTitle, const QString &inTxt)
+{
+	QMessageBox box((QMessageBox::Icon)icon, inTitle, inTxt);
+	box.setStandardButtons (QMessageBox::Ok);
+	box.setButtonText (QMessageBox::Ok,QString::fromLocal8Bit("确 定"));
+	box.setWindowFlags(Qt::WindowStaysOnTopHint);
+	box.setWindowFlags(box.windowFlags()&~Qt::WindowMaximizeButtonHint&~Qt::WindowMinimizeButtonHint);
+	box.setDefaultButton(QMessageBox::Ok);
+
+	QRect thisRect = this->geometry();
+	int iWidth = thisRect.width();
+	int iHeight = thisRect.height();
+	QRect boxRect = box.geometry();
+	int posx = x() + iWidth - boxRect.width() * 0.6;
+	int posy = y() + iHeight - boxRect.height() * 0.6;
+	box.setGeometry(posx, posy, box.width(), box.height());
+
+	int typeBtn = box.exec();
 }

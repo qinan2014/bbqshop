@@ -38,15 +38,20 @@ private:
 	inline void initFrame();
 	inline void asciiIntoIndex(QStringList &ioHotkeyLs, int tabNum, int *inASCII, int *outIndex);
 	int getImageScaleTag(float &outScale);
+	bool checkSoft();
+	void SetActualTimeGetPrice(bool isActualTime);
+	void ShowTipDialogOK(int icon, const QString &inTitle, const QString &inTxt);
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
 	virtual void hideEvent(QHideEvent * event);
 
-public slots:
+private slots:
 	void closeMainDlg();
 	void cashToolChanged(int newIndex);
 	void printerChanged(int newIndex);
+	void catchScreen();
+	void catchScreen(const QRect &inselect);
 };
 
 #endif // MAINDLG_H

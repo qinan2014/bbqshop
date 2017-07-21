@@ -259,6 +259,8 @@ inline void bbqshop::parseProcessJsonData(QString inJson)
 	case TO_FLOATWIN_CLOSEMAINDLG:
 		processJsonOnMainDlgClose(value);
 		break;
+	case TO_FLOATWIN_STARTOCR:
+		processJsonStartOCR();
 	default:
 		break;
 	}
@@ -439,5 +441,17 @@ void bbqshop::closeHookNum()
 inline void bbqshop::hookManInputNum(DWORD vkCode)
 {
 	
+}
+
+void bbqshop::processJsonStartOCR()
+{
+	QString program = ZHFuncLib::GetWorkPath().c_str();
+	program += "/";
+	program += OCREXE;
+	QProcess *process = new QProcess(this);
+	QStringList args;
+	//args << QString::number(1);
+	process->start(program, args);
+	SendToURLRecord(LOG_DEBUG, LOG_RESTARTOCR, "restart-ocr-process", URL_RECORD_STARTOCR);
 }
 
