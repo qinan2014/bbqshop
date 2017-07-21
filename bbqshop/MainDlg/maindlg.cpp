@@ -162,10 +162,8 @@ bool MainDlg::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::st
 		}
 		switch (urlTag)
 		{
-		case URL_SETTING_DLG:
-			{
-				
-			}
+		case URL_SETTING_DLG_COMMIT:
+			urlbackOnCommit(value);
 			break;
 		}
 		
@@ -574,5 +572,31 @@ void MainDlg::commitSlot()
 		itemVal.replace(rePos, 1, "");
 	}
 
-	urlServer->GetDataFromServer("api/app/v1", SETTINGCOMMITAPI, itemVal, URL_SETTING_DLG);
+	urlServer->GetDataFromServer("api/app/v1", SETTINGCOMMITAPI, itemVal, URL_SETTING_DLG_COMMIT);
+}
+
+bool MainDlg::isReturnSuccessFromeServer(const Json::Value &pjsonVal)
+{
+	std::string retCode = pjsonVal["return_code"].asString();
+	std::string resCode = pjsonVal["result_code"].asString();
+	bool isReturnSuc = !(retCode == "FAIL" || resCode == "FAIL" || retCode == "fail" || resCode == "fail" );
+	return isReturnSuc;
+}
+
+inline void MainDlg::urlbackOnCommit(const Json::Value &inVal)
+{
+	bool isReturnSuc = isReturnSuccessFromeServer(inVal);
+	bool hasReturnMsg = inVal.isMember("return_msgs");
+	if (isReturnSuc)
+	{
+		//SetCashInfo(inVal["data"]);
+	}
+	if (!hasReturnMsg)
+	{
+		Json::Value mValData;
+		mValData[PRO_HEAD] = TO_SHOWTIP;
+		mValData[PRO_TIPSTR] = (isReturnSuc ? QString::fromLocal8Bit("提交成功。").toStdString() : QString::fromLocal8Bit("提交失败。").toStdString());
+		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+	}
 }

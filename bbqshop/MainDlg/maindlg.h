@@ -44,6 +44,8 @@ private:
 	void catchScreenInfo();
 	inline void parseProcessJsonData(QString inJson);
 	inline void showPrice(const Json::Value &value);
+	inline void urlbackOnCommit(const Json::Value &value);
+	bool isReturnSuccessFromeServer(const Json::Value &pjsonVal);
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确

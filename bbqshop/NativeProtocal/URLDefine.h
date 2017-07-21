@@ -37,7 +37,7 @@ enum URL_SOURCE_DLG
 	URL_TRADEINFODETAIL, // 交易详情
 	URL_PRINTHANDOVER_STATEMENT, // 打印交班对账单
 
-	URL_SETTING_DLG,  // Setting Dialog
+	URL_SETTING_DLG_COMMIT,  // Setting Dialog
 	URL_CLIENT_INFO, // get client infomation after pay success
 
 	URL_RECORD_GETQR,
