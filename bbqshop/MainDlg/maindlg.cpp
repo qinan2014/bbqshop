@@ -9,7 +9,7 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	ui.setupUi(this);
 	setWindowTitle(MAINDLGTITLE);
 
-	setStyleSheet("QDialog#MainDlg{border: 1px solid #112D4E;border-radius:0px}"); 
+	setStyleSheet("QDialog{background-color:#F9F7F7;border: 1px solid #112D4E;border-width:1px;border-radius:2px}"); 
 	setTopBtn();
 }
 
