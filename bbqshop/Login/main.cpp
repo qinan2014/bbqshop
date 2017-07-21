@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 	ZHFuncLib::TerminateProcessExceptCurrentOne(LOGINEXE);
 	QApplication a(argc, argv);
 	a.setQuitOnLastWindowClosed(false);
-	Login w;
+	Login w(&a);
 	w.show();
 	return a.exec();
 }

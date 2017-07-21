@@ -4,8 +4,8 @@
 #include "ProcessProtocal.h"
 #include "ZhuiHuiMsg.h"
 
-Login::Login(QWidget *parent)
-	: QDialog(parent)
+Login::Login(QApplication *pApp, QWidget *parent)
+	: QDialog(parent), mainApp(pApp)
 {
 	ui.setupUi(this);
 	setWindowTitle(LOGINTITLE);
@@ -21,7 +21,6 @@ Login::Login(QWidget *parent)
 
 Login::~Login()
 {
-
 }
 
 void Login::initFrame()
@@ -141,8 +140,8 @@ void Login::onLoginStatus(bool isLogined)
 		acount.AddOrModifyUsr(mUsrs, const_cast<AccountNumber::USERPWD *>(&usrpwd), lastUsr);
 		acount.WriteUsrInfo(mUsrs, 1, lastUsr, -1);
 		acount.ClearUsersVector(mUsrs);
-
 		accept();
+		mainApp->quit();
 	}
 }
 
@@ -168,7 +167,6 @@ bool Login::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::stri
 			{
 				Json::Value data = value["data"];
 				loginInfoStore(data);
-
 				emit loginStatus(true);
 			}
 		}
@@ -189,42 +187,10 @@ void Login::loginInfoStore(const Json::Value &value)
 	mValData[PRO_HEAD] = TO_FLOATWIN_LOGININFO;
 	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
 	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
-
-	/*const char *shopCode = value["SHOP_CODE"].asCString();
-	int role = value["ROLE"].asInt();
-	const char *userName = value["USER_NAME"].asCString();
-	int id = value["ID"].asInt();
-	const char *shopName = value["SHOP_NAME"].asCString();
-	const char *shopID = value["SHOP_ID"].asCString();
-	int shopType = value["SHOP_TYPE"].asInt();
-	int workStatus = value["WORK_STATUS"].asInt();
-	const char *account = value["ACCOUNT"].asCString();
-	const char *loginTime = value["LOGIN_TIME"].asCString();
-	const char *extTime = NULL;
-	if (value.isMember("EXIT_TIME"))
-		extTime = value["EXIT_TIME"].asCString();
-
-	codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
-	memcpy(deskInfo.shopCode, shopCode, strlen(shopCode));
-	deskInfo.shopCode[strlen(shopCode)] = 0;
-	deskInfo.role = role;
-	memcpy(deskInfo.userName, userName, strlen(userName));
-	deskInfo.userName[strlen(userName)] = 0;
-	deskInfo.id = id;
-	memcpy(deskInfo.shopName, shopName, strlen(shopName));
-	deskInfo.shopName[strlen(shopName)] = 0;
-	deskInfo.shopid = atoi(shopID);
-	deskInfo.shoptype = shopType;
-	deskInfo.workStatus = workStatus;
-	memcpy(deskInfo.account, account, strlen(account));
-	deskInfo.account[strlen(account)] = 0;
-	memcpy(deskInfo.loginTime, loginTime, strlen(loginTime));
-	deskInfo.loginTime[strlen(loginTime)] = 0;
-	if (extTime != NULL)
-	{
-		memcpy(deskInfo.exitTime, extTime, strlen(extTime));
-		deskInfo.exitTime[strlen(extTime)] = 0;
-	}
-	*/
 	urlServer->RecordMemoryInfo("Login success", LOG_DEBUG, LOG_LOGIN, URL_RECORE_LOGIN_MEMORY);
+}
+
+void Login::closeEvent(QCloseEvent * e)
+{
+	mainApp->quit();
 }

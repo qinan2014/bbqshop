@@ -404,8 +404,9 @@ codeSetIO::ZHIHUISETTING &bbqshop::GetSetting()
 
 void bbqshop::showPayDialog()
 {
+	if (strlen(mZHSetting.shopCashdestInfo.account) == 0)
+		return;
 	PayDialog *dlg = PayDialog::InitInstance(true, this);
-
 	QDesktopWidget *desktop = QApplication::desktop();
 	QRect screen = desktop->screenGeometry();
 	int screenWidth = screen.width();

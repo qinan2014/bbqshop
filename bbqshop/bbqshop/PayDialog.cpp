@@ -42,6 +42,7 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 
 	setStyleSheet("QDialog{background-color: #F0F0F0}");
 
+	ui.ledtPrice->setFocus();
 	// 支付按钮
 	connect(ui.pbtPay, SIGNAL(released()), this, SLOT(ClickPay()));
 	connect(this, SIGNAL(enablePaySig(bool )), this, SLOT(EnablePay(bool )));
@@ -64,7 +65,9 @@ PayDialog *PayDialog::InitInstance(bool mustCreate, QWidget *parent, QString ima
 		instance->setModal(true);
 	}
 	if (instance != NULL)
+	{
 		::SetWindowPos((HWND)instance->winId(),HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
+	}
 	return instance;
 }
 
