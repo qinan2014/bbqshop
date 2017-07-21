@@ -145,6 +145,9 @@
     <ProjectReference Include="..\Login\Login.vcxproj">
       <Project>{008097a4-8a11-4ca0-85bf-f4d833e163af}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\MainDlg\MainDlg.vcxproj">
+      <Project>{a496c40a-a54d-4e4d-9ef3-768d7d57533a}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ZHFuncLib\ZHFuncLib.vcxproj">
       <Project>{52ce0339-d370-4caa-919e-788c715d1b37}</Project>
     </ProjectReference>

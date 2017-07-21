@@ -184,7 +184,14 @@ void bbqshop::programQuit()
 
 void bbqshop::showSettingDlg()
 {
+	QString program = ZHFuncLib::GetWorkPath().c_str();
+	program += "/";
+	program += MAINDLGEXE;
+	QStringList arguments;
+	QProcess *process = new QProcess(this);
+	QStringList args;
 
+	process->start(program, args);
 }
 
 void bbqshop::showLoginDialog()

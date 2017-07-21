@@ -14,7 +14,7 @@
 #define UPGRADEICONTITLE "UpgradeClientIcon"
 #define UPGRADEICONTITLEW L"UpgradeClientIcon"
 
-#define ZHCLIENTVERSION "v5.2.3"
+#define ZHCLIENTVERSION "v1.0.0"
 
 
 #endif
