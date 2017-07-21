@@ -208,7 +208,7 @@
        <string>收  银  台：</string>
       </property>
      </widget>
-     <widget class="QLabel" name="cashNoTxt_2">
+     <widget class="QLabel" name="cashNoTxt">
       <property name="geometry">
        <rect>
         <x>80</x>

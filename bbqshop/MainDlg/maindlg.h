@@ -24,6 +24,9 @@ public:
 	std::string GetPayTool(int inType);
 	bool IsImportentOperateNow();
 
+	std::vector<QString > mWinClassNames;
+	std::vector<QString > mWinWindowNames;
+
 private:
 	Ui::MainDlgClass ui;
 	QWidget *parWidget;
@@ -32,6 +35,9 @@ private:
 	BbqUrlServer *urlServer;
 
 	inline void setTopBtn();
+	inline void initFrame();
+	inline void asciiIntoIndex(QStringList &ioHotkeyLs, int tabNum, int *inASCII, int *outIndex);
+	int getImageScaleTag(float &outScale);
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
@@ -39,6 +45,8 @@ protected:
 
 public slots:
 	void closeMainDlg();
+	void cashToolChanged(int newIndex);
+	void printerChanged(int newIndex);
 };
 
 #endif // MAINDLG_H
