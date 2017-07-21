@@ -139,6 +139,14 @@ inline void bbqshop::stopHook()
 #endif
 }
 
+inline void bbqshop::hookNum(bool isEnable)
+{
+#ifdef USEKEYHOOK
+	mKeyHook.EnableInterception(HOOK_NUM, isEnable);
+	mKeyHook.EnableInterception(HOOK_ESC, isEnable);
+#endif
+}
+
 inline void bbqshop::createTray()
 {
 	if (!QSystemTrayIcon::isSystemTrayAvailable())      //判断系统是否支持系统托盘图标  
@@ -200,8 +208,8 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 			}
 		}
 		break;
-	case ZHIHUI_CODE_MSG:
-		hookCodeMsg(msg);
+	case ZHIHUI_MANINPUT_MSG:
+		hookManInputCodeMsg(msg);
 		break;
 	}
 	return false;
@@ -305,7 +313,7 @@ void bbqshop::parseProcessJsonData(QString inJson)
 	}
 }
 
-inline void bbqshop::hookCodeMsg(MSG* msg)
+inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 {
 	PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)msg->lParam;
 	switch (p->vkCode)
@@ -409,6 +417,7 @@ void bbqshop::showPayDialog()
 	PayDialog *dlg = PayDialog::InitInstance(true, this);
 	if (dlg != NULL)
 	{
+		hookNum(true);
 		dlg->show();
 	}
 }

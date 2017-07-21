@@ -109,7 +109,7 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 				if (hookChars[HOOK_WXKEY])
 				{
 					if (p->flags >= 128){
-						::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG, wparam, lparam); 
+						::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
 					}
 					return 1;
 				}

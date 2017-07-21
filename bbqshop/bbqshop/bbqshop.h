@@ -52,7 +52,8 @@ private:
 	void processJsonSaveLoginInfo(const Json::Value &value);
 	inline void startHook();
 	inline void stopHook();
-	inline void hookCodeMsg(MSG* msg);
+	inline void hookManInputCodeMsg(MSG* msg);
+	inline void hookNum(bool isEnable);
 	void showPayDialog();
 
 signals:
