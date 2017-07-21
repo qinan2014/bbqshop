@@ -35,6 +35,7 @@ private:
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
+	virtual void hideEvent(QHideEvent * event);
 
 public slots:
 	void closeMainDlg();

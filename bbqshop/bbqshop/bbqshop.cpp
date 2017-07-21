@@ -240,7 +240,7 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 	return false;
 }
 
-void bbqshop::parseProcessJsonData(QString inJson)
+inline void bbqshop::parseProcessJsonData(QString inJson)
 {
 	Json::Reader reader;
 	Json::Value value;
@@ -255,6 +255,9 @@ void bbqshop::parseProcessJsonData(QString inJson)
 		break;
 	case TO_FLOATWIN_LOGININFO:
 		processJsonSaveLoginInfo(value);
+		break;
+	case TO_FLOATWIN_CLOSEMAINDLG:
+		processJsonOnMainDlgClose(value);
 		break;
 	default:
 		break;
@@ -362,7 +365,7 @@ void bbqshop::setFocusOnCashier()
 	::SetFocus(hwnd);
 }
 
-void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
+inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 {
 	const char *shopCode = value["SHOP_CODE"].asCString();
 	int role = value["ROLE"].asInt();
@@ -399,6 +402,12 @@ void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 		memcpy(deskInfo.exitTime, extTime, strlen(extTime));
 		deskInfo.exitTime[strlen(extTime)] = 0;
 	}
+}
+
+inline void bbqshop::processJsonOnMainDlgClose(const Json::Value &value)
+{
+	if (value[PRO_DLG_STATUS].asInt() == 0)
+		emit returnFocusToCashier();
 }
 
 codeSetIO::ZHIHUISETTING &bbqshop::GetSetting()

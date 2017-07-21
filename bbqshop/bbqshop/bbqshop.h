@@ -48,8 +48,9 @@ private:
 
 	void createTray();
 	
-	void parseProcessJsonData(QString inJson);
-	void processJsonSaveLoginInfo(const Json::Value &value);
+	inline void parseProcessJsonData(QString inJson);
+	inline void processJsonSaveLoginInfo(const Json::Value &value);
+	inline void processJsonOnMainDlgClose(const Json::Value &value);
 	inline void startHook();
 	inline void stopHook();
 	inline void hookManInputCodeMsg(MSG* msg);

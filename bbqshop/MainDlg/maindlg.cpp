@@ -2,6 +2,9 @@
 #include "AllWindowTitle.h"
 #include "TipExtendBtn.h"
 #include "ZHSettingRW.h"
+#include "ProcessProtocal.h"
+#include "zhfunclib.h"
+#include "ZhuiHuiMsg.h"
 
 MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	: QDialog(parent), parWidget(parent), mainApp(pApp)
@@ -81,6 +84,15 @@ void MainDlg::closeMainDlg()
 {
 	hide();
 	mainApp->quit();
+}
+
+void MainDlg::hideEvent(QHideEvent * event)
+{
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_FLOATWIN_CLOSEMAINDLG;
+	mValData[PRO_DLG_STATUS] = 0;
+	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }
 
 bool MainDlg::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi)
