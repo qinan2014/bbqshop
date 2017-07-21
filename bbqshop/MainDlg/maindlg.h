@@ -17,8 +17,8 @@ public:
 	~MainDlg();
 
 	void SendToURLRecord(const char *logLevel, const char *logModule, const char *logMessage, int urlTag = -1);
-	void GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag = -1);
-	void GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag = -1);
+	//void GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag = -1);
+	//void GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag = -1);
 	void GetMAC(char *mac);
 	void TimeFormatRecover(std::string &outStr, std::string inOriTimeStr);
 	std::string GetPayTool(int inType);
@@ -57,6 +57,7 @@ private slots:
 	void catchScreen();
 	void catchScreen(const QRect &inselect);
 	void checkPrice();
+	void commitSlot();
 };
 
 #endif // MAINDLG_H

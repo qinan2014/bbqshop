@@ -84,15 +84,15 @@ void MainDlg::SendToURLRecord(const char *logLevel, const char *logModule, const
 	urlServer->SendToURLRecord(logLevel, logModule, logMessage, urlTag);
 }
 
-void MainDlg::GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag)
-{
-	urlServer->GetDataFromServer(inSecondAddr, inApi, inData, urlTag);
-}
+//void MainDlg::GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag)
+//{
+//	urlServer->GetDataFromServer(inSecondAddr, inApi, inData, urlTag);
+//}
 
-void MainDlg::GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag)
-{
-	urlServer->GetDataFromServer1(inUrl, inSecondAddr, inApi, ioRootVal, urlTag);
-}
+//void MainDlg::GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag)
+//{
+//	urlServer->GetDataFromServer1(inUrl, inSecondAddr, inApi, ioRootVal, urlTag);
+//}
 
 void MainDlg::GetMAC(char *mac)
 {
@@ -145,7 +145,33 @@ void MainDlg::hideEvent(QHideEvent * event)
 
 bool MainDlg::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi)
 {
-	return true;
+	Json::Reader reader;
+	Json::Value value;
+	bool suc = reader.parse(mRecvJsonStr, value);
+	if (suc)
+	{
+		if (value.isMember("return_msgs"))
+		{
+			const char *msg = value["return_msgs"].asCString();
+			Json::Value mValData;
+			mValData[PRO_HEAD] = TO_SHOWTIP;
+			mValData[PRO_TIPSTR] = msg;
+
+			HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+			ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+		}
+		switch (urlTag)
+		{
+		case URL_SETTING_DLG:
+			{
+				
+			}
+			break;
+		}
+		
+		return true;
+	}
+	return false;
 }
 
 inline void MainDlg::initFrame()
@@ -532,4 +558,21 @@ inline void MainDlg::showPrice(const Json::Value &inJson)
 {
 	QString pricestr = inJson[PRO_OCR_PRICE].asCString();
 	ui.txtPrice->setText(pricestr);
+}
+
+void MainDlg::commitSlot()
+{
+	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+
+	// 获得输入的门牌号
+	Json::Value item;
+	item["shopid"] = ui.shopNumTxt->text().toStdString();
+
+	std::string itemVal = item.toStyledString();
+	std::string::size_type rePos;
+	while ((rePos = itemVal.find(" ")) != -1) {
+		itemVal.replace(rePos, 1, "");
+	}
+
+	urlServer->GetDataFromServer("api/app/v1", SETTINGCOMMITAPI, itemVal, URL_SETTING_DLG);
 }

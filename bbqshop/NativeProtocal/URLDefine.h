@@ -3,59 +3,27 @@
 
 #include "AllWindowTitle.h"
 
-//#define PROJ_TEST
+#define PROJ_TEST
 
 #ifdef PROJ_TEST
-	#if VERSIONINT == VERSIONBIGOLD
-		#define URLCLOUND "http://cloud.bboqi.com/"
-		#define URLTRADE "http://t.trade.bboqi.com/"
-		#define SERVERIP "http://t.cm.bboqi.com/"
-	#else
-		#define URLCLOUND "http://t.api.bboqi.com/"
-		#define URLTRADE "http://t.api.bboqi.com/"
-		#define SERVERIP "http://t.cm.bboqi.com/"
-	#endif
-//#define SERVERIP "192.168.1.7:8088/"
+	#define URLCLOUND "http://t.api.bboqi.com/"
+	#define URLTRADE "http://t.api.bboqi.com/"
+	#define SERVERIP "http://t.cm.bboqi.com/"
+	//#define SERVERIP "192.168.1.7:8088/"
 #else
-	#if VERSIONINT == VERSIONBIGOLD
-		#define URLCLOUND "http://cloud.bboqi.com/"
-		#define URLTRADE "http://trade.bboqi.com/"
-		#define SERVERIP "http://cm.bboqi.com/"
-	#else
-		#define URLCLOUND "http://api.bboqi.com/"
-		#define URLTRADE "http://api.bboqi.com/"	
-		#define SERVERIP "http://cm.bboqi.com/"
-	#endif
+
+	#define URLCLOUND "http://api.bboqi.com/"
+	#define URLTRADE "http://api.bboqi.com/"	
+	#define SERVERIP "http://cm.bboqi.com/"
 #endif
 
 #define ZHHUIKEY "9F86772CD61F440680D11CB2B9EC3168"
 
 #define MONEY_MAX_COUNT 50000.00
-#define MEITUAN
-
-// 当前是请求属于哪个对话框
-//#define URL_DEFAULT_DLG -1  // 默认对话框
-//#define URL_UPGRDE_DLG_CHECKBTN 1  // 更新对话框
-//#define URL_LOGIN_DLG 2  // 登陆对话框
-//#define URL_LOGOUT_DLG 3  // 退出登陆对话框
-//#define URL_SWIP_CARD_DLG 4 // 刷卡支付对话框
-//#define URL_QR_PAY_DLG 5  // 二维码支付对话框
-//#define URL_UPLOAD_LOG 6  // 上传日志
-//#define URL_UPLOAD_LAST_LOG_EXIT 7 // 退出日志，上传后退出
-//#define URL_HANDOVER 8  // 交班对话框，跟退出登陆是同一个
-//#define URL_UPLOAD_LAST_LOG_HANDOVER 9 // 交班日志，上传后交班
-//#define URL_UPGRDE_DLG_LOGIN 10  // 更新对话框
-//#define URL_TRADESTATIC_SHORTCUT 11 // 交易统计  快捷方式
-//#define URL_PRINTHANDOVER_STATEMENT 12 // 打印交班对账单
-//#define URL_HANDOVER_AUTO 13  // 自动交班
-////#define URL_BINDSETTING_BTN 14	// 绑定服务器
-//#define URL_SETTING_DLG 15  // Setting Dialog
 
 enum URL_SOURCE_DLG
 {
 	URL_DEFAULT_DLG, // 默认对话框
-	URL_UPGRDE_DLG_LOGIN,  // 更新对话框
-	URL_UPGRDE_DLG_CHECKBTN,  //更新对话框
 	URL_LOGIN_DLG, // 登陆对话框
 	URL_LOGOUT_DLG,  // 退出登陆对话框
 	URL_SWIP_CARD_DLG, // 刷卡支付对话框
@@ -68,24 +36,12 @@ enum URL_SOURCE_DLG
 	URL_TRADESTATIC_MAINWIDGET,  // 交易统计 主界面里面
 	URL_TRADEINFODETAIL, // 交易详情
 	URL_PRINTHANDOVER_STATEMENT, // 打印交班对账单
-	URL_HANDOVER_AUTO,  // 自动交班
+
 	URL_SETTING_DLG,  // Setting Dialog
-	URL_VERIFICATION, // verification
-//#ifdef MEITUAN
-	URL_MEITUAN_VERIFICATION_HISTORY, // 美团券核销历史
-	URL_MT_VERIFICATION_CONSUME_PREPARE, // 美团验券准备
-	URL_MT_CONSUME_CANCEL, // 美团验券撤销
-	URL_MT_CONSUME_RESULTDLG_CANCEL, // 美团验券撤销
-//#endif
-	URL_MEMBER_CRM, // member crm
-	URL_MEMBER_CRM_DETAIL, // member detail
-	URL_MEMBER_STOREHISTORY, // store value history
 	URL_CLIENT_INFO, // get client infomation after pay success
 
-	URL_RECORD_SOCKETINIT,
 	URL_RECORD_GETQR,
 	URL_RECORD_STARTOCR,
-	URL_RECORD_PAYPUSH,
 	URL_RECORE_LOGIN_MEMORY,
 };
 
