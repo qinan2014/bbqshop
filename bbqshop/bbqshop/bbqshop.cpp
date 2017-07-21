@@ -210,10 +210,10 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 		break;
 	case ZHIHUI_MANINPUT_MSG:
 		hookManInputCodeMsg(msg);
-		break;
+		return true;
 	case ZHIHUI_CODE_MSG:
 		hookScanCodeMsg(msg);
-		break;
+		return true;
 	default:
 		break;
 	}
