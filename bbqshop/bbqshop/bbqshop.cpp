@@ -211,6 +211,11 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 	case ZHIHUI_MANINPUT_MSG:
 		hookManInputCodeMsg(msg);
 		break;
+	case ZHIHUI_CODE_MSG:
+		hookScanCodeMsg(msg);
+		break;
+	default:
+		break;
 	}
 	return false;
 }
@@ -321,8 +326,50 @@ inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 	case HOOK_KEY_WX:
 		showPayDialog();
 		break;
+	case 48:
+	case 49:
+	case 50:
+	case 51:
+	case 52:
+	case 53:
+	case 54:
+	case 55:
+	case 56:
+	case 57:
+	case '.':
+		hookManInputNum(p->vkCode);
+		break;
+	default:
+		break;
 	}
 }
+
+inline void bbqshop::hookScanCodeMsg(MSG* msg)
+{
+#define HOOKNUM 20
+	PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)msg->lParam;
+	static int hookInterceptionIndex = 0;
+	static KBDLLHOOKSTRUCT hookInterception[HOOKNUM]; // 所拦截到的数字
+	if (hookInterceptionIndex >= HOOKNUM)
+		return;
+	hookInterception[hookInterceptionIndex++] = *p;
+	if(p->vkCode == VK_RETURN )
+	{
+		PayDialog *dlg = PayDialog::InitInstance(false);
+		if (dlg != NULL)
+		{
+			QString scanCode;
+			int charLen = hookInterceptionIndex - 1;
+			for (int i = 0; i < charLen; ++i)
+			{
+				scanCode += (TCHAR)hookInterception[i].vkCode;
+			}
+			dlg->SetScanCode(scanCode);
+		}
+		hookInterceptionIndex = 0;
+	}
+}
+
 
 void bbqshop::ShowTipString(QString inTip, QString inTitle)
 {
@@ -340,8 +387,8 @@ void bbqshop::onCloseTipWin()
 {
 	if (isShowingPayResult)
 		return;
-	//if (PayDialog::InitInstance(false) != NULL)
-	//	return;
+	if (PayDialog::InitInstance(false) != NULL)
+		return;
 	//std::vector<int > ids;
 	//ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
 	//if (ids.size() != 0)
@@ -417,7 +464,24 @@ void bbqshop::showPayDialog()
 	PayDialog *dlg = PayDialog::InitInstance(true, this);
 	if (dlg != NULL)
 	{
+		connect(dlg, SIGNAL(closeThisDlg()), this, SLOT(closeHookNum()));
 		hookNum(true);
+		//dlg->SetScanCode(inCode);
 		dlg->show();
+		//QString moneyStr = priceLab->text();
+		//if (moneyStr.isEmpty())
+		//	moneyStr = "0";
+		//dlg->SetMoney(moneyStr);
 	}
 }
+
+void bbqshop::closeHookNum()
+{
+	hookNum(false);
+}
+
+inline void bbqshop::hookManInputNum(DWORD vkCode)
+{
+	
+}
+

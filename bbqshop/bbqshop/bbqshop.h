@@ -47,13 +47,16 @@ private:
 	BbqUrlServer *urlServer;
 
 	void createTray();
-	void showLoginDialog();
+	
 	void parseProcessJsonData(QString inJson);
 	void processJsonSaveLoginInfo(const Json::Value &value);
 	inline void startHook();
 	inline void stopHook();
 	inline void hookManInputCodeMsg(MSG* msg);
+	inline void hookScanCodeMsg(MSG* msg);
 	inline void hookNum(bool isEnable);
+	inline void hookManInputNum(DWORD vkCode);
+
 	void showPayDialog();
 
 signals:
@@ -65,6 +68,8 @@ private slots:
 	void showTipStringSlot(const QString &inTip, const QString &inTitle);
 	void onCloseTipWin();
 	void setFocusOnCashier();
+	void closeHookNum();
+	void showLoginDialog();
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);
