@@ -8,9 +8,10 @@ enum HookChars
 	HOOK_WXKEY,
 	HOOK_NUM,
 	HOOK_ESC,
+	HOOK_RETURN,
 };
 
-#define HOOKCHARSNUM 4
+#define HOOKCHARSNUM 5
 
 #define HOOK_KEY_WX VK_F1
 

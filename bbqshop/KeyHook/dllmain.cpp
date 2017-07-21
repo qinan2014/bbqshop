@@ -72,6 +72,7 @@ LRESULT keyNumProc(PKBDLLHOOKSTRUCT p, int nCode,WPARAM wparam,LPARAM lparam)
 		hookCode1 = *p;
 		break;
 	case 128:
+	case 129:
 		{
 			if (p->time - hookCode1.time > 35) 
 			{
@@ -109,6 +110,27 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 						::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
 					}
 					return 1;
+				}
+				return CallNextHookEx(glhHook,nCode,wparam,lparam);
+			}
+			break;
+		case VK_ESCAPE:
+			{
+				if (hookChars[HOOK_ESC])
+				{
+					if (p->flags >= 128){
+						::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
+					}
+					return 1;
+				}
+				return CallNextHookEx(glhHook,nCode,wparam,lparam);
+			}
+			break;
+		case VK_RETURN:
+			{
+				if (hookChars[HOOK_RETURN])
+				{
+					return keyNumProc(p,nCode,wparam,lparam);
 				}
 				return CallNextHookEx(glhHook,nCode,wparam,lparam);
 			}

@@ -144,6 +144,7 @@ inline void bbqshop::hookNum(bool isEnable)
 #ifdef USEKEYHOOK
 	mKeyHook.EnableInterception(HOOK_NUM, isEnable);
 	mKeyHook.EnableInterception(HOOK_ESC, isEnable);
+	mKeyHook.EnableInterception(HOOK_RETURN, isEnable);
 #endif
 }
 
@@ -236,84 +237,7 @@ void bbqshop::parseProcessJsonData(QString inJson)
 	case TO_FLOATWIN_LOGININFO:
 		processJsonSaveLoginInfo(value);
 		break;
-
-	case TO_SHOWPAYDLG:
-		//setPayInfo(value);
-		break;
-	case TO_SHOWTIP_NETERROR:
-		{
-			QString tipstr = QString::fromLocal8Bit("网络异常，请检查网络！");
-			QString tiptitle = QString::fromLocal8Bit("警告");
-			//showTipStringSlot(tipstr, tiptitle);
-		}
-		break;
-	case TO_FLOATWIN_REWRITESETTING:
-		{
-			//ZHSettingRW settingRW(mZHSetting);
-			//settingRW.ReadZHSetting();
-			////char tmpbuf[100];
-			////sprintf(tmpbuf, "isgetprice in time, %d", mZHSetting.shopCashdestInfo.isGetPriceActualTime);
-			////LogError(tmpbuf, "a");
-			//if (mZHSetting.shopCashdestInfo.isGetPriceActualTime == 1)
-			//{
-			//	std::vector<int > ids;
-			//	ZHFuncLib::GetTargetProcessIds(OCREXE, ids);
-			//	if (ids.size() > 0)
-			//		sendcashinfo();
-			//	else
-			//		startocr(); // 启动ocr
-			//}
-			//else
-			//	ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
-#ifdef USEKEYHOOK
-			if (mZHSetting.shopCashdestInfo.isUsePayGun == 1)
-			{
-				mKeyHook.StopHook();
-				mKeyHook.StartHook((HWND)this->winId());
-			}
-			else
-			{
-				mKeyHook.StopHook();
-			}
-#endif
-			ShowTipString(QString::fromLocal8Bit("保存完成！"));
-		}
-		break;
-	case TO_FLOATWIN_STARTOCR:
-		//killTargetTimer(TIMER_GETPRICE);
-		//onlyStartOCR();
-		break;
-	case RETURN_PRICE:
-		//showPrice(value);
-		break;
-	case TO_FLOAT_INSTALL:
-		//installNewVersion(value);
-		break;
-	case TO_FLOATWIN_HANDOVERPRINT:
-		//handoverPrint();
-		break;
-	case TO_FLOATWIN_HANDOVER:
-		//handover();
-		break;
-	case TO_FLOATWIN_CURTAB:
-		//changeCurrentTab(value);
-		break;
-	case TO_FLOATWIN_CHECKUPGRADE:
-		//CheckUpgrade(URL_UPGRDE_DLG_CHECKBTN);
-		break;
-	case TO_SHOW_CLIENT_ICON:
-		//isDownloadingClientIcon = false;
-		//emit toShowClientIcon(value[PRO_CLIENT_ICON_TYPE].asCString());
-		break;
-	case TO_FLOATWIN_RECONNECT_SOCKET:
-		//{
-		//	killTargetTimer(TIMER_SOCKET_INIT);
-		//	int tmtag = startTimer(1000, Qt::VeryCoarseTimer);
-		//	timers[tmtag] = TIMER_SOCKET_INIT;
-		//	char tmpchar[100];
-		//	sprintf(tmpchar, "reconnect socket startTimer tmtag: %d", tmtag);
-		//	ZHFuncLib::NativeLog("", tmpchar, "a");
-		//}
+	default:
 		break;
 	}
 }
