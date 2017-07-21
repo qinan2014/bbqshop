@@ -14,10 +14,7 @@
 #define UPGRADEICONTITLE "UpgradeClientIcon"
 #define UPGRADEICONTITLEW L"UpgradeClientIcon"
 
-#define VERSIONBIGOLD 4
-#define VERSIONBIGNEW 5
-
 #define ZHCLIENTVERSION "v5.2.3"
-#define VERSIONINT VERSIONBIGNEW
+
 
 #endif

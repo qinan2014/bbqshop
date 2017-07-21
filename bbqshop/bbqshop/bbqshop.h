@@ -67,6 +67,7 @@ signals:
 
 private slots:
 	void programQuit();
+	void showSettingDlg();
 	void showTipStringSlot(const QString &inTip, const QString &inTitle);
 	void onCloseTipWin();
 	void setFocusOnCashier();

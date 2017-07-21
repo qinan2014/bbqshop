@@ -160,9 +160,14 @@ inline void bbqshop::createTray()
 	connect(myTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason )), this, SLOT(clickTray(QSystemTrayIcon::ActivationReason )));
 
 	QMenu *myMenu = new QMenu(this);
+	QAction *settingAction = new QAction(QString::fromLocal8Bit("设置"),this);
+	myMenu->addAction(settingAction);
+	connect(settingAction, SIGNAL(triggered()), this, SLOT(showSettingDlg()));
+
 	QAction *quitAction = new QAction(QString::fromLocal8Bit("退出"),this);
 	myMenu->addAction(quitAction);
 	connect(quitAction, SIGNAL(triggered()), this, SLOT(programQuit()));
+	
 	myTrayIcon->setContextMenu(myMenu);     //设置托盘上下文菜单  
 	myTrayIcon->show();  
 }
@@ -175,6 +180,11 @@ void bbqshop::programQuit()
 	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADEEXE);
 	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADECLIENTICONEXE);
 	mainApp->quit();
+}
+
+void bbqshop::showSettingDlg()
+{
+
 }
 
 void bbqshop::showLoginDialog()
