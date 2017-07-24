@@ -341,6 +341,21 @@ inline void MainDlg::asciiIntoIndex(QStringList &ioHotkeyLs, int tabNum, int *in
 	}
 }
 
+inline void MainDlg::indexIntoAscii(int tabNum, int *inIdex, int *outASCII)
+{
+	for (int i = 0; i < tabNum; ++i)
+	{
+		if (inIdex[i] == 0)
+			outASCII[i] = -1;
+		else if (inIdex[i] >= 1 && inIdex[i] <= 26)
+			outASCII[i] = inIdex[i] + 64;
+		else if (inIdex[i] >= 27 && inIdex[i] <= 36)
+			outASCII[i] = inIdex[i] + 21;
+		else if (inIdex[i] >= 37 && inIdex[i] <= 40)
+			outASCII[i] = inIdex[i];
+	}
+}
+
 void MainDlg::catchScreen()
 {
 	if (!checkSoft())
@@ -728,4 +743,62 @@ void MainDlg::showTipSlot(bool isShow)
 		ui.labBindTip->setText(QString::fromLocal8Bit("未绑定"));
 	else
 		ui.labBindTip->hide();
+}
+
+void MainDlg::saveSetting()
+{
+	checkSoft();
+	memeryPrintName();
+	catchScreenInfo();
+	SavePrintFont(ui.cboSize->currentIndex(), ui.printFont->value());
+	codeSetIO::ShopCashdeskInfo &cashdesk = mZHSetting.shopCashdestInfo;
+	// 是否使用支付扫码枪
+	cashdesk.isUsePayGun = ui.chbStartGun->isChecked() ? 1 : 0;
+	// 是否自动打印
+	cashdesk.isAutoPrint = ui.chbAutioPrint->isChecked() ? 1 : 0;
+
+	// 保存快捷键
+	int indexs[2], asciis[2];
+	indexs[0] = ui.cboPrintHandover->currentIndex();
+	indexs[1] = ui.cboTradeInfo->currentIndex();
+	indexIntoAscii(2, indexs, asciis);
+	codeSetIO::HOTKEYS &hotKeys = mZHSetting.hotKeys;
+	hotKeys.hPrintHandover.qtkey = asciis[0];
+	hotKeys.hTradeInfo.qtkey = asciis[1];
+
+	SaveAllSetting();
+}
+
+void MainDlg::memeryPrintName()
+{
+	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
+	if (ui.cboPrinter->currentIndex() > 0)
+	{
+		QString printerName = ui.cboPrinter->currentText();
+		memcpy(carishInfo.printerName, printerName.toStdString().c_str(), printerName.length());
+		carishInfo.printerName[printerName.length()] = 0;
+	}
+	else
+	{
+		carishInfo.printerName[0] = 0;
+	}
+}
+
+void MainDlg::SavePrintFont(int printerType, int printerFont)
+{
+	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
+	carishInfo.printerType = printerType;
+	carishInfo.commentFontSZ = printerFont;
+}
+
+void MainDlg::SaveAllSetting()
+{
+	ZHSettingRW settingRW(mZHSetting);
+	settingRW.WriteZHSetting();
+
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_FLOATWIN_REWRITESETTING;
+	mValData[PRO_DLG_STATUS] = 0;
+	HWND hwnd =::FindWindowW(NULL, FLOATWINTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }

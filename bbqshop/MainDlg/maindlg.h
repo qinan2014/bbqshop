@@ -39,6 +39,7 @@ private:
 	inline void setTopBtn();
 	inline void initFrame();
 	inline void asciiIntoIndex(QStringList &ioHotkeyLs, int tabNum, int *inASCII, int *outIndex);
+	inline void indexIntoAscii(int tabNum, int *inIdex, int *outASCII);
 	int getImageScaleTag(float &outScale);
 	bool checkSoft();
 	void setActualTimeGetPrice(bool isActualTime);
@@ -50,6 +51,9 @@ private:
 	inline void urlbackOnBind(const Json::Value &value);
 	bool isReturnSuccessFromeServer(const Json::Value &pjsonVal);
 	void setCashInfo(const Json::Value &inData);
+	void memeryPrintName();
+	void SavePrintFont(int printerType, int printerFont);
+	void SaveAllSetting();
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
@@ -67,6 +71,7 @@ private slots:
 	void cashNoChanged(int newIndex);
 	void bindSlot();
 	void showTipSlot(bool isShow);
+	void saveSetting();
 
 signals:
 	void showBindTipSig(bool );
