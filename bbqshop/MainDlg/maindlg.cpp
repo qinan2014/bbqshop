@@ -802,3 +802,71 @@ void MainDlg::SaveAllSetting()
 	HWND hwnd =::FindWindowW(NULL, FLOATWINTITLEW);
 	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }
+
+void MainDlg::checkCashSoftCorrect()
+{
+	checkSoft();
+}
+
+void MainDlg::printerTest()
+{
+	memeryPrintName();
+
+	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
+	QString printerDevice = carishInfo.printerName;
+	if (printerDevice.contains("LPT"))
+	{
+		char tmpchar = printerDevice.at(3).toLatin1();
+		if (tmpchar >= '1' && tmpchar <= '3')
+		{
+			PosPrinterLptCls mPrinter;
+			mPrinter.Prepare(printerDevice.toStdString().c_str());
+			mPrinter.PrintString("测试您的小票打印机，如果您的打印机能够打印这些信息，则表明您的打印机已经可以正常使用！\r\n", PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString(" --------智慧微生活\r\n", PosPrinterLptCls::RIGHTALIGN);
+			return;
+		}
+	}
+
+	PosPrinter *mPrinter = new PosPrinter();
+#define NAMEPOS 0.02
+#define CONTENTPOS 0.45
+#define SPACE1 10
+	//USES_CONVERSION;
+	//CString printerName = A2W(pWnd->mZHSetting.carishInfo.printerName);
+	if (mPrinter->PreparePrinter(printerDevice.toStdWString()))
+	{
+		int commentFontSZ = mZHSetting.carishInfo.commentFontSZ;
+		mPrinter->SetDeviceWidth(GetPrinterDeviceWidth());
+		mPrinter->AddNewLine(NAMEPOS, L"测试您的小票打印机，如果您的打印机能够打印这些信息，则表明您的打印机已经可以正常使用！",SPACE1, commentFontSZ);
+		mPrinter->AddNewLine(NAMEPOS, L"         --------智慧微生活", commentFontSZ);
+		mPrinter->AddNewLine(0.5, ONLYLINE, SPACE1, 50, L"", 0);
+#undef NAMEPOS
+#undef CONTENTPOS
+#undef SPACE1
+
+		mPrinter->CallPrinter();
+	}
+	delete mPrinter;
+}
+
+int MainDlg::GetPrinterDeviceWidth()
+{
+	codeSetIO::CarishDesk &printer = mZHSetting.carishInfo;
+	int deviceWidth = -1;
+	switch (printer.printerType)
+	{
+	case 0:
+		deviceWidth = printer.deviceWidth58;
+		break;
+	case 1:
+		deviceWidth = printer.deviceWidth80;
+		break;
+	default:
+		break;
+	}
+	if (deviceWidth > 1000)
+		return -1;
+	if (deviceWidth < 100)
+		return -1;
+	return deviceWidth;
+}

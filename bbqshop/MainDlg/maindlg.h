@@ -54,6 +54,7 @@ private:
 	void memeryPrintName();
 	void SavePrintFont(int printerType, int printerFont);
 	void SaveAllSetting();
+	int GetPrinterDeviceWidth();
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
@@ -72,6 +73,8 @@ private slots:
 	void bindSlot();
 	void showTipSlot(bool isShow);
 	void saveSetting();
+	void checkCashSoftCorrect();
+	void printerTest();
 
 signals:
 	void showBindTipSig(bool );
