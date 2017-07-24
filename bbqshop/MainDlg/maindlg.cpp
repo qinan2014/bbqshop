@@ -62,18 +62,11 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	settingRW.ReadZHSetting();
 	// 初始化数据
 	//initFrame();
-	// 按钮控件的信号
-	connect(ui.btnGetScreen, SIGNAL(pressed()), this, SLOT(catchScreen()));
-	connect(ui.btnCheckPrice, SIGNAL(pressed()), this, SLOT(checkPrice()));
-	connect(ui.btnCommit, SIGNAL(pressed()), this, SLOT(commitSlot()));
-	connect(ui.btnBind, SIGNAL(pressed()), this, SLOT(bindSlot()));
-	connect(ui.pbtSave, SIGNAL(pressed()), this, SLOT(saveSetting()));
-	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int )), this, SLOT(cashNoChanged(int )));
-	connect(this, SIGNAL(showBindTipSig(bool )), this, SLOT(showTipSlot(bool )));
-	connect(ui.btnCheck, SIGNAL(pressed()), this, SLOT(checkCashSoftCorrect()));
-	connect(ui.btnPrinterTest, SIGNAL(pressed()), this, SLOT(printerTest()));
-	connect(ui.pbtClear, SIGNAL(pressed()), this, SLOT(clickClear()));
-	connect(this, SIGNAL(settingInfoFinished()), this, SLOT(showTipSlot(bool )));
+	connect(this, SIGNAL(settingInfoFinished()), this, SLOT(onSettingInfoFinished()));
+
+#ifdef INDEPENDENTLOGIN
+	login();
+#endif
 }
 
 MainDlg::~MainDlg()
@@ -135,6 +128,25 @@ bool MainDlg::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::st
 		case URL_SETTING_DLG_BIND:
 			urlbackOnBind(value);
 			break;
+#ifdef INDEPENDENTLOGIN
+		case URL_LOGIN_DLG:
+			{
+				std::string retCode = value["return_code"].asString();
+				std::string resCode = value["result_code"].asString();
+				std::string retmsg = value["return_msgs"].asString();
+				if (retCode == "FAIL" || resCode == "FAIL" || retCode == "fail" || resCode == "fail")
+				{
+					const char *msg = value["return_msgs"].asCString();
+					//::SendMessage(mLoginDlg.GetSafeHwnd(), ZHIHUI_LOGIN_OK, 0, 0);
+					//MessageBox(CharToWChar(msg), L"警告", MB_OK);
+				}else
+				{
+					Json::Value data = value["data"];
+					LoginInfoStore(data);
+				}
+			}
+			break;
+#endif
 		default:
 			break;
 		}
@@ -150,16 +162,16 @@ inline void MainDlg::initFrame()
 	ui.shopNameTxt->setText((shopInfo.shopName));
 	ui.cashNoTxt->setText(shopInfo.cashdeskName);
 	ui.shopNumTxt->setText(QString::number(shopInfo.shopid));
-
-	char cashdes[60];
+	char cashdes[150];
 	sprintf(cashdes, "(%s) %s", shopInfo.cashdeskId, shopInfo.cashdeskName);
+	ZHFuncLib::NativeLog("", "MainDlg::initFrame 11", "a");
 	ui.cboCashNo->addItem(cashdes);
+	ZHFuncLib::NativeLog("", "MainDlg::initFrame 12", "a");
 	ui.cboCashNo->setCurrentIndex(0);
 	// 收银软件信息
 	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
 	int mRelativeType = carishInfo.selectRange.relitiveType;
 	ui.cboMoneyPos->setCurrentIndex(mRelativeType);
-
 	QString windowName = QString::fromStdWString(ZHFuncLib::StringToWstring(carishInfo.windowName));
 	QString exeName = carishInfo.exeName;
 	// 是否二值化
@@ -243,6 +255,18 @@ inline void MainDlg::initFrame()
 	ui.cboPrintHandover->setCurrentIndex(curIndexs[0]);
 	ui.cboTradeInfo->addItems(hotkeyLs);
 	ui.cboTradeInfo->setCurrentIndex(curIndexs[1]);
+
+	// 按钮控件的信号
+	connect(ui.btnGetScreen, SIGNAL(pressed()), this, SLOT(catchScreen()));
+	connect(ui.btnCheckPrice, SIGNAL(pressed()), this, SLOT(checkPrice()));
+	connect(ui.btnCommit, SIGNAL(pressed()), this, SLOT(commitSlot()));
+	connect(ui.btnBind, SIGNAL(pressed()), this, SLOT(bindSlot()));
+	connect(ui.pbtSave, SIGNAL(pressed()), this, SLOT(saveSetting()));
+	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int )), this, SLOT(cashNoChanged(int )));
+	connect(this, SIGNAL(showBindTipSig(bool )), this, SLOT(showTipSlot(bool )));
+	connect(ui.btnCheck, SIGNAL(pressed()), this, SLOT(checkCashSoftCorrect()));
+	connect(ui.btnPrinterTest, SIGNAL(pressed()), this, SLOT(printerTest()));
+	connect(ui.pbtClear, SIGNAL(pressed()), this, SLOT(clickClear()));
 }
 
 int MainDlg::getImageScaleTag(float &outScale)
@@ -550,6 +574,7 @@ void MainDlg::onSettingInfoFinished()
 
 inline void MainDlg::saveLoginData(const Json::Value &value)
 {
+	ZHFuncLib::NativeLog("", value.toStyledString().c_str(), "a");
 	const char *shopCode = value[PRO_SHOP_CODE].asCString();
 	int role = value[PRO_ROLE].asInt();
 	const char *userName = value[PRO_USERNAME].asCString();
@@ -955,3 +980,65 @@ void MainDlg::showEvent(QShowEvent * event)
 	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
 	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }
+
+#ifdef INDEPENDENTLOGIN
+void MainDlg::login()
+{
+#include "MD5.h"
+	Json::Value mValData;
+	//mValData["username"] = "18888821642";
+	mValData["username"] = "13222222222";
+	mValData["password"] = md5("000000");
+
+	std::string itemVal = mValData.toStyledString();
+	std::string::size_type rePos;
+	while ((rePos = itemVal.find(" ")) != -1) {
+		itemVal.replace(rePos, 1, "");
+	}
+	urlServer->GetDataFromServer("api/app/v1", USERLOGINAPI, itemVal, URL_LOGIN_DLG);
+}
+#endif
+
+
+#ifdef INDEPENDENTLOGIN
+void MainDlg::LoginInfoStore(const Json::Value &value)
+{
+	const char *shopCode = value["SHOP_CODE"].asCString();
+	int role = value["ROLE"].asInt();
+	const char *userName = value["USER_NAME"].asCString();
+	int id = value["ID"].asInt();
+	const char *shopName = value["SHOP_NAME"].asCString();
+	const char *shopID = value["SHOP_ID"].asCString();
+	int shopType = value["SHOP_TYPE"].asInt();
+	int workStatus = value["WORK_STATUS"].asInt();
+	const char *account = value["ACCOUNT"].asCString();
+	const char *loginTime = value["LOGIN_TIME"].asCString();
+	const char *extTime = NULL;
+	if (value.isMember("EXIT_TIME"))
+		extTime = value["EXIT_TIME"].asCString();
+
+	codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+	memcpy(deskInfo.shopCode, shopCode, strlen(shopCode));
+	deskInfo.shopCode[strlen(shopCode)] = 0;
+	deskInfo.role = role;
+	memcpy(deskInfo.userName, userName, strlen(userName));
+	deskInfo.userName[strlen(userName)] = 0;
+	deskInfo.id = id;
+	memcpy(deskInfo.shopName, shopName, strlen(shopName));
+	deskInfo.shopName[strlen(shopName)] = 0;
+	deskInfo.shopid = atoi(shopID);
+	deskInfo.shoptype = shopType;
+	deskInfo.workStatus = workStatus;
+	memcpy(deskInfo.account, account, strlen(account));
+	deskInfo.account[strlen(account)] = 0;
+	memcpy(deskInfo.loginTime, loginTime, strlen(loginTime));
+	deskInfo.loginTime[strlen(loginTime)] = 0;
+	if (extTime != NULL)
+	{
+		memcpy(deskInfo.exitTime, extTime, strlen(extTime));
+		deskInfo.exitTime[strlen(extTime)] = 0;
+	}
+
+	emit settingInfoFinished();
+}
+#endif

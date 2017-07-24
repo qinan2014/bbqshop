@@ -8,6 +8,10 @@
 #include "BbqUrlServer.h"
 #include "AccessServerResult.h"
 
+#ifdef _DEBUG
+#define INDEPENDENTLOGIN
+#endif
+
 class MainDlg : public QDialog, public AccessServerResult
 {
 	Q_OBJECT
@@ -48,6 +52,11 @@ private:
 	void SavePrintFont(int printerType, int printerFont);
 	void SaveAllSetting();
 	int GetPrinterDeviceWidth();
+
+#ifdef INDEPENDENTLOGIN
+	void login();
+	void LoginInfoStore(const Json::Value &data);
+#endif
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
