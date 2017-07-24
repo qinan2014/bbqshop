@@ -412,7 +412,7 @@ void MainDlg::catchScreen(const QRect &inselect)
 bool MainDlg::checkSoft()
 {
 	int nIndex = ui.cboCashTool->currentIndex();
-	SetActualTimeGetPrice(nIndex != 0);
+	setActualTimeGetPrice(nIndex != 0);
 	if (mZHSetting.shopCashdestInfo.isGetPriceActualTime == 1)
 	{
 		QString strWinName = mWinWindowNames[nIndex];
@@ -427,14 +427,14 @@ bool MainDlg::checkSoft()
 		if (hwnd == NULL) 
 		{
 			//QMessageBox::about(this, QString::fromLocal8Bit("警告"), strWinName + QString::fromLocal8Bit("未打开"));
-			ShowTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("未打开"));
+			showTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("未打开"));
 
 			return false;
 		}
 		if (::IsWindowVisible(hwnd) == FALSE)
 		{
 			//QMessageBox::about(this, QString::fromLocal8Bit("警告"), strWinName + QString::fromLocal8Bit("窗口隐藏"));
-			ShowTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("窗口隐藏"));
+			showTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("窗口隐藏"));
 			return false;
 		}
 		ui.labSoftTag->setText(QString::fromLocal8Bit("正确"));
@@ -451,7 +451,7 @@ bool MainDlg::checkSoft()
 	return true;
 }
 
-void MainDlg::SetActualTimeGetPrice(bool isActualTime)
+void MainDlg::setActualTimeGetPrice(bool isActualTime)
 {
 	if (!isActualTime){
 		codeSetIO::CarishDesk &deskInfo = mZHSetting.carishInfo;
@@ -463,7 +463,7 @@ void MainDlg::SetActualTimeGetPrice(bool isActualTime)
 	}
 }
 
-void MainDlg::ShowTipDialogOK(int icon, const QString &inTitle, const QString &inTxt)
+void MainDlg::showTipDialogOK(int icon, const QString &inTitle, const QString &inTxt)
 {
 	QMessageBox box((QMessageBox::Icon)icon, inTitle, inTxt);
 	box.setStandardButtons (QMessageBox::Ok);
@@ -589,7 +589,7 @@ inline void MainDlg::urlbackOnCommit(const Json::Value &inVal)
 	bool hasReturnMsg = inVal.isMember("return_msgs");
 	if (isReturnSuc)
 	{
-		//SetCashInfo(inVal["data"]);
+		setCashInfo(inVal["data"]);
 	}
 	if (!hasReturnMsg)
 	{
@@ -599,4 +599,45 @@ inline void MainDlg::urlbackOnCommit(const Json::Value &inVal)
 		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
 		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 	}
+}
+
+void MainDlg::setCashInfo(const Json::Value &inData)
+{
+	mCashNos.clear();
+	mCashNames.clear();
+	disconnect(ui.cboCashNo, SIGNAL(currentIndexChanged(int)), this, SLOT(cashNoChanged(int)));
+	ui.cboCashNo->clear();
+	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int)), this, SLOT(cashNoChanged(int)));
+	ui.cashNoTxt->setText("");
+
+	const char *shopname = inData["SHOP_NAME"].asCString();
+	ui.shopNameTxt->setText(shopname);
+
+	Json::Value cashObj = inData["CASH_LIST"];
+	int sz = cashObj.size();
+	for (unsigned int i = 0; i < sz; i++)
+	{
+		Json::Value noInfo = cashObj[i];
+		int id = noInfo["ID"].asInt();
+		const char *cashNoName = noInfo["CASH_NAME"].asCString();
+		mCashNos.push_back(id);
+		mCashNames.push_back(cashNoName);
+		char string[255];
+		sprintf(string, "(%d)%s", id, cashNoName);
+		ui.cboCashNo->addItem(string);
+	}
+	if (sz != 0)
+	{
+		ui.cboCashNo->setCurrentIndex(0);
+		cashNoChanged(0);
+	}
+}
+
+void MainDlg::cashNoChanged(int newIndex)
+{
+	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+	if (newIndex < 0)
+		return;
+	sprintf(shopInfo.cashdeskId, "%d", mCashNos[newIndex]);
+	memcpy(shopInfo.cashdeskName, mCashNames[newIndex].c_str(), mCashNames[newIndex].length());
 }

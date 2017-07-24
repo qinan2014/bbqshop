@@ -33,19 +33,22 @@ private:
 	QApplication *mainApp;
 	codeSetIO::ZHIHUISETTING mZHSetting;
 	BbqUrlServer *urlServer;
+	std::vector<int > mCashNos;
+	std::vector<std::string >mCashNames;
 
 	inline void setTopBtn();
 	inline void initFrame();
 	inline void asciiIntoIndex(QStringList &ioHotkeyLs, int tabNum, int *inASCII, int *outIndex);
 	int getImageScaleTag(float &outScale);
 	bool checkSoft();
-	void SetActualTimeGetPrice(bool isActualTime);
-	void ShowTipDialogOK(int icon, const QString &inTitle, const QString &inTxt);
+	void setActualTimeGetPrice(bool isActualTime);
+	void showTipDialogOK(int icon, const QString &inTitle, const QString &inTxt);
 	void catchScreenInfo();
 	inline void parseProcessJsonData(QString inJson);
 	inline void showPrice(const Json::Value &value);
 	inline void urlbackOnCommit(const Json::Value &value);
 	bool isReturnSuccessFromeServer(const Json::Value &pjsonVal);
+	void setCashInfo(const Json::Value &inData);
 
 protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
@@ -60,6 +63,7 @@ private slots:
 	void catchScreen(const QRect &inselect);
 	void checkPrice();
 	void commitSlot();
+	void cashNoChanged(int newIndex);
 };
 
 #endif // MAINDLG_H
