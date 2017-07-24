@@ -13,6 +13,7 @@
 #include <ScreenCatch.h>
 #include "AllExeName.h"
 #include "ZBase64.h"
+#include <QDir>
 
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
@@ -869,4 +870,62 @@ int MainDlg::GetPrinterDeviceWidth()
 	if (deviceWidth < 100)
 		return -1;
 	return deviceWidth;
+}
+
+void MainDlg::clickClear()
+{
+	QString strDirName = ZHFuncLib::GetWorkPath().c_str();
+	QDir dir(strDirName);
+	if (!dir.exists())
+		return;
+	// clear log and moc info
+	dir.setFilter(QDir::Dirs|QDir::Files);
+	dir.setSorting(QDir::DirsFirst);
+	QFileInfoList list = dir.entryInfoList();
+	int i = 0;
+	//QStringList fileWillRemove;
+	do{
+		QFileInfo fileInfo = list.at(i);
+		++i;
+		QString fName = fileInfo.fileName();
+		if(fName == "." || fName == ".." || fileInfo.isDir())
+			continue;
+		if (fName.right(3) == "exe")
+			continue;
+		if (fName.contains("logdata"))
+		{
+			//fileWillRemove.push_back(fName);
+			dir.remove(fName);
+		}
+	}while(i < list.size());
+
+	//for (int i = 0; i < fileWillRemove.size(); ++i)
+	//{
+	//	dir.remove(fileWillRemove.at(i));
+	//}
+	// clear install exe
+	int searchRes = -1;
+
+	QString bbqDir = urlServer->SearchBBQDownloadDir(searchRes).c_str();
+	if (searchRes == 0)
+	{
+		dir.setPath(bbqDir);
+		QFileInfoList list = dir.entryInfoList();
+		int i = 0;
+		do{
+			QFileInfo fileInfo = list.at(i);
+			++i;
+			QString fName = fileInfo.fileName();
+			if(fName == "." || fName == ".." || fileInfo.isDir())
+				continue;
+			dir.remove(fName);
+		}while(i < list.size());
+		dir.rmdir(bbqDir);
+	}
+
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_SHOWTIP;
+	mValData[PRO_TIPSTR] = QString::fromLocal8Bit("清理缓存完成。").toStdString();
+	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }

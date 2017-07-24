@@ -75,6 +75,7 @@ private slots:
 	void saveSetting();
 	void checkCashSoftCorrect();
 	void printerTest();
+	void clickClear();
 
 signals:
 	void showBindTipSig(bool );
