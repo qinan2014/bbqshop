@@ -21,6 +21,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	setWindowTitle(FLOATWINTITLE);
 	setGeometry(0, 0, 5, 5);
 	isShowingPayResult = false;
+	getOCRPriceTimes = 0;
 	// 定时器
 	QTimer::singleShot(100,this, SLOT(hide()) );  // 隐藏自己
 	// 创建托盘
@@ -573,6 +574,7 @@ void bbqshop::showPayDialog()
 		connect(this, SIGNAL(manInputESC()), dlg, SLOT(closeSelf()));
 		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
 		hookNum(true);
+		startGetOCRPrice();
 		dlg->show();
 	}
 }
@@ -580,6 +582,7 @@ void bbqshop::showPayDialog()
 void bbqshop::closeHookNum()
 {
 	hookNum(false);
+	stopGetOCRPriceTimer();
 	emit returnFocusToCashier();
 }
 
@@ -590,6 +593,7 @@ inline void bbqshop::hookManInputNum(DWORD vkCode)
 
 void bbqshop::processJsonStartOCR()
 {
+	stopGetOCRPriceTimer();
 	QString program = ZHFuncLib::GetWorkPath().c_str();
 	program += "/";
 	program += OCREXE;
@@ -624,4 +628,97 @@ void bbqshop::sendCashInfo()
 
 	HWND hwnd = ::FindWindowW(NULL, OCRDLGTITLEW);
 	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+}
+
+void bbqshop::startGetOCRPrice()
+{
+	if (mZHSetting.shopCashdestInfo.isGetPriceActualTime != 1)
+	{
+		killTargetTimer(TIMER_GETPRICE);
+		return;
+	}
+	// ocr方式获得价格
+	std::vector<int > ids;
+	ZHFuncLib::GetTargetProcessIds(OCREXE, ids);
+	if (ids.size() == 0)
+	{
+		processJsonStartOCR();
+		QTimer::singleShot(200,this, SLOT(sendCashInfo()));
+	}
+	if (!isHasTargetTimer(TIMER_GETPRICE))
+		timers[startTimer(500, Qt::VeryCoarseTimer)] = TIMER_GETPRICE;
+}
+
+inline void bbqshop::stopGetOCRPriceTimer()
+{
+	// ocr方式
+	killTargetTimer(TIMER_GETPRICE);
+}
+
+inline bool bbqshop::isHasTargetTimer(int targetTimer)
+{
+	bool hasFloatTimer = false;
+	std::map<int, int>::iterator iter = timers.begin();
+	for (iter; iter != timers.end(); ++iter)
+	{
+		if (iter->second == targetTimer)
+		{
+			hasFloatTimer = true;
+			break;
+		}
+	}
+	return hasFloatTimer;
+}
+
+inline void bbqshop::killTargetTimer(int targetTimer)
+{
+	std::map<int, int>::iterator iter = timers.begin();
+	for (iter; iter != timers.end(); ++iter)
+	{
+		if (iter->second == targetTimer)
+		{
+			killTimer(iter->first);
+			timers.erase(iter);
+			break;
+		}
+	}
+}
+
+void bbqshop::timerEvent(QTimerEvent * event)
+{
+	int timetag = event->timerId();
+	switch (timers[timetag])
+	{
+	case TIMER_GETPRICE:
+		getOCRPrice();
+		break;
+	//case TIMER_MEMORYRECORD:
+	//	urlServer->RecordMemoryInfo("Get memory by fixed time");
+	//	break;
+	default:
+		break;
+	}
+}
+
+void bbqshop::getOCRPrice()
+{
+	if (getOCRPriceTimes > 1)
+	{
+		ZHFuncLib::NativeLog("", "after send get price cmd, there is not return", "a");
+		ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
+		startGetOCRPrice();
+		return;
+	}
+	++getOCRPriceTimes;
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_OCR_GETPRICE;
+
+	HWND hwnd = ::FindWindowW(NULL, OCRDLGTITLEW);
+	bool suc = ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+	if (!suc)
+	{
+		ZHFuncLib::NativeLog("", "send getprice cmd failed", "a");
+		ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
+		startGetOCRPrice();
+	}
 }

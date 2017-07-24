@@ -25,6 +25,11 @@ class bbqshop : public QWidget, public AccessServerResult
 	Q_OBJECT
 
 public:
+	enum TIMERINDEX
+	{
+		TIMER_GETPRICE,
+	};
+
 	bbqshop(QApplication *pApp, QWidget *parent = 0);
 	~bbqshop();
 
@@ -45,13 +50,16 @@ private:
 	CKeyHook mKeyHook;
 #endif
 	BbqUrlServer *urlServer;
+	//定时器
+	std::map<int, int> timers;
+	int getOCRPriceTimes;
 
 	void createTray();
 	
 	inline void parseProcessJsonData(QString inJson);
 	inline void processJsonSaveLoginInfo(const Json::Value &value);
 	inline void processJsonOnMainDlgClose(const Json::Value &value);
-	inline void processJsonStartOCR();
+	void processJsonStartOCR();
 	inline void processJsonShowMainDlg();
 	inline void processJsonRereadSetting();
 	inline void processJsonShowPrice(const Json::Value &value);
@@ -64,6 +72,11 @@ private:
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);
+	void startGetOCRPrice();
+	void stopGetOCRPriceTimer();
+	inline bool isHasTargetTimer(int targetTimer);
+	inline void killTargetTimer(int targetTimer);
+	void getOCRPrice();
 
 signals:
 	void showTipStringSig(const QString &, const QString &);
@@ -84,6 +97,7 @@ private slots:
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);
 	void CurlError(std::string url, int res, int urlTag);
+	virtual void timerEvent(QTimerEvent * event);
 };
 
 #endif // BBQSHOP_H
