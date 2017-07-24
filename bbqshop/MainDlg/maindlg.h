@@ -16,13 +16,13 @@ public:
 	MainDlg(QApplication *pApp, char *account = NULL, QWidget *parent = 0);
 	~MainDlg();
 
-	void SendToURLRecord(const char *logLevel, const char *logModule, const char *logMessage, int urlTag = -1);
+	//void SendToURLRecord(const char *logLevel, const char *logModule, const char *logMessage, int urlTag = -1);
 	//void GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag = -1);
 	//void GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag = -1);
-	void GetMAC(char *mac);
-	void TimeFormatRecover(std::string &outStr, std::string inOriTimeStr);
-	std::string GetPayTool(int inType);
-	bool IsImportentOperateNow();
+	//void GetMAC(char *mac);
+	//void TimeFormatRecover(std::string &outStr, std::string inOriTimeStr);
+	//std::string GetPayTool(int inType);
+	//bool IsImportentOperateNow();
 
 	std::vector<QString > mWinClassNames;
 	std::vector<QString > mWinWindowNames;
@@ -47,6 +47,7 @@ private:
 	inline void parseProcessJsonData(QString inJson);
 	inline void showPrice(const Json::Value &value);
 	inline void urlbackOnCommit(const Json::Value &value);
+	inline void urlbackOnBind(const Json::Value &value);
 	bool isReturnSuccessFromeServer(const Json::Value &pjsonVal);
 	void setCashInfo(const Json::Value &inData);
 
@@ -64,6 +65,11 @@ private slots:
 	void checkPrice();
 	void commitSlot();
 	void cashNoChanged(int newIndex);
+	void bindSlot();
+	void showTipSlot(bool isShow);
+
+signals:
+	void showBindTipSig(bool );
 };
 
 #endif // MAINDLG_H
