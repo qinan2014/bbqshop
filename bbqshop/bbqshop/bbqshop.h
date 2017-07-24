@@ -52,6 +52,7 @@ private:
 	inline void processJsonSaveLoginInfo(const Json::Value &value);
 	inline void processJsonOnMainDlgClose(const Json::Value &value);
 	inline void processJsonStartOCR();
+	inline void processJsonShowMainDlg();
 	inline void startHook();
 	inline void stopHook();
 	inline void hookManInputCodeMsg(MSG* msg);

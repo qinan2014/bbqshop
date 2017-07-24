@@ -261,6 +261,10 @@ inline void bbqshop::parseProcessJsonData(QString inJson)
 		break;
 	case TO_FLOATWIN_STARTOCR:
 		processJsonStartOCR();
+		break;
+	case TO_FLOAT_SHOWMAINDLG:
+		processJsonShowMainDlg();
+		break;
 	default:
 		break;
 	}
@@ -410,6 +414,26 @@ inline void bbqshop::processJsonOnMainDlgClose(const Json::Value &value)
 {
 	if (value[PRO_DLG_STATUS].asInt() == 0)
 		emit returnFocusToCashier();
+}
+
+inline void bbqshop::processJsonShowMainDlg()
+{
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_MAINDLG_IMPORTANTDATA;
+	codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+	mValData[PRO_SHOP_CODE] = deskInfo.shopCode;
+	mValData[PRO_ROLE] = deskInfo.role;
+	mValData[PRO_USERNAME] = deskInfo.userName;
+	mValData[PRO_ID] = deskInfo.id;
+	mValData[PRO_SHOPTYPE] = deskInfo.shoptype;
+	mValData[PRO_SHOP_NAME] =(deskInfo.shopName);
+	mValData[PRO_SHOPID] = deskInfo.shopid;
+	mValData[PRO_WORKSTATUS] = deskInfo.workStatus;
+	mValData[PRO_ACCOUNT] = deskInfo.account;
+	mValData[PRO_LOGINTIME] = deskInfo.loginTime;
+	mValData[PRO_EXITTIME] = deskInfo.exitTime;
+	HWND hwnd = ::FindWindowW(NULL, MAINDLGTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }
 
 codeSetIO::ZHIHUISETTING &bbqshop::GetSetting()

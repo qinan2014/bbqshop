@@ -61,7 +61,7 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	ZHSettingRW settingRW(mZHSetting);
 	settingRW.ReadZHSetting();
 	// 初始化数据
-	initFrame();
+	//initFrame();
 	// 按钮控件的信号
 	connect(ui.btnGetScreen, SIGNAL(pressed()), this, SLOT(catchScreen()));
 	connect(ui.btnCheckPrice, SIGNAL(pressed()), this, SLOT(checkPrice()));
@@ -73,47 +73,13 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	connect(ui.btnCheck, SIGNAL(pressed()), this, SLOT(checkCashSoftCorrect()));
 	connect(ui.btnPrinterTest, SIGNAL(pressed()), this, SLOT(printerTest()));
 	connect(ui.pbtClear, SIGNAL(pressed()), this, SLOT(clickClear()));
+	connect(this, SIGNAL(settingInfoFinished()), this, SLOT(showTipSlot(bool )));
 }
 
 MainDlg::~MainDlg()
 {
 
 }
-
-//void MainDlg::SendToURLRecord(const char *logLevel, const char *logModule, const char *logMessage, int urlTag)
-//{
-//	urlServer->SendToURLRecord(logLevel, logModule, logMessage, urlTag);
-//}
-
-//void MainDlg::GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag)
-//{
-//	urlServer->GetDataFromServer(inSecondAddr, inApi, inData, urlTag);
-//}
-
-//void MainDlg::GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag)
-//{
-//	urlServer->GetDataFromServer1(inUrl, inSecondAddr, inApi, ioRootVal, urlTag);
-//}
-
-//void MainDlg::GetMAC(char *mac)
-//{
-//	urlServer->GetMAC(mac);
-//}
-
-//void MainDlg::TimeFormatRecover(std::string &outStr, std::string inOriTimeStr)
-//{
-//	urlServer->TimeFormatRecover(outStr, inOriTimeStr);
-//}
-
-//std::string MainDlg::GetPayTool(int inType)
-//{
-//	return urlServer->GetPayTool(inType);
-//}
-
-//bool MainDlg::IsImportentOperateNow()
-//{
-//	return urlServer->IsImportentOperateNow();
-//}
 
 inline void MainDlg::setTopBtn()
 {
@@ -568,10 +534,61 @@ inline void MainDlg::parseProcessJsonData(QString inJson)
 	case RETURN_PRICE:
 		showPrice(value);
 		break;
+	case TO_MAINDLG_IMPORTANTDATA:
+		saveLoginData(value);
+		emit settingInfoFinished();
+		break;
 	default:
 		break;
 	}
 }
+
+void MainDlg::onSettingInfoFinished()
+{
+	initFrame();
+}
+
+inline void MainDlg::saveLoginData(const Json::Value &value)
+{
+	const char *shopCode = value[PRO_SHOP_CODE].asCString();
+	int role = value[PRO_ROLE].asInt();
+	const char *userName = value[PRO_USERNAME].asCString();
+	int id = value[PRO_ID].asInt();
+	const char *shopName = value[PRO_SHOP_NAME].asCString();
+	int shopID = value[PRO_SHOPID].asInt();
+	int shopType = value[PRO_SHOPTYPE].asInt();
+	int workStatus = value[PRO_WORKSTATUS].asInt();
+	const char *account = value[PRO_ACCOUNT].asCString();
+	const char *loginTime = value[PRO_LOGINTIME].asCString();
+	const char *extTime = NULL;
+	if (value.isMember(PRO_EXITTIME))
+		extTime = value[PRO_EXITTIME].asCString();
+
+	codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+	memcpy(deskInfo.shopCode, shopCode, strlen(shopCode));
+	deskInfo.shopCode[strlen(shopCode)] = 0;
+	deskInfo.role = role;
+	memcpy(deskInfo.userName, userName, strlen(userName));
+	deskInfo.userName[strlen(userName)] = 0;
+	deskInfo.id = id;
+	memcpy(deskInfo.shopName, shopName, strlen(shopName));
+	deskInfo.shopName[strlen(shopName)] = 0;
+	deskInfo.shopid = shopID;
+	deskInfo.shoptype = shopType;
+	deskInfo.workStatus = workStatus;
+	memcpy(deskInfo.account, account, strlen(account));
+	deskInfo.account[strlen(account)] = 0;
+	memcpy(deskInfo.loginTime, loginTime, strlen(loginTime));
+	deskInfo.loginTime[strlen(loginTime)] = 0;
+	if (extTime != NULL)
+	{
+		memcpy(deskInfo.exitTime, extTime, strlen(extTime));
+		deskInfo.exitTime[strlen(extTime)] = 0;
+	}
+
+	ui.labName->setText(userName);
+}
+
 
 inline void MainDlg::showPrice(const Json::Value &inJson)
 {
@@ -926,6 +943,15 @@ void MainDlg::clickClear()
 	Json::Value mValData;
 	mValData[PRO_HEAD] = TO_SHOWTIP;
 	mValData[PRO_TIPSTR] = QString::fromLocal8Bit("清理缓存完成。").toStdString();
+	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+}
+
+void MainDlg::showEvent(QShowEvent * event)
+{
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_FLOAT_SHOWMAINDLG;
+	mValData[PRO_DLG_STATUS] = 1;
 	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
 	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }

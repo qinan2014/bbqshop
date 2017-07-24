@@ -16,14 +16,6 @@ public:
 	MainDlg(QApplication *pApp, char *account = NULL, QWidget *parent = 0);
 	~MainDlg();
 
-	//void SendToURLRecord(const char *logLevel, const char *logModule, const char *logMessage, int urlTag = -1);
-	//void GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag = -1);
-	//void GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag = -1);
-	//void GetMAC(char *mac);
-	//void TimeFormatRecover(std::string &outStr, std::string inOriTimeStr);
-	//std::string GetPayTool(int inType);
-	//bool IsImportentOperateNow();
-
 	std::vector<QString > mWinClassNames;
 	std::vector<QString > mWinWindowNames;
 
@@ -46,6 +38,7 @@ private:
 	void showTipDialogOK(int icon, const QString &inTitle, const QString &inTxt);
 	void catchScreenInfo();
 	inline void parseProcessJsonData(QString inJson);
+	inline void saveLoginData(const Json::Value &inJson);
 	inline void showPrice(const Json::Value &value);
 	inline void urlbackOnCommit(const Json::Value &value);
 	inline void urlbackOnBind(const Json::Value &value);
@@ -60,6 +53,7 @@ protected:
 	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
 	virtual void hideEvent(QHideEvent * event);
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);
+	virtual void showEvent(QShowEvent * event);
 
 private slots:
 	void closeMainDlg();
@@ -76,9 +70,11 @@ private slots:
 	void checkCashSoftCorrect();
 	void printerTest();
 	void clickClear();
+	void onSettingInfoFinished();
 
 signals:
 	void showBindTipSig(bool );
+	void settingInfoFinished();
 };
 
 #endif // MAINDLG_H
