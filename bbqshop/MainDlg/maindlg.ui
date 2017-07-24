@@ -148,7 +148,7 @@
        <rect>
         <x>80</x>
         <y>0</y>
-        <width>281</width>
+        <width>211</width>
         <height>30</height>
        </rect>
       </property>
@@ -159,7 +159,7 @@
      <widget class="QLabel" name="labBindTip">
       <property name="geometry">
        <rect>
-        <x>200</x>
+        <x>320</x>
         <y>6</y>
         <width>41</width>
         <height>20</height>
@@ -177,7 +177,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>210</y>
+       <y>190</y>
        <width>151</width>
        <height>30</height>
       </rect>

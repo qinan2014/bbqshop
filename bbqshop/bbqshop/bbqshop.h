@@ -53,6 +53,8 @@ private:
 	inline void processJsonOnMainDlgClose(const Json::Value &value);
 	inline void processJsonStartOCR();
 	inline void processJsonShowMainDlg();
+	inline void processJsonRereadSetting();
+	inline void processJsonShowPrice(const Json::Value &value);
 	inline void startHook();
 	inline void stopHook();
 	inline void hookManInputCodeMsg(MSG* msg);
@@ -61,6 +63,7 @@ private:
 	inline void hookManInputNum(DWORD vkCode);
 
 	void showPayDialog();
+	bool isPriceNum(QString &ioPriceStr);
 
 signals:
 	void showTipStringSig(const QString &, const QString &);
@@ -76,6 +79,7 @@ private slots:
 	void setFocusOnCashier();
 	void closeHookNum();
 	void showLoginDialog();
+	void sendCashInfo();
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);

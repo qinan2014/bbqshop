@@ -12,6 +12,7 @@
 #include "HookKeyChar.h"
 #include "PayDialog.h"
 #include <QDesktopWidget>
+#include "ZBase64.h"
 
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
@@ -265,6 +266,12 @@ inline void bbqshop::parseProcessJsonData(QString inJson)
 	case TO_FLOAT_SHOWMAINDLG:
 		processJsonShowMainDlg();
 		break;
+	case TO_FLOATWIN_REWRITESETTING:
+		processJsonRereadSetting();
+		break;
+	case RETURN_PRICE:
+		processJsonShowPrice(value);
+		break;
 	default:
 		break;
 	}
@@ -436,6 +443,120 @@ inline void bbqshop::processJsonShowMainDlg()
 	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }
 
+inline void bbqshop::processJsonRereadSetting()
+{
+	ZHSettingRW settingRW(mZHSetting);
+	settingRW.ReadZHSetting();
+	//char tmpbuf[100];
+	//sprintf(tmpbuf, "isgetprice in time, %d", mZHSetting.shopCashdestInfo.isGetPriceActualTime);
+	//LogError(tmpbuf, "a");
+	if (mZHSetting.shopCashdestInfo.isGetPriceActualTime == 1)
+	{
+		std::vector<int > ids;
+		ZHFuncLib::GetTargetProcessIds(OCREXE, ids);
+		if (ids.size() > 0)
+			sendCashInfo();
+	}
+	else
+		ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
+
+	if (mZHSetting.shopCashdestInfo.isUsePayGun == 1)
+	{
+		startHook();
+	}
+	else
+	{
+		stopHook();
+	}
+
+	ShowTipString(QString::fromLocal8Bit("保存完成！"));
+}
+
+inline void bbqshop::processJsonShowPrice(const Json::Value &inJson)
+{
+	QString pricestr = inJson[PRO_OCR_PRICE].asCString();
+	int priceerror = inJson[PRO_OCR_ERROR].asInt();
+	if (priceerror == PRO_OCR_ERROR_NAME_EMPTY)
+	{
+		//priceLab->setText("0.00");
+		//killTargetTimer(TIMER_GETPRICE);
+		QTimer::singleShot(200,this, SLOT(sendCashInfo()) );
+		return;
+	}
+	if (isPriceNum(pricestr));
+	{
+		PayDialog *dlg = PayDialog::InitInstance(false);
+		if (dlg != NULL)
+		{
+			dlg->SetMoney(pricestr);
+		}
+	}
+}
+
+
+bool bbqshop::isPriceNum(QString &ioPriceStr)
+{
+	if (ioPriceStr.isEmpty()) 
+		return false;	
+	if (ioPriceStr.at(0) == '-')
+		return false;
+	ioPriceStr.replace('o', '0');
+	ioPriceStr.replace(']', '1');
+	QString newStr;
+	// 确保第一个字符是数字
+	int tmpLen = ioPriceStr.length();
+	for (int i = 0; i < tmpLen; ++i)
+	{
+		QChar tmpchar = ioPriceStr.at(i);
+		if ((tmpchar >= '0' && tmpchar <= '9') || tmpchar == '.')
+		{
+			newStr += tmpchar;
+		}
+	}
+	ioPriceStr = newStr;
+
+	if (ioPriceStr.isEmpty()) 
+		return false;	
+	int bytelen = ioPriceStr.length();
+	QChar tmpchar = ioPriceStr.at(0);
+	// 如果第一个字符不是数字则直接返回
+	if (tmpchar < '0' || tmpchar > '9')
+		return false;
+
+	// 第一个数字是0，第二个数字不是小数点返回false
+	if (bytelen > 1 && tmpchar == '0' && ioPriceStr.at(1) != '.')
+		return false;
+
+	short dotNum = 0;
+	int dotPos = -1;
+	for (int i = 1; i < bytelen; ++i)
+	{
+		QChar bychar = ioPriceStr.at(i);
+		// 小数点的判断
+		if (bychar == '.')
+		{
+			dotPos = i;
+			++dotNum;
+		}
+		if (dotNum > 1)
+			return false;
+
+		if ((bychar < '0' || bychar > '9') && bychar != '.' && bychar != 10){
+			return false;}
+
+		//char numch[50];
+		//sprintf(numch, "char is %c assic: %d\r\n", bychar, bychar);
+		//LogError(numch, "a");
+	}
+
+	// 小数点后超过2位的判断
+	if (dotPos != -1 &&(bytelen - 1 - dotPos > 2))
+		return false;
+
+	return true;
+}
+
+
 codeSetIO::ZHIHUISETTING &bbqshop::GetSetting()
 {
 	return mZHSetting;
@@ -479,3 +600,28 @@ void bbqshop::processJsonStartOCR()
 	SendToURLRecord(LOG_DEBUG, LOG_RESTARTOCR, "restart-ocr-process", URL_RECORD_STARTOCR);
 }
 
+void bbqshop::sendCashInfo()
+{
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_OCR_CASHINFO;
+	mValData[PRO_OCR_FROMDLG] = PRO_OCR_FROM_FLOATWIN;
+	codeSetIO::CarishDesk &carishInfo = GetSetting().carishInfo;
+	if (strlen(carishInfo.windowName) < 1)
+	{
+		ZHFuncLib::NativeLog("", "windowName empty", "a");
+		return;
+	}
+	codeSetIO::SelectRange &curSelRange = carishInfo.selectRange;
+	ZBase64 base64;
+	mValData[PRO_OCR_CASHNAME] = base64.Encode(carishInfo.windowName, strlen(carishInfo.windowName));
+	mValData[PRO_OCR_REALITIVETYPE] = curSelRange.relitiveType;
+	mValData[PRO_OCR_SELX] = curSelRange.xCenterDistance;
+	mValData[PRO_OCR_SELY] = curSelRange.yCenterDistance;
+	mValData[PRO_OCR_SELW] = curSelRange.widImage;
+	mValData[PRO_OCR_SELH] = curSelRange.heightImage;
+	mValData[PRO_OCR_SCALETAG] = curSelRange.priceImageScaleTag;
+	mValData[PRO_OCR_BINA] = curSelRange.imageBinaryzation;
+
+	HWND hwnd = ::FindWindowW(NULL, OCRDLGTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+}
