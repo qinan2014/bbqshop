@@ -26,7 +26,7 @@ private:
 	QString pngPath;
 	QWidget *parWidget;
 	bool isPaying;
-	std::string mcurtradeNo;
+	QString mcurtradeNo;
 	bool isSelfClose;
 	
 	PayDialog(QString imgPath, QWidget *parent = 0);
@@ -35,6 +35,7 @@ private:
 signals:
 	void enablePaySig(bool enablePay);
 	void closeThisDlg();
+	void micropaySucess(QString payTradeNo);
 
 	private slots:
 		void moneyChanged(const QString &newMoney);

@@ -199,9 +199,8 @@ void PayDialog::CardPayInfo(bool isPaySuc, const Json::Value &inVal)
 		EnablePay(TRUE);
 		return;
 	}
+	emit micropaySucess(mcurtradeNo);
 
-	std::string tmplog = "card pay success";
-	//parWid->LogError(tmplog.c_str(), "a");
 	accept();
 }
 
@@ -211,3 +210,4 @@ void PayDialog::CardPayQueryResult(const Json::Value & pjsonVal)
 	std::string resCode = pjsonVal["result_code"].asString();
 	const char *msg = pjsonVal["return_msgs"].asCString();
 }
+

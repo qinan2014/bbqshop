@@ -79,6 +79,29 @@ void bbqshop::CurlError(std::string url, int res, int urlTag)
 	ShowTipString(QString::fromLocal8Bit("网络异常，请检查网络！"));
 }
 
+bool bbqshop::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi)
+{
+	Json::Reader reader;
+	Json::Value value;
+	bool suc = reader.parse(mRecvJsonStr, value);
+	if (suc)
+	{
+		ZHFuncLib::NativeLog("", mRecvJsonStr.c_str(), "a");
+		switch (urlTag)
+		{
+		case URL_SWIP_CARD_DLG:
+			SwipCardPayURLBack(value, urlApi);
+			break;
+		case URL_TRADEINFODETAIL:
+			tradeNoResult(value["data"]);
+			break;
+		default:
+			break;
+		}
+	}
+	//NetStatus(1);
+	return true;
+}
 
 bool bbqshop::CreateGoodBillRequest(double inOriPrice, double inFavoPrice, int dlgTag)
 {
@@ -379,7 +402,7 @@ void bbqshop::onCloseTipWin()
 	//if (ids.size() != 0)
 	//	return;
 	//if (isVisible())
-	//	emit returnFocusToCashier();
+	emit returnFocusToCashier();
 }
 
 void bbqshop::setFocusOnCashier()
@@ -593,6 +616,7 @@ void bbqshop::showPayDialog()
 		connect(dlg, SIGNAL(closeThisDlg()), this, SLOT(closeHookNum()));
 		connect(this, SIGNAL(manInputESC()), dlg, SLOT(closeSelf()));
 		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
+		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(requestTradeInfoByNo(QString )));
 		hookNum(true);
 		startGetOCRPrice();
 		dlg->show();
@@ -791,4 +815,52 @@ bool bbqshop::isOperatorOtherDlg()
 	if (isShowingHandoverDlg)
 		return true;
 	return false;
+}
+
+void bbqshop::SwipCardPayURLBack(const Json::Value &value, std::string urlApi)
+{
+	std::string retCode = value["return_code"].asString();
+	std::string resCode = value["result_code"].asString();
+	bool isReturnSuc = !(retCode == "FAIL" || resCode == "FAIL" || retCode == "fail" || resCode == "fail" );
+	if (!isReturnSuc && value.isMember("return_msgs"))
+	{
+		ShowTipString((value["return_msgs"].asCString()));
+	}
+
+	std::string dataApi = value["api"].asString();
+	if (dataApi.empty())
+		dataApi = urlApi;
+	PayDialog *cardDlg = PayDialog::InitInstance(false);
+	if (cardDlg != NULL)
+	{
+		if (dataApi == CARDPAYUNIFIEDORDER){
+			cardDlg->CreatePayBillSucess(isReturnSuc, value);
+		}
+		else if(dataApi == CARDPAYMICROPAYAPI)
+			cardDlg->CardPayInfo(isReturnSuc, value);
+	}
+}
+
+void bbqshop::requestTradeInfoByNo(QString tradeNo)
+{
+	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+	Json::Value mValData;
+	mValData["shopid"] = shopInfo.shopid;
+	mValData["tradeno"] = tradeNo.toStdString();
+	std::string itemVal = mValData.toStyledString();
+	std::string::size_type rePos;
+	while ((rePos = itemVal.find(" ")) != -1) {
+		itemVal.replace(rePos, 1, "");
+	}
+	GetDataFromServer("api/app/v1", TRADEINFODETAILAPI, itemVal, URL_TRADEINFODETAIL);
+}
+
+void bbqshop::tradeNoResult(const Json::Value & inData)
+{
+	const char *tradeNo = inData["TRADE_NO"].asCString();
+	double tradeMoney = inData["ORIG_FEE"].asDouble();
+	const char *tradeTm = inData["CTIME"].asCString();
+	int tradeStatus = inData["STATUS"].asInt();
+
+	//ui.labVal1->setText(tradeNo);
 }

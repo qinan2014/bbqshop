@@ -5,6 +5,7 @@
 #include "ui_HandoverDlg.h"
 #include "AccessServerResult.h"
 #include "BbqUrlServer.h"
+#include "json/json.h"
 
 class HandoverDlg : public QDialog, public AccessServerResult
 {
@@ -22,6 +23,10 @@ private:
 	Ui::HandoverDlg ui;
 	BbqUrlServer *urlServer;
 	QWidget *parWidget;
+
+	inline void setJSONInfo(Json::Value &inData);
+	void getStatics();
+	void setTradeStatic(const Json::Value & inVal);
 };
 
 #endif // HANDOVERDLG_H

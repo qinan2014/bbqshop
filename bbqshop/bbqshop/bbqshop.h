@@ -82,6 +82,8 @@ private:
 	inline void killTargetTimer(int targetTimer);
 	void getOCRPrice();
 	bool isOperatorOtherDlg();
+	void SwipCardPayURLBack(const Json::Value &value, std::string urlApi);
+	void tradeNoResult(const Json::Value & inData);
 
 signals:
 	void showTipStringSig(const QString &, const QString &);
@@ -99,10 +101,12 @@ private slots:
 	void showLoginDialog();
 	void sendCashInfo();
 	void onESCEvent();
+	void requestTradeInfoByNo(QString tradeNo);
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);
 	void CurlError(std::string url, int res, int urlTag);
+	virtual bool DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::string urlApi);  // 返回值 结构是否正确
 	virtual void timerEvent(QTimerEvent * event);
 };
 
