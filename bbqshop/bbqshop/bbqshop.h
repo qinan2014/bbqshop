@@ -53,6 +53,7 @@ private:
 	//定时器
 	std::map<int, int> timers;
 	int getOCRPriceTimes;
+	QString curTradeNo;
 	bool isShowingHandoverDlg;
 
 	void createTray();
@@ -101,7 +102,8 @@ private slots:
 	void showLoginDialog();
 	void sendCashInfo();
 	void onESCEvent();
-	void requestTradeInfoByNo(QString tradeNo);
+	void requestTradeInfoByNo();
+	void saveCurrentTradeNo(QString tradeNo);
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);

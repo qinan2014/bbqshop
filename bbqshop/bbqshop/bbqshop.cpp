@@ -616,7 +616,7 @@ void bbqshop::showPayDialog()
 		connect(dlg, SIGNAL(closeThisDlg()), this, SLOT(closeHookNum()));
 		connect(this, SIGNAL(manInputESC()), dlg, SLOT(closeSelf()));
 		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
-		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(requestTradeInfoByNo(QString )));
+		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(saveCurrentTradeNo(QString )));
 		hookNum(true);
 		startGetOCRPrice();
 		dlg->show();
@@ -841,12 +841,18 @@ void bbqshop::SwipCardPayURLBack(const Json::Value &value, std::string urlApi)
 	}
 }
 
-void bbqshop::requestTradeInfoByNo(QString tradeNo)
+void bbqshop::saveCurrentTradeNo(QString tradeNo)
+{
+	curTradeNo = tradeNo;
+	QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()) );
+}
+
+void bbqshop::requestTradeInfoByNo()
 {
 	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
 	Json::Value mValData;
 	mValData["shopid"] = shopInfo.shopid;
-	mValData["tradeno"] = tradeNo.toStdString();
+	mValData["tradeno"] = curTradeNo.toStdString();
 	std::string itemVal = mValData.toStyledString();
 	std::string::size_type rePos;
 	while ((rePos = itemVal.find(" ")) != -1) {
@@ -861,6 +867,10 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	double tradeMoney = inData["ORIG_FEE"].asDouble();
 	const char *tradeTm = inData["CTIME"].asCString();
 	int tradeStatus = inData["STATUS"].asInt();
-
+	if (tradeStatus == 0) // 表示还未到账，要继续查询
+	{
+		QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()));
+		return;
+	}
 	//ui.labVal1->setText(tradeNo);
 }
