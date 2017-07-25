@@ -87,6 +87,18 @@ void PayDialog::closeSelf()
 	CloseInstance();
 }
 
+void PayDialog::onNetError(QString url, int res, int urlTag)
+{
+	if (urlTag == URL_SWIP_CARD_DLG)
+	{
+		if (!mcurtradeNo.isEmpty())
+		{
+			emit micropaySucess(mcurtradeNo);
+			emit accepted();		
+		}
+	}
+}
+
 void PayDialog::SetScanCode(QString inCode)
 {
 	ui.ledtScancode->setText(inCode);

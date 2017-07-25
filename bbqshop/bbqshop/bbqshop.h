@@ -91,6 +91,8 @@ signals:
 	void returnFocusToCashier();
 	void manInputEnter();
 	void manInputESC();
+	void checkPayResultSig();
+	void netError(QString, int, int);
 
 private slots:
 	void programQuit();
@@ -104,6 +106,7 @@ private slots:
 	void onESCEvent();
 	void requestTradeInfoByNo();
 	void saveCurrentTradeNo(QString tradeNo);
+	void checkPayResultSlot();
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);

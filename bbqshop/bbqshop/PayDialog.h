@@ -44,6 +44,8 @@ signals:
 public slots:
 	void ClickPay();
 	void closeSelf();
+	void onNetError(QString url, int res, int urlTag);
+
 public:
 	void CreatePayBillSucess(bool isReturnSuc, const Json::Value & value);
 	void CardPayInfo(bool isReturnSuc, const Json::Value & value);

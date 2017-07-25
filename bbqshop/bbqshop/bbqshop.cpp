@@ -40,6 +40,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	connect(this, SIGNAL(showTipStringSig(const QString &, const QString &)), this, SLOT(showTipStringSlot(const QString &, const QString &)));
 	connect(this, SIGNAL(returnFocusToCashier()), this, SLOT(setFocusOnCashier()));
 	connect(this, SIGNAL(manInputESC()), this, SLOT(onESCEvent()));
+	connect(this, SIGNAL(checkPayResultSig()), this, SLOT(checkPayResultSlot()));
 	// 登录
 	showLoginDialog();
 }
@@ -76,6 +77,7 @@ bool bbqshop::IsImportentOperateNow()
 
 void bbqshop::CurlError(std::string url, int res, int urlTag)
 {
+	emit netError(url.c_str(), res, urlTag);
 	ShowTipString(QString::fromLocal8Bit("网络异常，请检查网络！"));
 }
 
@@ -617,6 +619,7 @@ void bbqshop::showPayDialog()
 		connect(this, SIGNAL(manInputESC()), dlg, SLOT(closeSelf()));
 		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
 		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(saveCurrentTradeNo(QString )));
+		connect(this, SIGNAL(netError(QString, int, int)), dlg, SLOT(onNetError(QString, int, int)));
 		hookNum(true);
 		startGetOCRPrice();
 		dlg->show();
@@ -847,6 +850,11 @@ void bbqshop::saveCurrentTradeNo(QString tradeNo)
 	QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()) );
 }
 
+void bbqshop::checkPayResultSlot()
+{
+	QTimer::singleShot(400,this, SLOT(requestTradeInfoByNo()) );
+}
+
 void bbqshop::requestTradeInfoByNo()
 {
 	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
@@ -869,8 +877,11 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	int tradeStatus = inData["STATUS"].asInt();
 	if (tradeStatus == 0) // 表示还未到账，要继续查询
 	{
-		QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()));
+		emit checkPayResultSig();
 		return;
 	}
-	//ui.labVal1->setText(tradeNo);
+	if (tradeStatus == 1) // 支付成功
+	{
+		emit manInputESC();
+	}
 }
