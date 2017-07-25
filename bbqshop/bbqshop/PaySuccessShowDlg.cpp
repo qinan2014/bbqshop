@@ -1,7 +1,7 @@
 #include "PaySuccessShowDlg.h"
 #include "zhfunclib.h"
 #include <time.h> 
-//#include "bbqpay.h"
+#include "bbqshop.h"
 #include <QDesktopWidget>
 #include <QTimer>
 
@@ -42,16 +42,11 @@ PaySuccessShowDlg::PaySuccessShowDlg(QString iconPath, QWidget *parent)
 	ui.pbtPrint->setStyleSheet("border-image: url(" + pngPath + ");color: #FFFFFF; font: 12pt \"Arial\";");
 	connect(ui.pbtPrint, SIGNAL(released()), this, SLOT(accept()));
 
-	setClientIcon("/res/clientDefaultIcon.png");
-
-	//bbqpay *floatWin = (bbqpay *)floatWidget;
-	//connect(floatWin, SIGNAL(toShowClientIcon(const QString &)), this, SLOT(showClientIcon(const QString &)));
-	//connect(floatWin, SIGNAL(showUsrClientInfo(const QString &, int, int)), this, SLOT(showUsrClientInfoSlot(const QString &, int, int)));
-
-	//if (floatWin->GetSetting().shopCashdestInfo.isAutoPrint == 1)
-	//{
-	//	QTimer::singleShot(2000,this, SLOT(accept()) ); 
-	//}
+	bbqshop *floatWin = (bbqshop *)floatWidget;
+	if (floatWin->GetSetting().shopCashdestInfo.isAutoPrint == 1)
+	{
+		QTimer::singleShot(2000,this, SLOT(accept()) ); 
+	}
 }
 
 PaySuccessShowDlg::~PaySuccessShowDlg()
@@ -74,45 +69,3 @@ void PaySuccessShowDlg::SetPaySuccessInfo(const char *trade_no, const char *pay_
 	ui.labTradeTime->setText(tradeTime);
 	ui.labTradeValue->setText(tradeMoney);
 }
-
-void PaySuccessShowDlg::setClientIcon(const QString &clientIcon)
-{
-	QString pngPath = ZHFuncLib::GetWorkPath().c_str();
-	pngPath += clientIcon;
-	ZHFuncLib::NativeLog("", pngPath.toStdString().c_str(), "a");
-	QPixmap img(pngPath);
-	QSize imgsz = img.size();
-	QSize labsz = ui.labCIcon->size();
-	int imgwidth = labsz.width();
-	float widper = (float )imgwidth / (float )imgsz.width();
-	int imgheight = imgsz.height() * widper;
-	img = img.scaled(imgwidth, imgheight, Qt::KeepAspectRatio);
-	ui.labCIcon->setPixmap(img);
-	int posx = 0;
-	QSize cwidSz = ui.clientWidget->size();
-	int posy = (cwidSz.height() - imgheight) * 0.5;
-	ui.labCIcon->setGeometry(posx, posy, imgwidth, imgheight);
-}
-
-void PaySuccessShowDlg::showClientIcon(const QString &clientIconType)
-{
-	//QString iconName = "/";
-	//iconName += CLIENT_ICON_NAME;
-	//if (!clientIconType.isEmpty())
-	//{
-	//	iconName += ".";
-	//	iconName += clientIconType;
-	//}
-	//setClientIcon(iconName);
-}
-
-void PaySuccessShowDlg::showUsrClientInfoSlot(const QString &nickName, int payTimes, int isMember)
-{
-	//ui.labClientNickName->setText(nickName);
-	//ui.labPayTimes->setText(QString::number(payTimes) + QString::fromLocal8Bit("次"));
-	//if (isMember == 1)
-	//	ui.labMemberStatus->setText(QString::fromLocal8Bit("会员"));
-	//else
-	//	ui.labMemberStatus->setText(QString::fromLocal8Bit("非会员"));
-}
-

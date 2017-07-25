@@ -921,7 +921,6 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
 		PaySuccessShowDlg dlg(payTypeIcon, this);
 		connect(this, SIGNAL(manInputEnter()), &dlg, SLOT(accept()));
-		//GetClientInfoCMD(msg_info);
 		dlg.SetPaySuccessInfo(tradeNo, pay_fee);
 		INT_PTR nResponse = dlg.exec();
 		bool clickPrint = false;

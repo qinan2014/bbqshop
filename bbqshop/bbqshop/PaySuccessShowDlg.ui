@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>343</width>
-    <height>425</height>
+    <height>307</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -149,7 +149,7 @@
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>380</y>
+     <y>270</y>
      <width>191</width>
      <height>31</height>
     </rect>
@@ -263,164 +263,6 @@
    <property name="styleSheet">
     <string notr="true">background-color: rgb(67, 67, 67);</string>
    </property>
-  </widget>
-  <widget class="QWidget" name="clientWidget" native="true">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>260</y>
-     <width>321</width>
-     <height>111</height>
-    </rect>
-   </property>
-   <widget class="QLabel" name="labCIcon">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>20</y>
-      <width>81</width>
-      <height>71</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QWidget" name="widget_8" native="true">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>40</y>
-      <width>221</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <widget class="QLabel" name="label_11">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>71</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
-     </property>
-     <property name="text">
-      <string>到店次数：</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="labPayTimes">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>0</y>
-       <width>131</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font: 75 12pt &quot;Arial&quot;;</string>
-     </property>
-     <property name="text">
-      <string>3次</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="widget_7" native="true">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>0</y>
-      <width>221</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <widget class="QLabel" name="label_10">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>71</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
-     </property>
-     <property name="text">
-      <string>顾客昵称：</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="labClientNickName">
-     <property name="geometry">
-      <rect>
-       <x>80</x>
-       <y>0</y>
-       <width>141</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font: 75 12pt &quot;Arial&quot;;</string>
-     </property>
-     <property name="text">
-      <string>微信用户</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="widget_9" native="true">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>80</y>
-      <width>221</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <widget class="QLabel" name="label_12">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>71</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
-     </property>
-     <property name="text">
-      <string>是否会员：</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="labMemberStatus">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>0</y>
-       <width>131</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font: 75 12pt &quot;Arial&quot;;</string>
-     </property>
-     <property name="text">
-      <string>非会员</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
