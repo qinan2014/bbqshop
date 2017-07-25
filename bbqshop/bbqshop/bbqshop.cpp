@@ -401,13 +401,6 @@ void bbqshop::showTipStringSlot(const QString &inTip, const QString &inTitle)
 
 void bbqshop::onCloseTipWin()
 {
-	//if (isOperatorOtherDlg())
-	//	return;
-	//std::vector<int > ids;
-	//ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
-	//if (ids.size() != 0)
-	//	return;
-	//if (isVisible())
 	emit returnFocusToCashier();
 }
 
@@ -821,6 +814,8 @@ bool bbqshop::isOperatorOtherDlg()
 		return true;
 	if (isShowingHandoverDlg)
 		return true;
+	if (isShowingPayResult)
+		return true;
 	return false;
 }
 
@@ -932,8 +927,8 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 			if (carishInfo.isAutoPrint != 1)  // if equal 1, it has been printed
 				clickPrint = true;
 		}
-		emit returnFocusToCashier();
 		isShowingPayResult = false; 
+		emit returnFocusToCashier();
 		if (clickPrint)
 			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
 		QString showStatus = urlServer->GetPayTool(paytype).c_str();

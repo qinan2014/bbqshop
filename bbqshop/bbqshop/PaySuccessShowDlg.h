@@ -24,12 +24,6 @@ private:
 	//QString tradeType;
 	//QString tradeStatus;
 	QString tradeMoney;
-
-	void setClientIcon(const QString &clientIcon);
-
-private slots:
-	void showClientIcon(const QString &clientIconType);
-	void showUsrClientInfoSlot(const QString &nickName, int payTimes, int isMember);
 };
 
 #endif // PAYSUCCESSSHOWDLG_H

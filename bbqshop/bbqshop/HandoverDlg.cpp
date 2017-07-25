@@ -20,6 +20,7 @@ HandoverDlg::HandoverDlg(QWidget *parent)
 	int posy = (screenHeight - iHeight) * 0.5;
 	this->setGeometry(posx, posy, iWidth, iHeight);
 	// 访问url
+	getStatics();
 }
 
 HandoverDlg::~HandoverDlg()
@@ -84,6 +85,8 @@ inline void HandoverDlg::setJSONInfo(Json::Value &inData)
 	inData["role"] = shopInfo.role;
 	inData["shoptype"] = shopInfo.shoptype;
 	inData["logintime"] = shopInfo.loginTime;
+
+	ui.labName->setText(shopInfo.userName);
 }
 
 void HandoverDlg::setTradeStatic(const Json::Value & inData)
@@ -106,15 +109,4 @@ void HandoverDlg::setTradeStatic(const Json::Value & inData)
 	ui.labStaticTradeTms->setText(QString::number(orderNum) + QString::fromLocal8Bit(" / 笔"));
 	ui.labStaticRefundVal->setText(QString::number(payNumBack) + QString::fromLocal8Bit(" / 元"));
 	ui.labStaticRefundTms->setText(QString::number(ordernumback) + QString::fromLocal8Bit(" / 笔"));
-//#define NUMLEN 30
-//	char numstring[NUMLEN];
-//	sprintf(numstring, "%.2f元 / %d笔", alipayVal, alipayNum);
-//	ui.labReciptVal1->setText(QString::fromLocal8Bit(numstring));
-//	sprintf(numstring, "%.2f元 / %d笔", balanceVal, balanceNum);
-//	ui.labReciptVal2->setText(QString::fromLocal8Bit(numstring));
-//	sprintf(numstring, "%.2f元 / %d笔", wxpayVal, wxpayNum);
-//	ui.labReciptVal3->setText(QString::fromLocal8Bit(numstring));
-//	sprintf(numstring, "%.2f元 / %d笔", jdpayVal, jdpayNum);
-//	ui.labReciptVal4->setText(QString::fromLocal8Bit(numstring));
-//#undef NUMLEN
 }
