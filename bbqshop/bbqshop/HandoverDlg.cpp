@@ -1,10 +1,22 @@
-#include "HandoverDlg.h"
+ï»¿#include "HandoverDlg.h"
+#include <QDesktopWidget>
 
 HandoverDlg::HandoverDlg(QWidget *parent)
 	: QDialog(parent)
 {
 	ui.setupUi(this);
 	urlServer = new BbqUrlServer(this);
+	// ä½ç½®
+	QRect parRect = this->geometry();
+	int iWidth = parRect.width();
+	int iHeight = parRect.height();
+	QDesktopWidget *desktop = QApplication::desktop();
+	QRect screen = desktop->screenGeometry();
+	int screenWidth = screen.width();
+	int screenHeight = screen.height();
+	int posx = (screenWidth - iWidth) * 0.5;
+	int posy = (screenHeight - iHeight) * 0.5;
+	this->setGeometry(posx, posy, iWidth, iHeight);
 }
 
 HandoverDlg::~HandoverDlg()
@@ -44,8 +56,8 @@ bool HandoverDlg::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std
 
 void HandoverDlg::CurlError(std::string url, int res, int urlTag)
 {
-	//ui.pbtLogin->setText(QString::fromLocal8Bit("µÇÂ¼"));
+	//ui.pbtLogin->setText(QString::fromLocal8Bit("ç™»å½•"));
 	//isLogining = false;
 	//bbqpay *parPay = (bbqpay *)parWidget;
-	//parPay->ShowTipString(QString::fromLocal8Bit("ÍøÂçÒì³££¬Çë¼ì²éÍøÂç£¡"));
+	//parPay->ShowTipString(QString::fromLocal8Bit("ç½‘ç»œå¼‚å¸¸ï¼Œè¯·æ£€æŸ¥ç½‘ç»œï¼"));
 }

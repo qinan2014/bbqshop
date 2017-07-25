@@ -13,6 +13,7 @@
 #include "PayDialog.h"
 #include <QDesktopWidget>
 #include "ZBase64.h"
+#include "HandoverDlg.h"
 
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
@@ -20,8 +21,9 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint|Qt::Popup|Qt::Tool);
 	setWindowTitle(FLOATWINTITLE);
 	setGeometry(0, 0, 5, 5);
-	isShowingPayResult = false;
+	//isShowingPayResult = false;
 	getOCRPriceTimes = 0;
+	isShowingHandoverDlg = false;
 	// 定时器
 	QTimer::singleShot(100,this, SLOT(hide()) );  // 隐藏自己
 	// 创建托盘
@@ -147,7 +149,7 @@ inline void bbqshop::hookNum(bool isEnable)
 #ifdef USEKEYHOOK
 	mKeyHook.EnableInterception(HOOK_NUM, isEnable);
 	hookESC(isEnable);
-	mKeyHook.EnableInterception(HOOK_RETURN, isEnable);
+	hookReturn(isEnable);
 #endif
 }
 
@@ -155,6 +157,13 @@ inline void bbqshop::hookESC(bool isEnable)
 {
 #ifdef USEKEYHOOK
 	mKeyHook.EnableInterception(HOOK_ESC, isEnable);
+#endif
+}
+
+inline void bbqshop::hookReturn(bool isEnable)
+{
+#ifdef USEKEYHOOK
+	mKeyHook.EnableInterception(HOOK_RETURN, isEnable);
 #endif
 }
 
@@ -363,10 +372,8 @@ void bbqshop::showTipStringSlot(const QString &inTip, const QString &inTitle)
 
 void bbqshop::onCloseTipWin()
 {
-	if (isShowingPayResult)
-		return;
-	if (PayDialog::InitInstance(false) != NULL)
-		return;
+	//if (isOperatorOtherDlg())
+	//	return;
 	//std::vector<int > ids;
 	//ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
 	//if (ids.size() != 0)
@@ -377,7 +384,7 @@ void bbqshop::onCloseTipWin()
 
 void bbqshop::setFocusOnCashier()
 {
-	if (isShowingPayResult)
+	if (isOperatorOtherDlg())
 		return;
 	std::wstring softname = ZHFuncLib::StringToWstring(mZHSetting.carishInfo.windowName);
 	if (softname.empty())
@@ -610,12 +617,7 @@ inline void bbqshop::hookManInputShift(PKBDLLHOOKSTRUCT p)
 		hookESC(true);
 	else
 	{
-		PayDialog *dlg = PayDialog::InitInstance(false);
-		if (dlg != NULL)
-			return;
-		std::vector<int > ids;
-		ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
-		if (ids.size() > 0)
+		if (isOperatorOtherDlg())
 			return;
 		hookESC(false);
 	}
@@ -756,13 +758,37 @@ void bbqshop::getOCRPrice()
 void bbqshop::onESCEvent()
 {
 	// 正在弹出着任何对话框 此响应时间都不做操作
+	if (isOperatorOtherDlg())
+		return;
+	// 余下的这种情况是按着Shift键
+	if (strlen(mZHSetting.shopCashdestInfo.account) == 0)
+		return;
+	HandoverDlg handoverDlg(this);
+	isShowingHandoverDlg = true;
+	hookESC(true);
+	hookReturn(true);
+	connect(this, SIGNAL(manInputESC()), &handoverDlg, SLOT(reject()));
+	connect(this, SIGNAL(manInputEnter()), &handoverDlg, SLOT(accept()));
+	int exeres = handoverDlg.exec();
+	hookReturn(false);
+	hookESC(false);
+	isShowingHandoverDlg = false;
+	if (exeres == QDialog::Accepted)
+	{
+
+	}
+}
+
+bool bbqshop::isOperatorOtherDlg()
+{
 	PayDialog *dlg = PayDialog::InitInstance(false);
 	if (dlg != NULL)
-		return;
+		return true;
 	std::vector<int > ids;
 	ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
 	if (ids.size() > 0)
-		return;
-	// 余下的这种情况是按着Shift键
-	
+		return true;
+	if (isShowingHandoverDlg)
+		return true;
+	return false;
 }

@@ -44,7 +44,7 @@ public:
 
 private:
 	QApplication *mainApp;
-	bool isShowingPayResult;
+	//bool isShowingPayResult;
 	codeSetIO::ZHIHUISETTING mZHSetting;
 #ifdef USEKEYHOOK
 	CKeyHook mKeyHook;
@@ -53,6 +53,7 @@ private:
 	//定时器
 	std::map<int, int> timers;
 	int getOCRPriceTimes;
+	bool isShowingHandoverDlg;
 
 	void createTray();
 	
@@ -69,6 +70,7 @@ private:
 	inline void hookScanCodeMsg(MSG* msg);
 	inline void hookNum(bool isEnable);
 	inline void hookESC(bool isEnable);
+	inline void hookReturn(bool isEnable);
 	inline void hookManInputNum(DWORD vkCode);
 	inline void hookManInputShift(PKBDLLHOOKSTRUCT p);
 
@@ -79,6 +81,7 @@ private:
 	inline bool isHasTargetTimer(int targetTimer);
 	inline void killTargetTimer(int targetTimer);
 	void getOCRPrice();
+	bool isOperatorOtherDlg();
 
 signals:
 	void showTipStringSig(const QString &, const QString &);
