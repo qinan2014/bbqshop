@@ -41,10 +41,13 @@ public:
 	void GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag = -1);
 	std::string GetPayTool(int inType);
 	bool IsImportentOperateNow();
+	int GetCommentFontSZ();
+	int GetPrinterDeviceWidth();
+	std::wstring StrToWStr(const char *inChar);
 
 private:
 	QApplication *mainApp;
-	//bool isShowingPayResult;
+	bool isShowingPayResult;
 	codeSetIO::ZHIHUISETTING mZHSetting;
 #ifdef USEKEYHOOK
 	CKeyHook mKeyHook;
@@ -74,6 +77,7 @@ private:
 	inline void hookReturn(bool isEnable);
 	inline void hookManInputNum(DWORD vkCode);
 	inline void hookManInputShift(PKBDLLHOOKSTRUCT p);
+	inline void printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee);
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);

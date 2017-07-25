@@ -14,6 +14,10 @@
 #include <QDesktopWidget>
 #include "ZBase64.h"
 #include "HandoverDlg.h"
+#include "PosPrinterCls.h"
+#include "PosPrinterLptCls.h"
+#include "PaySuccessShowDlg.h"
+#include <time.h>
 
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
@@ -21,7 +25,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint|Qt::Popup|Qt::Tool);
 	setWindowTitle(FLOATWINTITLE);
 	setGeometry(0, 0, 5, 5);
-	//isShowingPayResult = false;
+	isShowingPayResult = false;
 	getOCRPriceTimes = 0;
 	isShowingHandoverDlg = false;
 	// 定时器
@@ -852,7 +856,7 @@ void bbqshop::saveCurrentTradeNo(QString tradeNo)
 
 void bbqshop::checkPayResultSlot()
 {
-	QTimer::singleShot(400,this, SLOT(requestTradeInfoByNo()) );
+	QTimer::singleShot(300,this, SLOT(requestTradeInfoByNo()) );
 }
 
 void bbqshop::requestTradeInfoByNo()
@@ -873,8 +877,18 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 {
 	const char *tradeNo = inData["TRADE_NO"].asCString();
 	double tradeMoney = inData["ORIG_FEE"].asDouble();
+	char orig_fee[10];
+	sprintf(orig_fee, "%0.2f", tradeMoney);
+	double favoFee = inData["TOTAL_FEE"].asDouble();
+	char favo_fee[10];
+	sprintf(favo_fee, "%0.2f", favoFee);
+	double payFee = inData["PAY_FEE"].asDouble();
+	char pay_fee[10];
+	sprintf(pay_fee, "%0.2f", payFee);
+
 	const char *tradeTm = inData["CTIME"].asCString();
 	int tradeStatus = inData["STATUS"].asInt();
+	int paytype = inData["PAY_TYPE"].asInt();
 	if (tradeStatus == 0) // 表示还未到账，要继续查询
 	{
 		emit checkPayResultSig();
@@ -882,6 +896,173 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	}
 	if (tradeStatus == 1) // 支付成功
 	{
-		emit manInputESC();
+		emit manInputESC(); // 目的是关闭支付对话框
+		isShowingPayResult = true;
+		QString payTypeIcon;
+		switch (paytype)
+		{
+		case 1:
+			payTypeIcon = "/res/paytool_ali.png";
+			break;
+		case 2:
+		case 9:
+			payTypeIcon = "/res/paytool_wx.png";
+			break;
+		case 4:
+			payTypeIcon = "/res/paytool_jd.png";
+			break;
+		case 5:
+			payTypeIcon = "/res/paytool_msyh.png";
+			break;
+		}
+		// get private account 
+		codeSetIO::ShopCashdeskInfo &carishInfo = GetSetting().shopCashdestInfo;
+		if (carishInfo.isAutoPrint == 1)
+			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
+		PaySuccessShowDlg dlg(payTypeIcon, this);
+		connect(this, SIGNAL(manInputEnter()), &dlg, SLOT(accept()));
+		//GetClientInfoCMD(msg_info);
+		dlg.SetPaySuccessInfo(tradeNo, pay_fee);
+		INT_PTR nResponse = dlg.exec();
+		bool clickPrint = false;
+		//char tmpbuf[100];
+		//sprintf(tmpbuf, "pay success dlg exec return %d", nResponse);
+		//LogError(tmpbuf, "a");
+		if (nResponse == QDialog::Accepted)
+		{
+			if (carishInfo.isAutoPrint != 1)  // if equal 1, it has been printed
+				clickPrint = true;
+		}
+		emit returnFocusToCashier();
+		isShowingPayResult = false; 
+		if (clickPrint)
+			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
+		QString showStatus = urlServer->GetPayTool(paytype).c_str();
+		showStatus += QString::fromLocal8Bit("，已收款");
+		showStatus += pay_fee;
+		showStatus += QString::fromLocal8Bit("元");
+
+		SendToURLRecord(LOG_DEBUG, LOG_PUSHPAYRES, inData.toStyledString().c_str(), URL_RECORE_PAYRESULT);
+
+		ShowTipString(showStatus);
 	}
+}
+
+inline void bbqshop::printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee)
+{
+#ifdef ENABLE_PRINTER
+	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+	QString printerName = mZHSetting.carishInfo.printerName;
+	std::string paytypestr = GetPayTool(pay_type);
+	paytypestr += "支付";
+
+	time_t t = time(0);
+	struct tm *p = gmtime(&t);
+	char ctimetmp[25];
+	memset(ctimetmp, 0, 25);
+	sprintf(ctimetmp, "%d-%d-%d %d:%d:%d", p->tm_year + 1900, p->tm_mon + 1, p->tm_mday, p->tm_hour + 8, p->tm_min, p->tm_sec);
+
+	if (printerName.contains("LPT"))
+	{
+		char tmpchar = printerName.at(3).toLatin1();
+		if (tmpchar >= '1' && tmpchar <= '9')
+		{
+			PosPrinterLptCls mPrinter;
+			mPrinter.Prepare(printerName.toStdString().c_str());
+			PrintHeaderLPT(mPrinter, shopInfo, "支付存根（收银留存）");
+			mPrinter.PrintString("订单编号：",PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString(trade_no, PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString("\r\n", PosPrinterLptCls::NORMAL);
+
+			mPrinter.PrintString("支付方式：", PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString(paytypestr, PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString("\r\n", PosPrinterLptCls::NORMAL);
+
+			mPrinter.PrintString("原价金额：", PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString(orig_fee, PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString("\r\n", PosPrinterLptCls::NORMAL);
+
+			mPrinter.PrintString("优惠金额：", PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString(favo_fee, PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString("\r\n", PosPrinterLptCls::NORMAL);
+
+			mPrinter.PrintString("支付金额：", PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString(pay_fee, PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString("\r\n", PosPrinterLptCls::NORMAL);
+
+			mPrinter.PrintString("支付时间：", PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString(ctimetmp, PosPrinterLptCls::NORMAL);
+			mPrinter.PrintString("\r\n", PosPrinterLptCls::NORMAL);
+
+			PrintEndLPT(mPrinter);
+		}
+	}
+	else {
+		PosPrinter *mPrinter = new PosPrinter();
+#define NAMEPOS 0.02
+#define CONTENTPOS 0.35
+#define NEXTLINE 0.25
+#define SPACE1 35
+		if (mPrinter->PreparePrinter(printerName.toStdWString()))
+		{
+			PrintHeader(mPrinter, shopInfo, this, L"支付存根（收银留据）");
+			mPrinter->AddNewLine(NAMEPOS, L"订单编号：",SPACE1);
+			mPrinter->AppendLineString(CONTENTPOS, StrToWStr(trade_no));
+			mPrinter->AddNewLine(NAMEPOS, L"");
+			mPrinter->AddNewLine(NAMEPOS, L"支付方式：",SPACE1);
+			QString tmpstr = QString::fromLocal8Bit(paytypestr.c_str());
+			mPrinter->AppendLineString(CONTENTPOS, tmpstr.toStdWString());
+
+			mPrinter->AddNewLine(NAMEPOS, L"原价金额：",SPACE1);
+			mPrinter->AppendLineString(CONTENTPOS, StrToWStr(orig_fee));
+			mPrinter->AddNewLine(NAMEPOS, L"优惠金额：",SPACE1);
+			mPrinter->AppendLineString(CONTENTPOS, StrToWStr(favo_fee));
+			mPrinter->AddNewLine(NAMEPOS, L"支付金额：",SPACE1);
+			mPrinter->AppendLineString(CONTENTPOS, StrToWStr(pay_fee));
+			mPrinter->AddNewLine(NAMEPOS, L"支付时间：",SPACE1);
+			mPrinter->AppendLineString(CONTENTPOS, StrToWStr(ctimetmp));
+
+			PrintEnd(mPrinter);
+#undef NAMEPOS
+#undef CONTENTPOS
+#undef NEXTLINE
+#undef SPACE1
+			mPrinter->CallPrinter();
+		}
+		delete mPrinter;
+	}
+#endif
+}
+
+int bbqshop::GetCommentFontSZ()
+{
+	return mZHSetting.carishInfo.commentFontSZ;
+}
+
+int bbqshop::GetPrinterDeviceWidth()
+{
+	codeSetIO::CarishDesk &printer = mZHSetting.carishInfo;
+	int deviceWidth = -1;
+	switch (printer.printerType)
+	{
+	case 0:
+		deviceWidth = printer.deviceWidth58;
+		break;
+	case 1:
+		deviceWidth = printer.deviceWidth80;
+		break;
+	default:
+		break;
+	}
+	if (deviceWidth > 1000)
+		return -1;
+	if (deviceWidth < 100)
+		return -1;
+	return deviceWidth;
+}
+
+std::wstring bbqshop::StrToWStr(const char *inChar)
+{
+	QString tmpStr(inChar);
+	return tmpStr.toStdWString();
 }

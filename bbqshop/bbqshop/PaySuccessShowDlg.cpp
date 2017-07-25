@@ -58,35 +58,21 @@ PaySuccessShowDlg::~PaySuccessShowDlg()
 {
 }
 
-void PaySuccessShowDlg::SetPaySuccessInfo(const Json::Value & inVal)
+void PaySuccessShowDlg::SetPaySuccessInfo(const char *trade_no, const char *pay_fee)
 {
-	Json::Value msg_info = inVal["msg_info"];
-	const char *status_des = msg_info["status_des"].asCString();
-	const char *trade_no = msg_info["trade_no"].asCString();
-	const char *pay_type = msg_info["pay_type"].asCString();
-	const char *favo_fee = msg_info["favo_fee"].asCString();
-	const char *total_fee = msg_info["total_fee"].asCString();
-	const char *pay_fee = msg_info["pay_fee"].asCString();
-	const char *orig_fee = msg_info["orig_fee"].asCString();
-	const char *pay_status = msg_info["pay_status"].asCString();
-	const char *payType = msg_info["pay_type"].asCString();
-
 	tradeNO = trade_no;
 	time_t t = time(NULL);
 	struct tm *local = localtime(&t);
 	char tmpbuf[200];
 	sprintf(tmpbuf, "%d-%d-%d %d:%d:%d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
 	tradeTime = tmpbuf;
-	int iPaytype = atoi(payType);
-	//bbqpay *floatWin = (bbqpay *)floatWidget;
+	tradeMoney = QString::fromLocal8Bit("гд");
+	tradeMoney += pay_fee;
 
-	//tradeMoney = QString::fromLocal8Bit("гд");
-	//tradeMoney += pay_fee;
-
-	//ui.labTradeMoney->setText(pay_fee);
-	//ui.labTradeNo->setText(tradeNO);
-	//ui.labTradeTime->setText(tradeTime);
-	//ui.labTradeValue->setText(tradeMoney);
+	ui.labTradeMoney->setText(pay_fee);
+	ui.labTradeNo->setText(tradeNO);
+	ui.labTradeTime->setText(tradeTime);
+	ui.labTradeValue->setText(tradeMoney);
 }
 
 void PaySuccessShowDlg::setClientIcon(const QString &clientIcon)

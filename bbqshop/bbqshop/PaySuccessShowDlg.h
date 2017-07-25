@@ -13,7 +13,7 @@ public:
 	PaySuccessShowDlg(QString iconPath, QWidget *parent = 0);
 	~PaySuccessShowDlg();
 
-	void SetPaySuccessInfo(const Json::Value & inVal);
+	void SetPaySuccessInfo(const char *trade_no, const char *pay_fee);
 private:
 	Ui::PaySuccessShowDlg ui;
 	QString iconPath;
