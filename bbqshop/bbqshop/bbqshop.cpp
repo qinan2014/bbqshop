@@ -37,6 +37,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	// 信号
 	connect(this, SIGNAL(showTipStringSig(const QString &, const QString &)), this, SLOT(showTipStringSlot(const QString &, const QString &)));
 	connect(this, SIGNAL(returnFocusToCashier()), this, SLOT(setFocusOnCashier()));
+	connect(this, SIGNAL(manInputESC()), this, SLOT(onESCEvent()));
 	// 登录
 	showLoginDialog();
 }
@@ -145,8 +146,15 @@ inline void bbqshop::hookNum(bool isEnable)
 {
 #ifdef USEKEYHOOK
 	mKeyHook.EnableInterception(HOOK_NUM, isEnable);
-	mKeyHook.EnableInterception(HOOK_ESC, isEnable);
+	hookESC(isEnable);
 	mKeyHook.EnableInterception(HOOK_RETURN, isEnable);
+#endif
+}
+
+inline void bbqshop::hookESC(bool isEnable)
+{
+#ifdef USEKEYHOOK
+	mKeyHook.EnableInterception(HOOK_ESC, isEnable);
 #endif
 }
 
@@ -304,6 +312,10 @@ inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 		break;
 	case VK_RETURN:
 		emit manInputEnter();
+		break;
+	case VK_LSHIFT:
+	case VK_RSHIFT:
+		hookManInputShift(p);
 		break;
 	default:
 		break;
@@ -592,6 +604,23 @@ inline void bbqshop::hookManInputNum(DWORD vkCode)
 	
 }
 
+inline void bbqshop::hookManInputShift(PKBDLLHOOKSTRUCT p)
+{
+	if (p->flags < 128)  // 这是按下
+		hookESC(true);
+	else
+	{
+		PayDialog *dlg = PayDialog::InitInstance(false);
+		if (dlg != NULL)
+			return;
+		std::vector<int > ids;
+		ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
+		if (ids.size() > 0)
+			return;
+		hookESC(false);
+	}
+}
+
 void bbqshop::processJsonStartOCR()
 {
 	stopGetOCRPriceTimer();
@@ -722,4 +751,18 @@ void bbqshop::getOCRPrice()
 		ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
 		startGetOCRPrice();
 	}
+}
+
+void bbqshop::onESCEvent()
+{
+	// 正在弹出着任何对话框 此响应时间都不做操作
+	PayDialog *dlg = PayDialog::InitInstance(false);
+	if (dlg != NULL)
+		return;
+	std::vector<int > ids;
+	ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
+	if (ids.size() > 0)
+		return;
+	// 余下的这种情况是按着Shift键
+	
 }

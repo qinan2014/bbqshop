@@ -118,7 +118,7 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 			{
 				if (hookChars[HOOK_ESC])
 				{
-					if (p->flags >= 128){
+					if (p->flags < 128){
 						::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
 					}
 					return 1;
@@ -132,6 +132,13 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 				{
 					return keyNumProc(p,nCode,wparam,lparam);
 				}
+				return CallNextHookEx(glhHook,nCode,wparam,lparam);
+			}
+			break;
+		case VK_LSHIFT:
+		case VK_RSHIFT:
+			{
+				::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
 				return CallNextHookEx(glhHook,nCode,wparam,lparam);
 			}
 			break;
@@ -186,6 +193,11 @@ BOOL CKeyHook::StartHook(HWND hWnd)
 void CKeyHook::EnableInterception(int keyIndex, bool isNeedInterception)
 {
 	hookChars[keyIndex] = isNeedInterception;
+}
+
+bool CKeyHook::IsInterception(int keyIndex)
+{
+	return hookChars[keyIndex];
 }
 
 BOOL CKeyHook::StopHook()

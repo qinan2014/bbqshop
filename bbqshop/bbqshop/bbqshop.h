@@ -68,7 +68,9 @@ private:
 	inline void hookManInputCodeMsg(MSG* msg);
 	inline void hookScanCodeMsg(MSG* msg);
 	inline void hookNum(bool isEnable);
+	inline void hookESC(bool isEnable);
 	inline void hookManInputNum(DWORD vkCode);
+	inline void hookManInputShift(PKBDLLHOOKSTRUCT p);
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);
@@ -93,6 +95,7 @@ private slots:
 	void closeHookNum();
 	void showLoginDialog();
 	void sendCashInfo();
+	void onESCEvent();
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);

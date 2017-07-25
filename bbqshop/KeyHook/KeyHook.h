@@ -11,4 +11,5 @@ public:
 	BOOL StartHook(HWND hWnd);
 	BOOL StopHook();
 	void EnableInterception(int keyIndex, bool isNeedInterception);
+	bool IsInterception(int keyIndex);
 };
