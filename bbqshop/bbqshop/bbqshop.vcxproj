@@ -171,6 +171,9 @@
     <ProjectReference Include="..\PosPrinter\PosPrinter.vcxproj">
       <Project>{facc87c2-5fc9-4247-bfa0-14c5acc4576c}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Relogin\Relogin.vcxproj">
+      <Project>{2f337594-d4cb-441d-b838-3e8f214d9233}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ZHFuncLib\ZHFuncLib.vcxproj">
       <Project>{52ce0339-d370-4caa-919e-788c715d1b37}</Project>
     </ProjectReference>

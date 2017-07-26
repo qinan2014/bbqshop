@@ -101,6 +101,19 @@ bool bbqshop::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::st
 		case URL_TRADEINFODETAIL:
 			tradeNoResult(value["data"]);
 			break;
+		case URL_HANDOVER:
+			ExitFromServer(true);
+			break;
+		case URL_UPLOAD_LAST_LOG_HANDOVER:
+			Handover();
+			break;
+		case URL_UPLOAD_LAST_LOG_EXIT:
+			ZHFuncLib::TerminateProcessExceptCurrentOne(MAINDLGEXE);
+			ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
+			ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADEEXE);
+			ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADECLIENTICONEXE);
+			mainApp->quit();
+			break;
 		default:
 			break;
 		}
@@ -799,8 +812,13 @@ void bbqshop::onESCEvent()
 	isShowingHandoverDlg = false;
 	if (exeres == QDialog::Accepted)
 	{
-
+		LogOut(URL_HANDOVER);
 	}
+	else
+	{
+		emit returnFocusToCashier();
+	}
+	
 }
 
 bool bbqshop::isOperatorOtherDlg()
@@ -1061,4 +1079,36 @@ std::wstring bbqshop::StrToWStr(const char *inChar)
 {
 	QString tmpStr(inChar);
 	return tmpStr.toStdWString();
+}
+
+void bbqshop::LogOut(int urlTag)
+{
+	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+	Json::Value mValData;
+	mValData["id"] = shopInfo.id;
+
+	std::string itemVal = mValData.toStyledString();
+	std::string::size_type rePos;
+	while ((rePos = itemVal.find(" ")) != -1) {
+		itemVal.replace(rePos, 1, "");
+	}
+	GetDataFromServer("api/app/v1", USERLOGOUTAPI, itemVal, urlTag);
+}
+
+void bbqshop::ExitFromServer(bool isHandover)
+{
+	if (isHandover)
+		SendToURLRecord(LOG_DEBUG, LOG_LOGOUT, "logout", URL_UPLOAD_LAST_LOG_HANDOVER);
+	else
+		SendToURLRecord(LOG_DEBUG, LOG_LOGOUT, "logout", URL_UPLOAD_LAST_LOG_EXIT);
+}
+
+void bbqshop::Handover()
+{
+	QString program = ZHFuncLib::GetWorkPath().c_str();
+	program += "/";
+	program += RELOGINEXE;
+	QProcess *process = new QProcess();
+	QStringList args;
+	process->start(program, args);
 }

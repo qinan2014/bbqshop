@@ -89,6 +89,9 @@ private:
 	bool isOperatorOtherDlg();
 	void SwipCardPayURLBack(const Json::Value &value, std::string urlApi);
 	void tradeNoResult(const Json::Value & inData);
+	void LogOut(int urlTag);
+	void ExitFromServer(bool isHandover = false);
+	void Handover();
 
 signals:
 	void showTipStringSig(const QString &, const QString &);
