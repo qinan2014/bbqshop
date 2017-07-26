@@ -54,6 +54,7 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	setTopBtn();
 
 	urlServer = new BbqUrlServer(this);
+	isMouseDown = false;
 	// 保存Account
 	codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
 	memcpy(deskInfo.account, account, strlen(account));
@@ -1042,3 +1043,29 @@ void MainDlg::LoginInfoStore(const Json::Value &value)
 	emit settingInfoFinished();
 }
 #endif
+void MainDlg::mousePressEvent(QMouseEvent *event)    
+{    
+	//按住左键可以托动窗口，按下右键关闭程序    
+	if(event->button() == Qt::LeftButton)    
+	{
+		isMouseDown = true;
+		m_CurrentPos = event->globalPos() - frameGeometry().topLeft();    
+		event->accept();    
+	}
+}    
+
+void MainDlg::mouseMoveEvent(QMouseEvent *event)    
+{    
+	if (event->buttons() && Qt::LeftButton)    
+	{    
+		if (!isMouseDown)
+			return;
+		move(event->globalPos() - m_CurrentPos);    
+		event->accept();    
+	}    
+}
+
+void MainDlg::mouseReleaseEvent(QMouseEvent * event)
+{
+	isMouseDown = false;
+}

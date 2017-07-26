@@ -31,6 +31,8 @@ private:
 	BbqUrlServer *urlServer;
 	std::vector<int > mCashNos;
 	std::vector<std::string >mCashNames;
+	bool isMouseDown;
+	QPoint m_CurrentPos;
 
 	inline void setTopBtn();
 	inline void initFrame();
@@ -63,6 +65,9 @@ protected:
 	virtual void hideEvent(QHideEvent * event);
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);
 	virtual void showEvent(QShowEvent * event);
+	virtual void mousePressEvent(QMouseEvent *event);
+	virtual void mouseMoveEvent(QMouseEvent *event);
+	virtual void mouseReleaseEvent(QMouseEvent * event);
 
 private slots:
 	void closeMainDlg();
