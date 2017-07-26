@@ -94,6 +94,7 @@ private:
 	void Handover();
 	void PrintHandoverStatementRequest();
 	void PrintHandoverStatement(const Json::Value & inVal);
+	void setAutoRun(bool isAuto = true); // boot auto
 
 signals:
 	void showTipStringSig(const QString &, const QString &);

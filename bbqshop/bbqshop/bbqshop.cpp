@@ -18,6 +18,7 @@
 #include "PosPrinterLptCls.h"
 #include "PaySuccessShowDlg.h"
 #include <time.h>
+#include <QSettings>
 
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
@@ -47,6 +48,8 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	connect(this, SIGNAL(checkPayResultSig()), this, SLOT(checkPayResultSlot()));
 	// 登录
 	showLoginDialog();
+	// 开启启动
+	setAutoRun();
 }
 
 bbqshop::~bbqshop()
@@ -1199,4 +1202,16 @@ void bbqshop::PrintHandoverStatement(const Json::Value & inVal)
 	{
 		ShowTipString(return_msgs);
 	}
+}
+
+void bbqshop::setAutoRun(bool isAuto)
+{
+	QSettings *reg = new QSettings(REGEDITRUN,QSettings::NativeFormat);
+	QString application_path = ZHFuncLib::GetWorkPath().c_str();
+	application_path += "/";
+	application_path += BBQSHOPEXE;
+	if (isAuto)
+		reg->setValue(APPLICATIONNAME, application_path.replace("/", "\\"));
+	else
+		reg->setValue(APPLICATIONNAME, "");
 }
