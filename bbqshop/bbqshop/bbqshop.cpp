@@ -893,6 +893,7 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	{
 		emit manInputESC(); // 目的是关闭支付对话框
 		isShowingPayResult = true;
+		hookReturn(true);
 		QString payTypeIcon;
 		switch (paytype)
 		{
@@ -928,10 +929,11 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 				clickPrint = true;
 		}
 		isShowingPayResult = false; 
+		hookReturn(false);
 		emit returnFocusToCashier();
 		if (clickPrint)
 			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
-		QString showStatus = urlServer->GetPayTool(paytype).c_str();
+		QString showStatus = QString::fromLocal8Bit(urlServer->GetPayTool(paytype).c_str());
 		showStatus += QString::fromLocal8Bit("，已收款");
 		showStatus += pay_fee;
 		showStatus += QString::fromLocal8Bit("元");
