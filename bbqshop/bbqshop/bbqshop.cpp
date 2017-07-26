@@ -33,19 +33,18 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	QTimer::singleShot(100,this, SLOT(hide()) );  // 隐藏自己
 	// 创建托盘
 	createTray();
-	// 读取配置
-	ZHSettingRW settingRW(mZHSetting);
-	settingRW.ReadZHSetting();
 	// url
 	urlServer = new BbqUrlServer(this, &mZHSetting);
 	// 启动钩子
 	startHook();
 
 	// 信号
+	qRegisterMetaType<Json::Value>("Json::Value");
 	connect(this, SIGNAL(showTipStringSig(const QString &, const QString &)), this, SLOT(showTipStringSlot(const QString &, const QString &)));
 	connect(this, SIGNAL(returnFocusToCashier()), this, SLOT(setFocusOnCashier()));
 	connect(this, SIGNAL(manInputESC()), this, SLOT(onESCEvent()));
 	connect(this, SIGNAL(checkPayResultSig()), this, SLOT(checkPayResultSlot()));
+	connect(this, SIGNAL(tradeResultSig(const Json::Value &)), this, SLOT(tradeNoResult(const Json::Value &)));
 	timers[startTimer(60000 * 3, Qt::VeryCoarseTimer)] = TIMER_MEMORYRECORD;
 	// 登录
 	showLoginDialog();
@@ -103,7 +102,7 @@ bool bbqshop::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::st
 			SwipCardPayURLBack(value, urlApi);
 			break;
 		case URL_TRADEINFODETAIL:
-			tradeNoResult(value["data"]);
+			emit tradeResultSig(value["data"]);
 			break;
 		case URL_HANDOVER:
 			ExitFromServer(true);
@@ -478,6 +477,10 @@ inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 		memcpy(deskInfo.exitTime, extTime, strlen(extTime));
 		deskInfo.exitTime[strlen(extTime)] = 0;
 	}
+
+	// 读取配置
+	ZHSettingRW settingRW(mZHSetting);
+	settingRW.ReadZHSetting();
 }
 
 inline void bbqshop::processJsonOnMainDlgClose(const Json::Value &value)

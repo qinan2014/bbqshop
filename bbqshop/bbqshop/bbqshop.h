@@ -89,7 +89,7 @@ private:
 	void getOCRPrice();
 	bool isOperatorOtherDlg();
 	void SwipCardPayURLBack(const Json::Value &value, std::string urlApi);
-	void tradeNoResult(const Json::Value & inData);
+	
 	void LogOut(int urlTag);
 	void ExitFromServer(bool isHandover = false);
 	void Handover();
@@ -104,6 +104,7 @@ signals:
 	void manInputESC();
 	void checkPayResultSig();
 	void netError(QString, int, int);
+	void tradeResultSig(const Json::Value &);
 
 private slots:
 	void programQuit();
@@ -118,6 +119,7 @@ private slots:
 	void requestTradeInfoByNo();
 	void saveCurrentTradeNo(QString tradeNo);
 	void checkPayResultSlot();
+	void tradeNoResult(const Json::Value & inData);
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);

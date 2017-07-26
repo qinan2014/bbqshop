@@ -45,7 +45,7 @@ PaySuccessShowDlg::PaySuccessShowDlg(QString iconPath, QWidget *parent)
 	bbqshop *floatWin = (bbqshop *)floatWidget;
 	if (floatWin->GetSetting().shopCashdestInfo.isAutoPrint == 1)
 	{
-		QTimer::singleShot(2000,this, SLOT(accept()) ); 
+		QTimer::singleShot(2000, this, SLOT(accept())); 
 	}
 }
 
