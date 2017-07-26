@@ -101,7 +101,8 @@ void PayDialog::onNetError(QString url, int res, int urlTag)
 
 void PayDialog::SetScanCode(QString inCode)
 {
-	ui.ledtScancode->setText(inCode);
+	if (!inCode.isEmpty())
+		ui.ledtScancode->setText(inCode);
 }
 
 void PayDialog::SetMoney(QString inMoney)
