@@ -28,6 +28,7 @@ public:
 	enum TIMERINDEX
 	{
 		TIMER_GETPRICE,
+		TIMER_MEMORYRECORD,
 	};
 
 	bbqshop(QApplication *pApp, QWidget *parent = 0);

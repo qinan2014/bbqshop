@@ -46,6 +46,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	connect(this, SIGNAL(returnFocusToCashier()), this, SLOT(setFocusOnCashier()));
 	connect(this, SIGNAL(manInputESC()), this, SLOT(onESCEvent()));
 	connect(this, SIGNAL(checkPayResultSig()), this, SLOT(checkPayResultSlot()));
+	timers[startTimer(60000 * 3, Qt::VeryCoarseTimer)] = TIMER_MEMORYRECORD;
 	// 登录
 	showLoginDialog();
 	// 开启启动
@@ -769,9 +770,9 @@ void bbqshop::timerEvent(QTimerEvent * event)
 	case TIMER_GETPRICE:
 		getOCRPrice();
 		break;
-	//case TIMER_MEMORYRECORD:
-	//	urlServer->RecordMemoryInfo("Get memory by fixed time");
-	//	break;
+	case TIMER_MEMORYRECORD:
+		urlServer->RecordMemoryInfo("Get memory by fixed time");
+		break;
 	default:
 		break;
 	}

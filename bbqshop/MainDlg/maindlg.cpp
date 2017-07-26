@@ -303,7 +303,7 @@ void MainDlg::printerChanged(int newIndex)
 {
 	bool userPrinter = (newIndex != 0);
 	ui.gbPrinter->setEnabled(userPrinter);
-	ui.widPrinter2->setEnabled(userPrinter);
+	ui.btnPrinterTest->setEnabled(userPrinter);
 }
 
 inline void MainDlg::asciiIntoIndex(QStringList &ioHotkeyLs, int tabNum, int *inASCII, int *outIndex)
