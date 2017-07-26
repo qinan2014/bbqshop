@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>271</width>
-    <height>221</height>
+    <height>187</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -189,7 +189,7 @@ color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>180</y>
+     <y>150</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -205,7 +205,7 @@ color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>180</y>
+     <y>150</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -221,13 +221,16 @@ color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>120</y>
-     <width>151</width>
+     <y>110</y>
+     <width>251</width>
      <height>30</height>
     </rect>
    </property>
    <property name="text">
     <string>username</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
  </widget>
