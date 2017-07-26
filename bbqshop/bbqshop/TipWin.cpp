@@ -32,7 +32,7 @@ TipWin::TipWin(QString inTip, QString inTitle, QWidget *parent)
 	animation->setEndValue(1);
 	animation->start();
 
-	QTimer::singleShot(3000,this,SLOT(close())); 
+	QTimer::singleShot(2000,this,SLOT(close())); 
 }
 
 TipWin::~TipWin()

@@ -645,6 +645,7 @@ void bbqshop::showPayDialog()
 
 void bbqshop::closeHookNum()
 {
+	//if (!isOperatorOtherDlg())
 	hookNum(false);
 	stopGetOCRPriceTimer();
 	emit returnFocusToCashier();
@@ -920,7 +921,7 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	{
 		emit manInputESC(); // 目的是关闭支付对话框
 		isShowingPayResult = true;
-		hookReturn(true);
+		
 		QString payTypeIcon;
 		switch (paytype)
 		{
@@ -945,6 +946,7 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 		PaySuccessShowDlg dlg(payTypeIcon, this);
 		connect(this, SIGNAL(manInputEnter()), &dlg, SLOT(accept()));
 		dlg.SetPaySuccessInfo(tradeNo, pay_fee);
+		hookReturn(true);
 		INT_PTR nResponse = dlg.exec();
 		bool clickPrint = false;
 		//char tmpbuf[100];
