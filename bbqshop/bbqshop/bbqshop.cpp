@@ -114,6 +114,10 @@ bool bbqshop::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::st
 			ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADECLIENTICONEXE);
 			mainApp->quit();
 			break;
+		case URL_PRINTHANDOVER_STATEMENT:
+			PrintHandoverStatement(value);
+			LogOut(URL_HANDOVER);
+			break;
 		default:
 			break;
 		}
@@ -812,7 +816,9 @@ void bbqshop::onESCEvent()
 	isShowingHandoverDlg = false;
 	if (exeres == QDialog::Accepted)
 	{
-		LogOut(URL_HANDOVER);
+		// 先打印当班对账单，再进行交班
+		//LogOut(URL_HANDOVER);
+		PrintHandoverStatementRequest();
 	}
 	else
 	{
@@ -1111,4 +1117,86 @@ void bbqshop::Handover()
 	QProcess *process = new QProcess();
 	QStringList args;
 	process->start(program, args);
+}
+
+void bbqshop::PrintHandoverStatementRequest()
+{
+	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+	if (shopInfo.isBind != 1)
+	{
+		return;
+	}
+	Json::Value root;
+	char str[25];
+	itoa(shopInfo.id, str, 10);
+	root["uid"] = str; 
+	root["cashdesk_id"] = shopInfo.cashdeskId;
+	root["cashdesk_name"] = shopInfo.cashdeskName;
+	root["dcdev_no"] = shopInfo.dcdevNo;  
+	root["dcdev_mac"] = shopInfo.dcdevMac;
+
+	GetDataFromServer1(URLCLOUND, PRINTSTATEMENTAPI, "", root, URL_PRINTHANDOVER_STATEMENT);
+}
+
+void bbqshop::PrintHandoverStatement(const Json::Value & inVal)
+{
+	//CFloatWindowDlg *pWnd = (CFloatWindowDlg *)theApp.m_pMainWnd;
+	const char *return_msgs = inVal["return_msgs"].asCString();
+	std::string retCode = inVal["return_code"].asString();
+	std::string resCode = inVal["result_code"].asString();
+	bool isReturnSuc = !(retCode == "FAIL" || resCode == "FAIL" || retCode == "fail" || resCode == "fail" );
+	if (isReturnSuc)
+	{
+		codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+		QString printerName = mZHSetting.carishInfo.printerName;
+
+		if (printerName.contains("LPT"))
+		{
+			char tmpchar = printerName.at(3).toLatin1();
+			if (tmpchar >= '1' && tmpchar <= '3')
+			{
+				std::string printData = inVal["print_data"].asString();
+				QString qprintdata = printData.c_str();
+				qprintdata.replace(QString("\\n"), QString("\r\n"));
+				PosPrinterLptCls mPrinter;
+				mPrinter.Prepare(printerName.toStdString().c_str());
+				mPrinter.PrintString(qprintdata.toLocal8Bit().toStdString(), PosPrinterLptCls::NORMAL);
+				return;
+			}
+		}
+
+#ifdef ENABLE_PRINTER
+		PosPrinter *mPrinter = new PosPrinter();
+#define NAMEPOS 0.02
+#define CONTENTPOS 0.75
+#define NEXTLINE 0.3
+#define SPACE1 35
+
+		if (mPrinter->PreparePrinter(printerName.toStdWString()))
+		{
+			mPrinter->SetDeviceWidth(GetPrinterDeviceWidth());
+
+			std::string printData = inVal["print_data"].asString();
+			int pos = -1;
+			//const int lineMaxLen = 40;
+			while ((pos = printData.find("\\n")) != std::string::npos)
+			{
+				QString tmpLine = printData.substr(0, pos).c_str();
+				mPrinter->AddNewLine(NAMEPOS, tmpLine.toStdWString(), SPACE1, GetCommentFontSZ());
+				printData = printData.substr(pos + 2);
+			}
+			mPrinter->CallPrinter();
+		}
+
+		delete mPrinter;
+#undef NAMEPOS
+#undef CONTENTPOS
+#undef NEXTLINE
+#undef SPACE1
+#endif
+	}
+	else
+	{
+		ShowTipString(return_msgs);
+	}
 }

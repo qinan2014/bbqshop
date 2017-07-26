@@ -92,6 +92,8 @@ private:
 	void LogOut(int urlTag);
 	void ExitFromServer(bool isHandover = false);
 	void Handover();
+	void PrintHandoverStatementRequest();
+	void PrintHandoverStatement(const Json::Value & inVal);
 
 signals:
 	void showTipStringSig(const QString &, const QString &);
