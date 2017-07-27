@@ -961,7 +961,7 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 		}
 		isShowingPayResult = false; 
 		//hookReturn(false);
-		//emit returnFocusToCashier();
+		emit returnFocusToCashier();
 		if (clickPrint)
 			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
 		QString showStatus = QString::fromLocal8Bit(urlServer->GetPayTool(paytype).c_str());
@@ -971,7 +971,7 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 
 		SendToURLRecord(LOG_DEBUG, LOG_PUSHPAYRES, inData.toStyledString().c_str(), URL_RECORE_PAYRESULT);
 
-		ShowTipString(showStatus);
+		//ShowTipString(showStatus);
 	}
 }
 

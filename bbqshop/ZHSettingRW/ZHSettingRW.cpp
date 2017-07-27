@@ -48,8 +48,8 @@
 
 // 快捷键设置
 #define HOTKEYSET "HotKeySet"
-#define SHORTPRINTHANDOVER "PrintHandover"
-#define SHORTTRADEINDO "TradeInfo"
+#define SHORTKEYWX "WX"
+#define SHORTKEYALIPY "Alipay"
 #define SHORTMODIFIERS "Modifiers"
 #define SHORTKEY "Key"
 
@@ -250,14 +250,14 @@ bool ZHSettingRW::readHotKeysEle(TiXmlElement * hotkeyEle, codeSetIO::HOTKEYS &i
 	if (hotkeyEle == NULL)
 		return false;
 
-	TiXmlElement *tmpHotKeyEle = hotkeyEle->FirstChildElement(SHORTPRINTHANDOVER);
+	TiXmlElement *tmpHotKeyEle = hotkeyEle->FirstChildElement(SHORTKEYWX);
 	if (tmpHotKeyEle == NULL)
 		return false;
-	readEleNum(tmpHotKeyEle->FirstChildElement(SHORTMODIFIERS), ioHotKeys.hPrintHandover.modifier);
-	readEleNum(tmpHotKeyEle->FirstChildElement(SHORTKEY), ioHotKeys.hPrintHandover.qtkey);
-	tmpHotKeyEle = hotkeyEle->FirstChildElement(SHORTTRADEINDO);
-	readEleNum(tmpHotKeyEle->FirstChildElement(SHORTMODIFIERS), ioHotKeys.hTradeInfo.modifier);
-	readEleNum(tmpHotKeyEle->FirstChildElement(SHORTKEY), ioHotKeys.hTradeInfo.qtkey);
+	readEleNum(tmpHotKeyEle->FirstChildElement(SHORTMODIFIERS), ioHotKeys.hWXKey.modifier);
+	readEleNum(tmpHotKeyEle->FirstChildElement(SHORTKEY), ioHotKeys.hWXKey.qtkey);
+	tmpHotKeyEle = hotkeyEle->FirstChildElement(SHORTKEYALIPY);
+	readEleNum(tmpHotKeyEle->FirstChildElement(SHORTMODIFIERS), ioHotKeys.hAlipayKey.modifier);
+	readEleNum(tmpHotKeyEle->FirstChildElement(SHORTKEY), ioHotKeys.hAlipayKey.qtkey);
 
 	return true;
 }
@@ -416,9 +416,9 @@ TiXmlElement *ZHSettingRW::writeHotKeySetting(codeSetIO::HOTKEYS &inHotKeys)
 {
 	TiXmlElement *hotKeysEle = new TiXmlElement(HOTKEYSET);
 	TiXmlElement *tmpHotKeyEle = NULL;
-	tmpHotKeyEle = createHotKeySetting(new TiXmlElement(SHORTPRINTHANDOVER), inHotKeys.hPrintHandover);
+	tmpHotKeyEle = createHotKeySetting(new TiXmlElement(SHORTKEYWX), inHotKeys.hWXKey);
 	hotKeysEle->LinkEndChild(tmpHotKeyEle);
-	tmpHotKeyEle = createHotKeySetting(new TiXmlElement(SHORTTRADEINDO), inHotKeys.hTradeInfo);
+	tmpHotKeyEle = createHotKeySetting(new TiXmlElement(SHORTKEYALIPY), inHotKeys.hAlipayKey);
 	hotKeysEle->LinkEndChild(tmpHotKeyEle);
 
 	return hotKeysEle;

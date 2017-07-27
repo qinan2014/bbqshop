@@ -249,8 +249,8 @@ inline void MainDlg::initFrame()
 	QStringList hotkeyLs;
 	codeSetIO::HOTKEYS &pHotKeys = mZHSetting.hotKeys;
 	int oriAscii[2], curIndexs[2];
-	oriAscii[0] = pHotKeys.hPrintHandover.qtkey;
-	oriAscii[1] = pHotKeys.hTradeInfo.qtkey;
+	oriAscii[0] = pHotKeys.hWXKey.qtkey;
+	oriAscii[1] = pHotKeys.hAlipayKey.qtkey;
 	asciiIntoIndex(hotkeyLs, 2, oriAscii, curIndexs);
 	//ui.cboPrintHandover->addItems(hotkeyLs);
 	//ui.cboPrintHandover->setCurrentIndex(curIndexs[0]);

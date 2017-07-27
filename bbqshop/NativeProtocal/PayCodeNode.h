@@ -109,8 +109,8 @@ namespace codeSetIO
 
 	struct HOTKEYS 
 	{
-		HOTKEY hPrintHandover;
-		HOTKEY hTradeInfo;
+		HOTKEY hWXKey;
+		HOTKEY hAlipayKey;
 	};
 
 	struct ZHIHUISETTING
