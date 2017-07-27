@@ -53,7 +53,7 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 PayDialog::~PayDialog()
 {
 	instance = NULL;
-	emit closeThisDlg();
+	emit closeThisDlg(hasPayed);
 }
 
 PayDialog *PayDialog::InitInstance(bool mustCreate, QWidget *parent, QString imagePath)
@@ -67,6 +67,7 @@ PayDialog *PayDialog::InitInstance(bool mustCreate, QWidget *parent, QString ima
 	if (instance != NULL)
 	{
 		::SetWindowPos((HWND)instance->winId(),HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
+		instance->hasPayed = false;
 	}
 	return instance;
 }
@@ -164,7 +165,7 @@ void PayDialog::ClickPay()
 
 	if (parWid->IsImportentOperateNow())
 		return;
-
+	hasPayed = true;
 	bool requestSuc = parWid->CreateGoodBillRequest(pricestr.toDouble(), 0.00, URL_SWIP_CARD_DLG);
 	if (requestSuc)
 		emit enablePaySig(false);

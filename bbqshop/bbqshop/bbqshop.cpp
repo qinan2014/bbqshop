@@ -683,7 +683,7 @@ void bbqshop::showPayDialog()
 	PayDialog *dlg = PayDialog::InitInstance(true, this);
 	if (dlg != NULL)
 	{
-		connect(dlg, SIGNAL(closeThisDlg()), this, SLOT(closeHookNum()));
+		connect(dlg, SIGNAL(closeThisDlg(bool)), this, SLOT(onClosePayDlg(bool)));
 		connect(this, SIGNAL(manInputESC()), dlg, SLOT(closeSelf()));
 		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
 		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(saveCurrentTradeNo(QString )));
@@ -694,12 +694,14 @@ void bbqshop::showPayDialog()
 	}
 }
 
-void bbqshop::closeHookNum()
+void bbqshop::onClosePayDlg(bool haspayed)
 {
-	//if (!isOperatorOtherDlg())
-	//hookNum(false);
 	stopGetOCRPriceTimer();
-	//emit returnFocusToCashier();
+	if (!haspayed)
+	{
+		hookNum(false);
+		emit returnFocusToCashier();
+	}
 }
 
 inline void bbqshop::hookManInputNum(DWORD vkCode)

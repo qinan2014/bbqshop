@@ -118,7 +118,7 @@ private slots:
 	void showTipStringSlot(const QString &inTip, const QString &inTitle);
 	void onCloseTipWin();
 	void setFocusOnCashier();
-	void closeHookNum();
+	void onClosePayDlg(bool haspayed);
 	void showLoginDialog();
 	void sendCashInfo();
 	void onESCEvent();

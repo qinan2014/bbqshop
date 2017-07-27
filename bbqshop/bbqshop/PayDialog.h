@@ -17,6 +17,7 @@ public:
 	static void CloseInstance(bool selfclose = false);
 	void SetScanCode(QString inCode);
 	void SetMoney(QString inMoney);
+	bool hasPayed;
 
 protected:
 	virtual void resizeEvent(QResizeEvent *event);
@@ -29,12 +30,13 @@ private:
 	QString mcurtradeNo;
 	bool isSelfClose;
 	
+	
 	PayDialog(QString imgPath, QWidget *parent = 0);
 	static PayDialog* instance;
 
 signals:
 	void enablePaySig(bool enablePay);
-	void closeThisDlg();
+	void closeThisDlg(bool haspayed);
 	void micropaySucess(QString payTradeNo);
 
 	private slots:
