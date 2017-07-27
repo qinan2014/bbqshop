@@ -101,17 +101,6 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 
 	if (hookChars[START_HOOK] && nCode>=0 && IsWindow(glhDisplayWnd)) 
 	{
-		if (p->vkCode == wxKey || p->vkCode == alipayKey)
-		{
-			if (hookChars[HOOK_WXKEY])
-			{
-				if (p->flags >= 128){
-					::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
-				}
-				return 1;
-			}
-			return CallNextHookEx(glhHook,nCode,wparam,lparam);
-		}
 		switch (p->vkCode)
 		{
 		case VK_ESCAPE:
@@ -166,6 +155,16 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 				if (hookChars[HOOK_SETPAYKEY])
 				{
 					::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
+				}
+				else if (p->vkCode == wxKey || p->vkCode == alipayKey)
+				{
+					if (hookChars[HOOK_WXKEY])
+					{
+						if (p->flags >= 128){
+							::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
+						}
+						return 1;
+					}
 				}
 				return CallNextHookEx(glhHook,nCode,wparam,lparam);
 			}

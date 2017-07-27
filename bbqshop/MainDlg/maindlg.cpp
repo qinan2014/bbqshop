@@ -826,6 +826,9 @@ void MainDlg::saveSetting()
 	codeSetIO::HOTKEYS &hotKeys = mZHSetting.hotKeys;
 	hotKeys.hWXKey.qtkey = ui.ledtWXKey->text().toInt();
 	hotKeys.hAlipayKey.qtkey = ui.ledtAlipayKey->text().toInt();
+	ui.ledtAlipayKey->setEnabled(false);
+	ui.ledtWXKey->setEnabled(false);
+	editPayKey(Finished_AlipayKey);
 
 	SaveAllSetting();
 }
