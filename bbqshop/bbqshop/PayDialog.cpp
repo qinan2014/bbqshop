@@ -48,6 +48,7 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 	connect(this, SIGNAL(enablePaySig(bool )), this, SLOT(EnablePay(bool )));
 	//bbqpay *parWid = (bbqpay *)parWidget;
 	//connect(this, SIGNAL(closeThisDlg()), parWid, SLOT(toShowFloat()));
+	hasPayed = false;
 }
 
 PayDialog::~PayDialog()
@@ -67,7 +68,7 @@ PayDialog *PayDialog::InitInstance(bool mustCreate, QWidget *parent, QString ima
 	if (instance != NULL)
 	{
 		::SetWindowPos((HWND)instance->winId(),HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
-		instance->hasPayed = false;
+		//instance->hasPayed = false;
 	}
 	return instance;
 }

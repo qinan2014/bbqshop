@@ -36,7 +36,7 @@ private:
 
 signals:
 	void enablePaySig(bool enablePay);
-	void closeThisDlg(bool haspayed);
+	void closeThisDlg(bool );
 	void micropaySucess(QString payTradeNo);
 
 	private slots:

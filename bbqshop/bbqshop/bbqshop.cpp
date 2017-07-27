@@ -95,7 +95,7 @@ bool bbqshop::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::st
 	bool suc = reader.parse(mRecvJsonStr, value);
 	if (suc)
 	{
-		ZHFuncLib::NativeLog("", mRecvJsonStr.c_str(), "a");
+		//ZHFuncLib::NativeLog("", mRecvJsonStr.c_str(), "a");
 		switch (urlTag)
 		{
 		case URL_SWIP_CARD_DLG:
@@ -683,7 +683,7 @@ void bbqshop::showPayDialog()
 	PayDialog *dlg = PayDialog::InitInstance(true, this);
 	if (dlg != NULL)
 	{
-		connect(dlg, SIGNAL(closeThisDlg(bool)), this, SLOT(onClosePayDlg(bool)));
+		connect(dlg, SIGNAL(closeThisDlg(bool )), this, SLOT(onClosePayDlg(bool)));
 		connect(this, SIGNAL(manInputESC()), dlg, SLOT(closeSelf()));
 		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
 		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(saveCurrentTradeNo(QString )));
