@@ -23,6 +23,7 @@ HINSTANCE glhInstance = NULL;//DLL实例句柄
 #pragma data_seg()
 
 bool hookChars[HOOKCHARSNUM];
+int wxKey, alipayKey;
 
 extern "C" int APIENTRY
 DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
@@ -100,20 +101,19 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 
 	if (hookChars[START_HOOK] && nCode>=0 && IsWindow(glhDisplayWnd)) 
 	{
+		if (p->vkCode == wxKey || p->vkCode == alipayKey)
+		{
+			if (hookChars[HOOK_WXKEY])
+			{
+				if (p->flags >= 128){
+					::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
+				}
+				return 1;
+			}
+			return CallNextHookEx(glhHook,nCode,wparam,lparam);
+		}
 		switch (p->vkCode)
 		{
-		case HOOK_KEY_WX:
-			{
-				if (hookChars[HOOK_WXKEY])
-				{
-					if (p->flags >= 128){
-						::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
-					}
-					return 1;
-				}
-				return CallNextHookEx(glhHook,nCode,wparam,lparam);
-			}
-			break;
 		case VK_ESCAPE:
 			{
 				if (hookChars[HOOK_ESC])
@@ -221,4 +221,10 @@ BOOL CKeyHook::StopHook()
 		glhHook = NULL;
 	}
 	return bResult;
+}
+
+void CKeyHook::SetPayKey(int inwxKey, int inalipayKey)
+{
+	wxKey = inwxKey;
+	alipayKey = inalipayKey;
 }

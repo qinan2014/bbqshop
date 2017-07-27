@@ -823,9 +823,9 @@ void MainDlg::saveSetting()
 	//indexs[0] = ui.cboPrintHandover->currentIndex();
 	//indexs[1] = ui.cboTradeInfo->currentIndex();
 	//indexIntoAscii(2, indexs, asciis);
-	//codeSetIO::HOTKEYS &hotKeys = mZHSetting.hotKeys;
-	//hotKeys.hPrintHandover.qtkey = asciis[0];
-	//hotKeys.hTradeInfo.qtkey = asciis[1];
+	codeSetIO::HOTKEYS &hotKeys = mZHSetting.hotKeys;
+	hotKeys.hWXKey.qtkey = ui.ledtWXKey->text().toInt();
+	hotKeys.hAlipayKey.qtkey = ui.ledtAlipayKey->text().toInt();
 
 	SaveAllSetting();
 }

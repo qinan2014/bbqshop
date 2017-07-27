@@ -14,6 +14,4 @@ enum HookChars
 
 #define HOOKCHARSNUM 6
 
-#define HOOK_KEY_WX VK_F1
-
 #endif

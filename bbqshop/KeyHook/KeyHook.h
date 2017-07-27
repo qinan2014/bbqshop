@@ -12,4 +12,5 @@ public:
 	BOOL StopHook();
 	void EnableInterception(int keyIndex, bool isNeedInterception);
 	bool IsInterception(int keyIndex);
+	void SetPayKey(int inwxKey, int inalipayKey);
 };

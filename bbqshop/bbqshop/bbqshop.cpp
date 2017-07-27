@@ -371,11 +371,13 @@ inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 		hookSettingPayKey(p);
 		return;
 	}
+	if (p->vkCode == mZHSetting.hotKeys.hWXKey.qtkey || p->vkCode == mZHSetting.hotKeys.hAlipayKey.qtkey)
+	{
+		showPayDialog();
+		return;
+	}
 	switch (p->vkCode)
 	{
-	case HOOK_KEY_WX:
-		showPayDialog();
-		break;
 	case 48:
 	case 49:
 	case 50:
@@ -506,6 +508,7 @@ inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 	// 读取配置
 	ZHSettingRW settingRW(mZHSetting);
 	settingRW.ReadZHSetting();
+	setHookPayKeyValueFromZHSetting();
 }
 
 inline void bbqshop::processJsonOnMainDlgClose(const Json::Value &value)
@@ -538,6 +541,7 @@ inline void bbqshop::processJsonRereadSetting()
 {
 	ZHSettingRW settingRW(mZHSetting);
 	settingRW.ReadZHSetting();
+	setHookPayKeyValueFromZHSetting();
 	//char tmpbuf[100];
 	//sprintf(tmpbuf, "isgetprice in time, %d", mZHSetting.shopCashdestInfo.isGetPriceActualTime);
 	//LogError(tmpbuf, "a");
@@ -1261,7 +1265,7 @@ void bbqshop::setAutoRun(bool isAuto)
 		reg->setValue(APPLICATIONNAME, "");
 }
 
-inline void bbqshop::hookSettingPayKey(PKBDLLHOOKSTRUCT p)
+void bbqshop::hookSettingPayKey(PKBDLLHOOKSTRUCT p)
 {
 	std::vector<int > ids;
 	ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
@@ -1276,4 +1280,11 @@ inline void bbqshop::hookSettingPayKey(PKBDLLHOOKSTRUCT p)
 
 	HWND hwnd = ::FindWindowW(NULL, MAINDLGTITLEW);
 	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+}
+
+inline void bbqshop::setHookPayKeyValueFromZHSetting()
+{
+#ifdef USEKEYHOOK
+	mKeyHook.SetPayKey(mZHSetting.hotKeys.hWXKey.qtkey, mZHSetting.hotKeys.hAlipayKey.qtkey);
+#endif
 }

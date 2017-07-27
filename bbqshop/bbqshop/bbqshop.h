@@ -81,7 +81,8 @@ private:
 	inline void hookAttempToSetPayKey(bool isEnable);
 	inline void hookManInputNum(DWORD vkCode);
 	inline void hookManInputShift(PKBDLLHOOKSTRUCT p);
-	inline void hookSettingPayKey(PKBDLLHOOKSTRUCT p);
+	void hookSettingPayKey(PKBDLLHOOKSTRUCT p);
+	inline void setHookPayKeyValueFromZHSetting();
 	inline void printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee);
 
 
