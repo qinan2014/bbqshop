@@ -59,6 +59,7 @@ private:
 	int getOCRPriceTimes;
 	QString curTradeNo;
 	bool isShowingHandoverDlg;
+	bool isShiftKeyDown;
 
 	void createTray();
 	

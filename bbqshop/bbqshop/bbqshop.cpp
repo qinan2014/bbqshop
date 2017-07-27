@@ -29,6 +29,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	isShowingPayResult = false;
 	getOCRPriceTimes = 0;
 	isShowingHandoverDlg = false;
+	isShiftKeyDown = false;
 	// 定时器
 	QTimer::singleShot(100,this, SLOT(hide()) );  // 隐藏自己
 	// 创建托盘
@@ -460,11 +461,13 @@ void bbqshop::setFocusOnCashier()
 	HWND hwnd = ::FindWindow(NULL, softname.c_str());
 	if (hwnd == NULL)
 		return;
-	hookNum(false);
+	//hookNum(false);
 	BOOL suc = ::SetForegroundWindow(hwnd);//设置后能成功激活进程窗口，但是无法将输入焦点转移到进程窗口
 
 	::BringWindowToTop(hwnd);
 	::SetFocus(hwnd);
+
+	mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN,5,5,0,0); 
 }
 
 inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
@@ -697,27 +700,44 @@ void bbqshop::showPayDialog()
 void bbqshop::onClosePayDlg(bool haspayed)
 {
 	stopGetOCRPriceTimer();
-	if (!haspayed)
-	{
-		hookNum(false);
-		emit returnFocusToCashier();
-	}
+	hookNum(false);
+	emit returnFocusToCashier();
+
 }
 
 inline void bbqshop::hookManInputNum(DWORD vkCode)
 {
-	
+	if (isShiftKeyDown)
+	{
+		if (vkCode == 49)
+		{
+			//QString program = ZHFuncLib::GetWorkPath().c_str();
+			//program += "/";
+			//program += MAINDLGEXE;
+			//QStringList arguments;
+			//QProcess *process = new QProcess(this);
+			//QStringList args;
+			//codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+			//args << deskInfo.account;
+
+			//process->start(program, args);
+		}
+	}
 }
 
 inline void bbqshop::hookManInputShift(PKBDLLHOOKSTRUCT p)
 {
 	if (p->flags < 128)  // 这是按下
-		hookESC(true);
+	{
+		isShiftKeyDown = true;
+		hookNum(true);
+	}
 	else
 	{
+		isShiftKeyDown = false;
 		if (isOperatorOtherDlg())
 			return;
-		hookESC(false);
+		hookNum(false);
 	}
 }
 
@@ -972,8 +992,8 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	}
 	if (tradeStatus == 1) // 支付成功
 	{
-		isShowingPayResult = true;
 		emit manInputESC(); // 目的是关闭支付对话框
+		isShowingPayResult = true;
 		QString payTypeIcon;
 		switch (paytype)
 		{
@@ -998,7 +1018,7 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 		PaySuccessShowDlg dlg(payTypeIcon, this);
 		connect(this, SIGNAL(manInputEnter()), &dlg, SLOT(accept()));
 		dlg.SetPaySuccessInfo(tradeNo, pay_fee);
-		//hookReturn(true);
+		hookReturn(true);
 		INT_PTR nResponse = dlg.exec();
 		bool clickPrint = false;
 		if (nResponse == QDialog::Accepted)
@@ -1007,7 +1027,7 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 				clickPrint = true;
 		}
 		isShowingPayResult = false; 
-		//hookReturn(false);
+		hookReturn(false);
 		emit returnFocusToCashier();
 		if (clickPrint)
 			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
