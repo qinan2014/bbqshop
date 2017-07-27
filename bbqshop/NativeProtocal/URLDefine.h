@@ -3,7 +3,7 @@
 
 #include "AllWindowTitle.h"
 
-#define PROJ_TEST
+//#define PROJ_TEST
 
 #ifdef PROJ_TEST
 	#define URLCLOUND "http://t.api.bboqi.com/"
