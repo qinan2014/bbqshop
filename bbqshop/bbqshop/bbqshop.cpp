@@ -434,6 +434,7 @@ void bbqshop::setFocusOnCashier()
 	HWND hwnd = ::FindWindow(NULL, softname.c_str());
 	if (hwnd == NULL)
 		return;
+	hookNum(false);
 	BOOL suc = ::SetForegroundWindow(hwnd);//设置后能成功激活进程窗口，但是无法将输入焦点转移到进程窗口
 
 	::BringWindowToTop(hwnd);
@@ -651,9 +652,9 @@ void bbqshop::showPayDialog()
 void bbqshop::closeHookNum()
 {
 	//if (!isOperatorOtherDlg())
-	hookNum(false);
+	//hookNum(false);
 	stopGetOCRPriceTimer();
-	emit returnFocusToCashier();
+	//emit returnFocusToCashier();
 }
 
 inline void bbqshop::hookManInputNum(DWORD vkCode)
@@ -884,7 +885,7 @@ void bbqshop::saveCurrentTradeNo(QString tradeNo)
 
 void bbqshop::checkPayResultSlot()
 {
-	QTimer::singleShot(300,this, SLOT(requestTradeInfoByNo()) );
+	QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()) );
 }
 
 void bbqshop::requestTradeInfoByNo()
@@ -924,9 +925,8 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	}
 	if (tradeStatus == 1) // 支付成功
 	{
-		emit manInputESC(); // 目的是关闭支付对话框
 		isShowingPayResult = true;
-		
+		emit manInputESC(); // 目的是关闭支付对话框
 		QString payTypeIcon;
 		switch (paytype)
 		{
@@ -951,20 +951,17 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 		PaySuccessShowDlg dlg(payTypeIcon, this);
 		connect(this, SIGNAL(manInputEnter()), &dlg, SLOT(accept()));
 		dlg.SetPaySuccessInfo(tradeNo, pay_fee);
-		hookReturn(true);
+		//hookReturn(true);
 		INT_PTR nResponse = dlg.exec();
 		bool clickPrint = false;
-		//char tmpbuf[100];
-		//sprintf(tmpbuf, "pay success dlg exec return %d", nResponse);
-		//LogError(tmpbuf, "a");
 		if (nResponse == QDialog::Accepted)
 		{
 			if (carishInfo.isAutoPrint != 1)  // if equal 1, it has been printed
 				clickPrint = true;
 		}
 		isShowingPayResult = false; 
-		hookReturn(false);
-		emit returnFocusToCashier();
+		//hookReturn(false);
+		//emit returnFocusToCashier();
 		if (clickPrint)
 			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
 		QString showStatus = QString::fromLocal8Bit(urlServer->GetPayTool(paytype).c_str());
