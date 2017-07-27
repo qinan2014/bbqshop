@@ -54,6 +54,8 @@ private:
 	void SavePrintFont(int printerType, int printerFont);
 	void SaveAllSetting();
 	int GetPrinterDeviceWidth();
+	void editPayKey(int paykeyStatus);
+	inline void currentInputPaykey(const Json::Value &inData);
 
 #ifdef INDEPENDENTLOGIN
 	void login();
@@ -85,6 +87,10 @@ private slots:
 	void printerTest();
 	void clickClear();
 	void onSettingInfoFinished();
+	void clickModifyWXKey();
+	void clickFinishWXKey();
+	void clickModifyAlipayKey();
+	void clickFinishAlipayKey();
 
 signals:
 	void showBindTipSig(bool );

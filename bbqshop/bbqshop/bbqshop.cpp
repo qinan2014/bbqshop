@@ -216,6 +216,22 @@ inline void bbqshop::hookReturn(bool isEnable)
 #endif
 }
 
+inline void bbqshop::hookAttempToSetPayKey(bool isEnable)
+{
+#ifdef USEKEYHOOK
+	mKeyHook.EnableInterception(HOOK_SETPAYKEY, isEnable);
+#endif
+}
+
+inline bool bbqshop::isHooking(int hookKey)
+{
+#ifdef USEKEYHOOK
+	return mKeyHook.IsInterception(hookKey);
+#else
+	return false;
+#endif
+}
+
 inline void bbqshop::createTray()
 {
 	if (!QSystemTrayIcon::isSystemTrayAvailable())      //判断系统是否支持系统托盘图标  
@@ -339,6 +355,9 @@ inline void bbqshop::parseProcessJsonData(QString inJson)
 	case RETURN_PRICE:
 		processJsonShowPrice(value);
 		break;
+	case TO_FLOATWIN_EDITPAYKEY:
+		processJsonPayKeySet(value);
+		break;
 	default:
 		break;
 	}
@@ -347,6 +366,11 @@ inline void bbqshop::parseProcessJsonData(QString inJson)
 inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 {
 	PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)msg->lParam;
+	if (isHooking(HOOK_SETPAYKEY))
+	{
+		hookSettingPayKey(p);
+		return;
+	}
 	switch (p->vkCode)
 	{
 	case HOOK_KEY_WX:
@@ -562,6 +586,23 @@ inline void bbqshop::processJsonShowPrice(const Json::Value &inJson)
 	}
 }
 
+inline void bbqshop::processJsonPayKeySet(const Json::Value &inJson)
+{
+	int editstatus = inJson[PRO_PAYKEY_EDIT].asInt();
+	switch (editstatus)
+	{
+	case Modify_WXKey:
+	case Modify_AlipayKey:
+		hookAttempToSetPayKey(true);
+		break;
+	case Finished_WXKey:
+	case Finished_AlipayKey:
+		hookAttempToSetPayKey(false);
+		break;
+	default:
+		break;
+	}
+}
 
 bool bbqshop::isPriceNum(QString &ioPriceStr)
 {
@@ -1218,4 +1259,21 @@ void bbqshop::setAutoRun(bool isAuto)
 		reg->setValue(APPLICATIONNAME, application_path.replace("/", "\\"));
 	else
 		reg->setValue(APPLICATIONNAME, "");
+}
+
+inline void bbqshop::hookSettingPayKey(PKBDLLHOOKSTRUCT p)
+{
+	std::vector<int > ids;
+	ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
+	if (ids.size() == 0)
+	{
+		hookAttempToSetPayKey(false);
+		return;
+	}
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_MAINDLG_SET_PAYKEY;
+	mValData[PRO_PAYKEY_VALUE] = (int )p->vkCode;
+
+	HWND hwnd = ::FindWindowW(NULL, MAINDLGTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }

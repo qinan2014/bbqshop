@@ -162,6 +162,13 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 			}
 			break;
 		default:
+			{
+				if (hookChars[HOOK_SETPAYKEY])
+				{
+					::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
+				}
+				return CallNextHookEx(glhHook,nCode,wparam,lparam);
+			}
 			break;
 		}
 	}

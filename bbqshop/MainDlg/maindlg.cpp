@@ -248,14 +248,14 @@ inline void MainDlg::initFrame()
 	// 快捷键界面
 	QStringList hotkeyLs;
 	codeSetIO::HOTKEYS &pHotKeys = mZHSetting.hotKeys;
-	int oriAscii[2], curIndexs[2];
-	oriAscii[0] = pHotKeys.hWXKey.qtkey;
-	oriAscii[1] = pHotKeys.hAlipayKey.qtkey;
-	asciiIntoIndex(hotkeyLs, 2, oriAscii, curIndexs);
-	//ui.cboPrintHandover->addItems(hotkeyLs);
-	//ui.cboPrintHandover->setCurrentIndex(curIndexs[0]);
-	//ui.cboTradeInfo->addItems(hotkeyLs);
-	//ui.cboTradeInfo->setCurrentIndex(curIndexs[1]);
+	//int oriAscii[2], curIndexs[2];
+	//oriAscii[0] = pHotKeys.hWXKey.qtkey;
+	//oriAscii[1] = pHotKeys.hAlipayKey.qtkey;
+	ui.ledtWXKey->setText(QString::number(pHotKeys.hWXKey.qtkey));
+	ui.ledtWXKey->setEnabled(false);
+	ui.ledtAlipayKey->setText(QString::number(pHotKeys.hAlipayKey.qtkey));
+	ui.ledtAlipayKey->setEnabled(false);
+	//asciiIntoIndex(hotkeyLs, 2, oriAscii, curIndexs);
 
 	// 按钮控件的信号
 	connect(ui.btnGetScreen, SIGNAL(pressed()), this, SLOT(catchScreen()));
@@ -268,6 +268,10 @@ inline void MainDlg::initFrame()
 	connect(ui.btnCheck, SIGNAL(pressed()), this, SLOT(checkCashSoftCorrect()));
 	connect(ui.btnPrinterTest, SIGNAL(pressed()), this, SLOT(printerTest()));
 	connect(ui.pbtClear, SIGNAL(pressed()), this, SLOT(clickClear()));
+	connect(ui.pbtWXModify, SIGNAL(pressed()), this, SLOT(clickModifyWXKey()));
+	connect(ui.pbtWXFinish, SIGNAL(pressed()), this, SLOT(clickFinishWXKey()));
+	connect(ui.pbtAlipayModify, SIGNAL(pressed()), this, SLOT(clickModifyAlipayKey()));
+	connect(ui.pbtAlipayFinish, SIGNAL(pressed()), this, SLOT(clickFinishAlipayKey()));
 }
 
 int MainDlg::getImageScaleTag(float &outScale)
@@ -563,6 +567,9 @@ inline void MainDlg::parseProcessJsonData(QString inJson)
 		saveLoginData(value);
 		emit settingInfoFinished();
 		break;
+	case TO_MAINDLG_SET_PAYKEY:
+		currentInputPaykey(value);
+		break;
 	default:
 		break;
 	}
@@ -615,6 +622,16 @@ inline void MainDlg::saveLoginData(const Json::Value &value)
 	ui.labName->setText(userName);
 }
 
+inline void MainDlg::currentInputPaykey(const Json::Value &inData)
+{
+	int paykeyVal = inData[PRO_PAYKEY_VALUE].asInt();
+	if (ui.ledtWXKey->isEnabled())
+		ui.ledtWXKey->setText(QString::number(paykeyVal));
+	else if (ui.ledtAlipayKey->isEnabled())
+		ui.ledtAlipayKey->setText(QString::number(paykeyVal));
+	else
+		editPayKey(Finished_AlipayKey);
+}
 
 inline void MainDlg::showPrice(const Json::Value &inJson)
 {
@@ -1068,4 +1085,39 @@ void MainDlg::mouseMoveEvent(QMouseEvent *event)
 void MainDlg::mouseReleaseEvent(QMouseEvent * event)
 {
 	isMouseDown = false;
+}
+
+void MainDlg::clickModifyWXKey()
+{
+	ui.ledtWXKey->setEnabled(true);
+	ui.ledtAlipayKey->setEnabled(false);
+	editPayKey(Modify_WXKey);
+}
+
+void MainDlg::clickFinishWXKey()
+{
+	ui.ledtWXKey->setEnabled(false);
+	editPayKey(Finished_WXKey);
+}
+
+void MainDlg::clickModifyAlipayKey()
+{
+	ui.ledtAlipayKey->setEnabled(true);
+	ui.ledtWXKey->setEnabled(false);
+	editPayKey(Modify_AlipayKey);
+}
+
+void MainDlg::clickFinishAlipayKey()
+{
+	ui.ledtAlipayKey->setEnabled(false);
+	editPayKey(Finished_AlipayKey);
+}
+
+void MainDlg::editPayKey(int paykeyStatus)
+{
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_FLOATWIN_EDITPAYKEY;
+	mValData[PRO_PAYKEY_EDIT] = paykeyStatus;  
+	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }

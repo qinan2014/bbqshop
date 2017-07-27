@@ -9,9 +9,10 @@ enum HookChars
 	HOOK_NUM,
 	HOOK_ESC,
 	HOOK_RETURN,
+	HOOK_SETPAYKEY,
 };
 
-#define HOOKCHARSNUM 5
+#define HOOKCHARSNUM 6
 
 #define HOOK_KEY_WX VK_F1
 

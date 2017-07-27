@@ -69,16 +69,21 @@ private:
 	inline void processJsonShowMainDlg();
 	inline void processJsonRereadSetting();
 	inline void processJsonShowPrice(const Json::Value &value);
+	inline void processJsonPayKeySet(const Json::Value &value);
 	inline void startHook();
 	inline void stopHook();
+	inline bool isHooking(int hookKey);
 	inline void hookManInputCodeMsg(MSG* msg);
 	inline void hookScanCodeMsg(MSG* msg);
 	inline void hookNum(bool isEnable);
 	inline void hookESC(bool isEnable);
 	inline void hookReturn(bool isEnable);
+	inline void hookAttempToSetPayKey(bool isEnable);
 	inline void hookManInputNum(DWORD vkCode);
 	inline void hookManInputShift(PKBDLLHOOKSTRUCT p);
+	inline void hookSettingPayKey(PKBDLLHOOKSTRUCT p);
 	inline void printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee);
+
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);

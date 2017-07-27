@@ -62,9 +62,14 @@
 #define PRO_CLIENT_ICON_TYPE "clientIconType"
 #define CLIENT_ICON_NAME "tmpClientIconName"
 
+// edit pay key
+#define PRO_PAYKEY_EDIT "paykeyStatus"
+#define PRO_PAYKEY_VALUE "keyVal"
+
 enum ProtocalHeader
 {
 	TO_FLOAT_SHOWMAINDLG,
+	TO_FLOATWIN_EDITPAYKEY,
 	TO_FLOATWIN_CLOSEMAINDLG,
 	TO_FLOATWIN_LOGININFO,
 	TO_FLOATWIN_REWRITESETTING,
@@ -83,6 +88,7 @@ enum ProtocalHeader
 	TO_MAINDLG_SHOW_PAYDLG,
 	TO_MAINDLG_SHOWSELF,
 	TO_MAINDLG_NETSTATUS,
+	TO_MAINDLG_SET_PAYKEY,
 	TO_OCR_CASHINFO,
 	TO_OCR_GETPRICE,
 	RETURN_PRICE,
@@ -92,19 +98,12 @@ enum ProtocalHeader
 	TO_SHOW_CLIENT_ICON,
 };
 
-#include "URLDefine.h"
-enum TABTYPE
+enum PayKeyEdit
 {
-	ERRORTAB,
-	CASH,
-	TRADELIST,
-	CARDVERIFICATE,
-	MEMBER_MANAGE,
-	STORE_RECORD,
-	SETTING,
-#ifdef MEITUAN
-	TAB_METURNHISTORY,
-#endif
+	Modify_WXKey,
+	Finished_WXKey,
+	Modify_AlipayKey,
+	Finished_AlipayKey,
 };
 
 #endif
