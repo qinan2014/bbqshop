@@ -555,7 +555,8 @@ inline void bbqshop::processJsonShowPrice(const Json::Value &inJson)
 		if (dlg != NULL)
 		{
 			dlg->SetMoney(pricestr);
-			stopGetOCRPriceTimer();
+			if (pricestr.toDouble() > 0.00)
+				stopGetOCRPriceTimer();
 		}
 	}
 }
