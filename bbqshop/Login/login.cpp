@@ -1,4 +1,4 @@
-#include "login.h"
+ï»¿#include "login.h"
 #include "zhfunclib.h"
 #include "MD5.h"
 #include "ProcessProtocal.h"
@@ -9,15 +9,15 @@ Login::Login(QApplication *pApp, QWidget *parent)
 	: QDialog(parent), mainApp(pApp)
 {
 	ui.setupUi(this);
-	setWindowTitle(LOGINTITLE);
+	setWindowTitle(QString::fromLocal8Bit("ç™»å½•"));
 	setFixedSize(size());
 	urlServer = new BbqUrlServer(this);
 	initFrame();
 	getLoginInfo();
 	ui.pbtLogin->setFocus();
-	ui.pbtLogin->setShortcut( QKeySequence::InsertParagraphSeparator ); //ÉèÖÃ¿ì½Ý¼üÎª¼üÅÌµÄ¡°»Ø³µ¡±¼ü
-	ui.pbtLogin->setShortcut(Qt::Key_Enter); //ÉèÖÃ¿ì½Ý¼üÎªenter¼ü
-	ui.pbtLogin->setShortcut(Qt::Key_Return); //ÉèÖÃ¿ì½Ý¼üÎªÐ¡¼üÅÌÉÏµÄenter¼ü	
+	ui.pbtLogin->setShortcut( QKeySequence::InsertParagraphSeparator ); //è®¾ç½®å¿«æ·é”®ä¸ºé”®ç›˜çš„â€œå›žè½¦â€é”®
+	ui.pbtLogin->setShortcut(Qt::Key_Enter); //è®¾ç½®å¿«æ·é”®ä¸ºenteré”®
+	ui.pbtLogin->setShortcut(Qt::Key_Return); //è®¾ç½®å¿«æ·é”®ä¸ºå°é”®ç›˜ä¸Šçš„enteré”®	
 }
 
 Login::~Login()
@@ -33,14 +33,14 @@ void Login::initFrame()
 	QPixmap img(pngPath);
 	ui.labicon->setPixmap(img);
 
-	// ÕËºÅ¿òÖ»ÔÊÐíÊäÈëÊý×Ö
-	QRegExp rx("^[0-9]{1,11}$");//Õâ¸ö11¾ÍÊÇ×î´ó³¤¶È
+	// è´¦å·æ¡†åªå…è®¸è¾“å…¥æ•°å­—
+	QRegExp rx("^[0-9]{1,11}$");//è¿™ä¸ª11å°±æ˜¯æœ€å¤§é•¿åº¦
 	QValidator *validator = new QRegExpValidator(rx,0);
 	ui.cboAccount->setValidator(validator);
 	QString styl = "font: bold 20px;";
 	ui.cboAccount->setStyleSheet(styl);
 	//ui.cboAccount->setMa
-	// ÃÜÂë¿òÉèÖÃ
+	// å¯†ç æ¡†è®¾ç½®
 	ui.ledtPWD->setEchoMode(QLineEdit::Password);
 	// version
 	ui.labVersion->setText(ZHCLIENTVERSION);
@@ -50,7 +50,7 @@ void Login::initFrame()
 	ui.pbtLogin->setStyleSheet("border-image: url(" + pngPath + ");color: #FFFFFF;font: 12pt \"Arial\";");
 
 	setStyleSheet("QDialog{background-color: #F0F0F0}");
-	// µÇÂ¼°´Å¥
+	// ç™»å½•æŒ‰é’®
 	isLogining = false;
 	connect(ui.pbtLogin, SIGNAL(released()), this, SLOT(clickLogin()));
 	connect(this, SIGNAL(loginStatus(bool )), this, SLOT(onLoginStatus(bool )));
@@ -93,8 +93,8 @@ void Login::clickLogin()
 {
 	if (isLogining)
 	{
-		// ÌáÊ¾
-		showTipString(QString::fromLocal8Bit("ÕýÔÚµÇÂ¼ÖÐ"));
+		// æç¤º
+		showTipString(QString::fromLocal8Bit("æ­£åœ¨ç™»å½•ä¸­"));
 		return;
 	}
 	Json::Value mValData;
@@ -102,7 +102,7 @@ void Login::clickLogin()
 	tmp = tmp.trimmed();
 	if (tmp.isEmpty())
 	{
-		showTipString(QString::fromLocal8Bit("ÕËºÅ²»ÄÜÎª¿Õ"));
+		showTipString(QString::fromLocal8Bit("è´¦å·ä¸èƒ½ä¸ºç©º"));
 		return;
 	}
 	ui.cboAccount->setCurrentText(tmp);
@@ -110,8 +110,8 @@ void Login::clickLogin()
 	tmp = ui.ledtPWD->text();
 	if (tmp.isEmpty())
 	{
-		//parPay->ShowTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("¾¯¸æ"), QString::fromLocal8Bit("ÃÜÂë²»ÄÜÎª¿Õ"), this);
-		showTipString(QString::fromLocal8Bit("ÃÜÂë²»ÄÜÎª¿Õ"));
+		//parPay->ShowTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("è­¦å‘Š"), QString::fromLocal8Bit("å¯†ç ä¸èƒ½ä¸ºç©º"), this);
+		showTipString(QString::fromLocal8Bit("å¯†ç ä¸èƒ½ä¸ºç©º"));
 		return;
 	}
 	mValData["password"] = md5(tmp.toStdString());
@@ -122,7 +122,7 @@ void Login::clickLogin()
 		itemVal.replace(rePos, 1, "");
 	}
 	isLogining = true;
-	ui.pbtLogin->setText(QString::fromLocal8Bit("ÕýÔÚµÇÂ¼"));
+	ui.pbtLogin->setText(QString::fromLocal8Bit("æ­£åœ¨ç™»å½•"));
 	urlServer->GetDataFromServer("api/app/v1", USERLOGINAPI, itemVal, URL_LOGIN_DLG);
 }
 
@@ -154,7 +154,7 @@ bool Login::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::stri
 	bool suc = reader.parse(mRecvJsonStr, value);
 	if (suc)
 	{
-		ui.pbtLogin->setText(QString::fromLocal8Bit("µÇÂ¼"));
+		ui.pbtLogin->setText(QString::fromLocal8Bit("ç™»å½•"));
 		if (urlTag == URL_LOGIN_DLG)
 		{
 			std::string retCode = value["return_code"].asString();
@@ -177,9 +177,9 @@ bool Login::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::stri
 
 void Login::CurlError(std::string url, int res, int urlTag)
 {
-	ui.pbtLogin->setText(QString::fromLocal8Bit("µÇÂ¼"));
+	ui.pbtLogin->setText(QString::fromLocal8Bit("ç™»å½•"));
 	isLogining = false;
-	showTipString(QString::fromLocal8Bit("ÍøÂçÒì³££¬Çë¼ì²éÍøÂç£¡"));
+	showTipString(QString::fromLocal8Bit("ç½‘ç»œå¼‚å¸¸ï¼Œè¯·æ£€æŸ¥ç½‘ç»œï¼"));
 }
 
 void Login::loginInfoStore(const Json::Value &value)
@@ -191,7 +191,7 @@ void Login::loginInfoStore(const Json::Value &value)
 	urlServer->RecordMemoryInfo("Login success", LOG_DEBUG, LOG_LOGIN, URL_RECORE_LOGIN_MEMORY);
 }
 
-void Login::closeEvent(QCloseEvent * e) // Ö±½ÓµãµÄ¹Ø±Õ°´Å¥£¬´ËÊ±Î´µãµÇÂ½°´Å¥
+void Login::closeEvent(QCloseEvent * e) // ç›´æŽ¥ç‚¹çš„å…³é—­æŒ‰é’®ï¼Œæ­¤æ—¶æœªç‚¹ç™»é™†æŒ‰é’®
 {
 	ZHFuncLib::TerminateProcessExceptCurrentOne(BBQSHOPEXE);
 	ZHFuncLib::TerminateProcessExceptCurrentOne(MAINDLGEXE);

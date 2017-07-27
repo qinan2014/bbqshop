@@ -252,10 +252,10 @@ inline void MainDlg::initFrame()
 	oriAscii[0] = pHotKeys.hPrintHandover.qtkey;
 	oriAscii[1] = pHotKeys.hTradeInfo.qtkey;
 	asciiIntoIndex(hotkeyLs, 2, oriAscii, curIndexs);
-	ui.cboPrintHandover->addItems(hotkeyLs);
-	ui.cboPrintHandover->setCurrentIndex(curIndexs[0]);
-	ui.cboTradeInfo->addItems(hotkeyLs);
-	ui.cboTradeInfo->setCurrentIndex(curIndexs[1]);
+	//ui.cboPrintHandover->addItems(hotkeyLs);
+	//ui.cboPrintHandover->setCurrentIndex(curIndexs[0]);
+	//ui.cboTradeInfo->addItems(hotkeyLs);
+	//ui.cboTradeInfo->setCurrentIndex(curIndexs[1]);
 
 	// 按钮控件的信号
 	connect(ui.btnGetScreen, SIGNAL(pressed()), this, SLOT(catchScreen()));
@@ -802,13 +802,13 @@ void MainDlg::saveSetting()
 	cashdesk.isAutoPrint = ui.chbAutioPrint->isChecked() ? 1 : 0;
 
 	// 保存快捷键
-	int indexs[2], asciis[2];
-	indexs[0] = ui.cboPrintHandover->currentIndex();
-	indexs[1] = ui.cboTradeInfo->currentIndex();
-	indexIntoAscii(2, indexs, asciis);
-	codeSetIO::HOTKEYS &hotKeys = mZHSetting.hotKeys;
-	hotKeys.hPrintHandover.qtkey = asciis[0];
-	hotKeys.hTradeInfo.qtkey = asciis[1];
+	//int indexs[2], asciis[2];
+	//indexs[0] = ui.cboPrintHandover->currentIndex();
+	//indexs[1] = ui.cboTradeInfo->currentIndex();
+	//indexIntoAscii(2, indexs, asciis);
+	//codeSetIO::HOTKEYS &hotKeys = mZHSetting.hotKeys;
+	//hotKeys.hPrintHandover.qtkey = asciis[0];
+	//hotKeys.hTradeInfo.qtkey = asciis[1];
 
 	SaveAllSetting();
 }
