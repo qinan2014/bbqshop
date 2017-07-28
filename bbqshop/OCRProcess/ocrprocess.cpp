@@ -265,7 +265,10 @@ void OCRProcess::saveCashInfo(const Json::Value &value)
 	mImageSel.priceImageScaleTag = value[PRO_OCR_SCALETAG].asInt();
 	mImageSel.imageBinaryzation = value[PRO_OCR_BINA].asInt();
 
-	ocrPreparedReflect();
+	if (sourceHand == PRO_OCR_FROM_MAINDLG)
+		sendBackPrice();
+	else
+		ocrPreparedReflect();
 }
 
 void OCRProcess::sendBackPrice()

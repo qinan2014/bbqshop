@@ -811,6 +811,8 @@ void bbqshop::startGetOCRPrice()
 	ZHFuncLib::GetTargetProcessIds(OCREXE, ids);
 	if (ids.size() == 0)
 	{
+		killTargetTimer(TIMER_GETPRICE);
+		getOCRPriceTimes = 0;
 		processJsonStartOCR();
 		QTimer::singleShot(200,this, SLOT(sendCashInfo()));
 		return;
