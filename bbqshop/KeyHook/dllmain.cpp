@@ -126,6 +126,8 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 			break;
 		case VK_LSHIFT:
 		case VK_RSHIFT:
+		case VK_LCONTROL:
+		case VK_RCONTROL:
 			{
 				::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
 				return CallNextHookEx(glhHook,nCode,wparam,lparam);

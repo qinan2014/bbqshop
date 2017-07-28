@@ -29,7 +29,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	isShowingPayResult = false;
 	getOCRPriceTimes = 0;
 	isShowingHandoverDlg = false;
-	isShiftKeyDown = false;
+	isCtrlKeyDown = false;
 	// 定时器
 	QTimer::singleShot(100,this, SLOT(hide()) );  // 隐藏自己
 	// 创建托盘
@@ -405,6 +405,10 @@ inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 	case VK_RSHIFT:
 		hookManInputShift(p);
 		break;
+	case VK_LCONTROL:
+	case VK_RCONTROL:
+		hookManInputCtrl(p);
+		break;
 	default:
 		break;
 	}
@@ -515,6 +519,8 @@ inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 	ZHSettingRW settingRW(mZHSetting);
 	settingRW.ReadZHSetting();
 	setHookPayKeyValueFromZHSetting();
+
+	emit returnFocusToCashier();
 }
 
 inline void bbqshop::processJsonOnMainDlgClose(const Json::Value &value)
@@ -726,20 +732,11 @@ void bbqshop::onClosePayDlg(bool haspayed)
 
 inline void bbqshop::hookManInputNum(DWORD vkCode)
 {
-	if (isShiftKeyDown)
+	if (isCtrlKeyDown)
 	{
 		if (vkCode == 49)
 		{
-			QString program = ZHFuncLib::GetWorkPath().c_str();
-			program += "/";
-			program += MAINDLGEXE;
-			QStringList arguments;
-			QProcess *process = new QProcess(this);
-			QStringList args;
-			codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
-			args << deskInfo.account;
-
-			process->start(program, args);
+			QTimer::singleShot(200,this, SLOT(showSettingDlg()) );
 		}
 	}
 }
@@ -747,16 +744,28 @@ inline void bbqshop::hookManInputNum(DWORD vkCode)
 inline void bbqshop::hookManInputShift(PKBDLLHOOKSTRUCT p)
 {
 	if (p->flags < 128)  // 这是按下
+		hookESC(true);
+	else
 	{
-		isShiftKeyDown = true;
-		//hookNum(true);
+		if (isOperatorOtherDlg())
+			return;
+		hookESC(false);
+	}
+}
+
+inline void bbqshop::hookManInputCtrl(PKBDLLHOOKSTRUCT p)
+{
+	if (p->flags < 128)  // 这是按下
+	{
+		isCtrlKeyDown = true;
+		hookNum(true);
 	}
 	else
 	{
-		isShiftKeyDown = false;
+		isCtrlKeyDown = false;
 		if (isOperatorOtherDlg())
 			return;
-		//hookNum(false);
+		hookNum(false);
 	}
 }
 

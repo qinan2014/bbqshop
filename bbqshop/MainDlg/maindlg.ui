@@ -339,7 +339,7 @@
       <widget class="QComboBox" name="cboMoneyPos">
        <property name="geometry">
         <rect>
-         <x>100</x>
+         <x>70</x>
          <y>0</y>
          <width>71</width>
          <height>22</height>
@@ -371,71 +371,71 @@
         </property>
        </item>
       </widget>
-      <widget class="QPushButton" name="btnGetScreen">
+      <widget class="QComboBox" name="cboImageScale">
        <property name="geometry">
         <rect>
-         <x>250</x>
+         <x>150</x>
          <y>0</y>
-         <width>101</width>
-         <height>23</height>
+         <width>131</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>1.0倍识别</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.2倍识别</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.3倍识别</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.5倍识别</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2.0倍识别</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QCheckBox" name="chbBinarization">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>0</y>
+         <width>61</width>
+         <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>截屏</string>
+        <string>二值化</string>
        </property>
       </widget>
      </widget>
      <widget class="QLineEdit" name="txtPrice">
       <property name="geometry">
        <rect>
-        <x>260</x>
+        <x>160</x>
         <y>40</y>
-        <width>101</width>
+        <width>201</width>
         <height>21</height>
        </rect>
       </property>
      </widget>
-     <widget class="QComboBox" name="cboImageScale">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>81</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <item>
-       <property name="text">
-        <string>1.0倍识别</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>1.2倍识别</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>1.3倍识别</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>1.5倍识别</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>2.0倍识别</string>
-       </property>
-      </item>
-     </widget>
      <widget class="QPushButton" name="btnCheckPrice">
       <property name="geometry">
        <rect>
-        <x>190</x>
+        <x>80</x>
         <y>40</y>
-        <width>51</width>
+        <width>71</width>
         <height>23</height>
        </rect>
       </property>
@@ -443,17 +443,17 @@
        <string>检测</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="chbBinarization">
+     <widget class="QPushButton" name="btnGetScreen">
       <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>10</x>
         <y>40</y>
         <width>61</width>
-        <height>21</height>
+        <height>23</height>
        </rect>
       </property>
       <property name="text">
-       <string>二值化</string>
+       <string>截屏</string>
       </property>
      </widget>
     </widget>
