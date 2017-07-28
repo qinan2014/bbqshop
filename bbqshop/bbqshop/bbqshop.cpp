@@ -708,6 +708,8 @@ void bbqshop::showPayDialog()
 {
 	if (strlen(mZHSetting.shopCashdestInfo.account) == 0)
 		return;
+	if (isOperatorOtherDlg())
+		return;
 	PayDialog *dlg = PayDialog::InitInstance(true, this);
 	if (dlg != NULL)
 	{
