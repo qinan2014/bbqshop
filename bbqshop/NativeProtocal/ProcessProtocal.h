@@ -42,6 +42,7 @@
 #define PRO_OCR_BINA "isbina"
 #define PRO_OCR_PRICE "price"
 #define PRO_OCR_ERROR "priceError"
+#define PRO_OCR_PREPARE_STATUS "status"
 
 #define PRO_OCR_ERROR_NAME_EMPTY -1
 #define PRO_OCR_ERROR_SOFT_NOTOPEN -2
@@ -92,6 +93,7 @@ enum ProtocalHeader
 	TO_OCR_CASHINFO,
 	TO_OCR_GETPRICE,
 	RETURN_PRICE,
+	OCR_PREPARED,
 	TO_FLOAT_INSTALL,
 	TO_UPDATE_CHECK,
 	TO_UPDATE_CLIENT_ICON,

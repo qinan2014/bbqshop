@@ -71,6 +71,7 @@ private:
 	inline void processJsonRereadSetting();
 	inline void processJsonShowPrice(const Json::Value &value);
 	inline void processJsonPayKeySet(const Json::Value &value);
+	inline void processJsonOCRPrepared(const Json::Value &value);
 	inline void startHook();
 	inline void stopHook();
 	inline bool isHooking(int hookKey);

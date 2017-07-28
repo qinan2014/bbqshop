@@ -151,6 +151,8 @@ void PayDialog::resizeEvent(QResizeEvent *event)
 
 void PayDialog::ClickPay()
 {
+	if (!ui.pbtPay->isEnabled())
+		return;
 	bbqshop *parWid = (bbqshop *)parWidget;
 	QString pricestr = ui.ledtPrice->text();
 	if (pricestr.isEmpty())

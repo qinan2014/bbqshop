@@ -265,7 +265,7 @@ void OCRProcess::saveCashInfo(const Json::Value &value)
 	mImageSel.priceImageScaleTag = value[PRO_OCR_SCALETAG].asInt();
 	mImageSel.imageBinaryzation = value[PRO_OCR_BINA].asInt();
 
-	sendBackPrice();
+	ocrPreparedReflect();
 }
 
 void OCRProcess::sendBackPrice()
@@ -293,6 +293,22 @@ void OCRProcess::sendBackPrice()
 	if (!suc)
 	{
 		ZHFuncLib::NativeLog("", "ocr process send back price failed", "a");
+	}
+	else
+		ZHFuncLib::NativeLog("ocr", mValData.toStyledString().c_str(), "a");
+}
+
+void OCRProcess::ocrPreparedReflect()
+{
+	Json::Value mValData;
+	mValData[PRO_HEAD] = OCR_PREPARED;
+	mValData[PRO_OCR_PREPARE_STATUS] = 1;
+
+	HWND hwnd = ::FindWindow(NULL, FLOATWINTITLEW);
+	bool suc = ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+	if (!suc)
+	{
+		ZHFuncLib::NativeLog("", "ocr process prepare reflect failed", "a");
 	}
 	else
 		ZHFuncLib::NativeLog("ocr", mValData.toStyledString().c_str(), "a");

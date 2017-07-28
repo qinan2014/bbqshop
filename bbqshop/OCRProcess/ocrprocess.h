@@ -39,6 +39,7 @@ private:
 	void saveCashInfo(const Json::Value &value);
 	void sendBackPrice();
 	float getImageScaleFactor();
+	void ocrPreparedReflect();
 };
 
 #endif // OCRPROCESS_H

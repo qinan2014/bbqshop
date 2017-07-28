@@ -359,6 +359,9 @@ inline void bbqshop::parseProcessJsonData(QString inJson)
 	case TO_FLOATWIN_EDITPAYKEY:
 		processJsonPayKeySet(value);
 		break;
+	case OCR_PREPARED:
+		processJsonOCRPrepared(value);
+		break;
 	default:
 		break;
 	}
@@ -467,7 +470,7 @@ void bbqshop::setFocusOnCashier()
 	::BringWindowToTop(hwnd);
 	::SetFocus(hwnd);
 
-	mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN,5,5,0,0); 
+	mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,5,5,0,0); 
 }
 
 inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
@@ -572,6 +575,7 @@ inline void bbqshop::processJsonRereadSetting()
 
 inline void bbqshop::processJsonShowPrice(const Json::Value &inJson)
 {
+	getOCRPriceTimes = 0;
 	QString pricestr = inJson[PRO_OCR_PRICE].asCString();
 	int priceerror = inJson[PRO_OCR_ERROR].asInt();
 	if (priceerror == PRO_OCR_ERROR_NAME_EMPTY)
@@ -579,6 +583,11 @@ inline void bbqshop::processJsonShowPrice(const Json::Value &inJson)
 		//priceLab->setText("0.00");
 		//killTargetTimer(TIMER_GETPRICE);
 		QTimer::singleShot(200,this, SLOT(sendCashInfo()) );
+		return;
+	}
+	if (priceerror != PRO_OCR_ERROR_SOFT_NOERROR)
+	{
+		stopGetOCRPriceTimer();
 		return;
 	}
 	if (isPriceNum(pricestr));
@@ -608,6 +617,16 @@ inline void bbqshop::processJsonPayKeySet(const Json::Value &inJson)
 		break;
 	default:
 		break;
+	}
+}
+
+inline void bbqshop::processJsonOCRPrepared(const Json::Value &value)
+{
+	int status = value[PRO_OCR_PREPARE_STATUS].asInt();
+	if (status == 1 && PayDialog::InitInstance(false) != NULL)
+	{
+		if (!isHasTargetTimer(TIMER_GETPRICE))
+			timers[startTimer(300, Qt::VeryCoarseTimer)] = TIMER_GETPRICE;		
 	}
 }
 
@@ -711,16 +730,16 @@ inline void bbqshop::hookManInputNum(DWORD vkCode)
 	{
 		if (vkCode == 49)
 		{
-			//QString program = ZHFuncLib::GetWorkPath().c_str();
-			//program += "/";
-			//program += MAINDLGEXE;
-			//QStringList arguments;
-			//QProcess *process = new QProcess(this);
-			//QStringList args;
-			//codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
-			//args << deskInfo.account;
+			QString program = ZHFuncLib::GetWorkPath().c_str();
+			program += "/";
+			program += MAINDLGEXE;
+			QStringList arguments;
+			QProcess *process = new QProcess(this);
+			QStringList args;
+			codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+			args << deskInfo.account;
 
-			//process->start(program, args);
+			process->start(program, args);
 		}
 	}
 }
@@ -730,14 +749,14 @@ inline void bbqshop::hookManInputShift(PKBDLLHOOKSTRUCT p)
 	if (p->flags < 128)  // 这是按下
 	{
 		isShiftKeyDown = true;
-		hookNum(true);
+		//hookNum(true);
 	}
 	else
 	{
 		isShiftKeyDown = false;
 		if (isOperatorOtherDlg())
 			return;
-		hookNum(false);
+		//hookNum(false);
 	}
 }
 
@@ -794,9 +813,10 @@ void bbqshop::startGetOCRPrice()
 	{
 		processJsonStartOCR();
 		QTimer::singleShot(200,this, SLOT(sendCashInfo()));
+		return;
 	}
 	if (!isHasTargetTimer(TIMER_GETPRICE))
-		timers[startTimer(500, Qt::VeryCoarseTimer)] = TIMER_GETPRICE;
+		timers[startTimer(300, Qt::VeryCoarseTimer)] = TIMER_GETPRICE;
 }
 
 inline void bbqshop::stopGetOCRPriceTimer()
@@ -852,7 +872,7 @@ void bbqshop::timerEvent(QTimerEvent * event)
 
 void bbqshop::getOCRPrice()
 {
-	if (getOCRPriceTimes > 1)
+	if (getOCRPriceTimes > 4)
 	{
 		ZHFuncLib::NativeLog("", "after send get price cmd, there is not return", "a");
 		ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
@@ -865,7 +885,7 @@ void bbqshop::getOCRPrice()
 
 	HWND hwnd = ::FindWindowW(NULL, OCRDLGTITLEW);
 	bool suc = ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
-	if (!suc)
+	if (!suc && getOCRPriceTimes > 4)
 	{
 		ZHFuncLib::NativeLog("", "send getprice cmd failed", "a");
 		ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
