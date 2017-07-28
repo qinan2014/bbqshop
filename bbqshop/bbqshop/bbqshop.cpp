@@ -992,8 +992,8 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	}
 	if (tradeStatus == 1) // 支付成功
 	{
-		emit manInputESC(); // 目的是关闭支付对话框
 		isShowingPayResult = true;
+		emit manInputESC(); // 目的是关闭支付对话框
 		QString payTypeIcon;
 		switch (paytype)
 		{
