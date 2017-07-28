@@ -501,6 +501,16 @@ void MainDlg::showTipDialogOK(int icon, const QString &inTitle, const QString &i
 
 void MainDlg::checkPrice()
 {
+	std::vector<int > ids;
+	ZHFuncLib::GetTargetProcessIds(OCREXE, ids);
+	if (ids.size() == 0)
+	{
+		Json::Value mValData;
+		mValData[PRO_HEAD] = TO_FLOATWIN_STARTOCR;
+		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+	}
+
 	catchScreenInfo();
 	Json::Value mValData;
 	mValData[PRO_HEAD] = TO_OCR_CASHINFO;
