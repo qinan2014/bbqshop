@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="widCashdesk">
     <attribute name="title">
@@ -462,12 +462,22 @@
       <rect>
        <x>20</x>
        <y>220</y>
-       <width>151</width>
+       <width>111</width>
        <height>21</height>
       </rect>
      </property>
      <property name="text">
       <string>启用支付扫码枪</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cboToolexe">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>220</y>
+       <width>241</width>
+       <height>22</height>
+      </rect>
      </property>
     </widget>
    </widget>
