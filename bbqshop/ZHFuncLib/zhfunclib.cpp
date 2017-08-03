@@ -75,6 +75,44 @@ void ZHFuncLib::GetTargetProcessIds(std::string inTarget, std::vector<int > &out
 	CloseHandle(hProcessSnap);
 }
 
+void ZHFuncLib::GetAllProcesses(std::wstring inTarget, int &outTargetIndex, std::vector<std::wstring > &outAllProcess, std::vector<int > &outIds)
+{
+	PROCESSENTRY32 pe32;
+	pe32.dwSize = sizeof(pe32);
+	HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
+	if(hProcessSnap == INVALID_HANDLE_VALUE)
+		return;
+	BOOL bProcess = Process32First(hProcessSnap, &pe32);
+	int targetNameLen = inTarget.length();
+	int indextarget = 0;
+	while(bProcess)
+	{
+		outAllProcess.push_back(pe32.szExeFile);
+		outIds.push_back(pe32.th32ProcessID);
+
+		int searchLen = wcslen(pe32.szExeFile);
+		if (targetNameLen == searchLen)
+		{
+			bool isEqualName = true;
+			for (int i = 0; i < targetNameLen; ++i)
+			{
+				if (inTarget[i] != pe32.szExeFile[i])
+				{
+					isEqualName = false;
+					break;
+				}
+			}
+			if (isEqualName)
+				outTargetIndex = indextarget;
+		}
+
+		++indextarget;
+		// 继续查找
+		bProcess = Process32Next(hProcessSnap,&pe32);
+	}
+	CloseHandle(hProcessSnap);
+}
+
 bool ZHFuncLib::TerminateProcessExceptCurrentOne(std::string inTarget)
 {
 	std::vector<int > ids;

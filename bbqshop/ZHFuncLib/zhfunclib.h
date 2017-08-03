@@ -1,4 +1,4 @@
-#ifndef ZHFUNCLIB_H
+ï»¿#ifndef ZHFUNCLIB_H
 #define ZHFUNCLIB_H
 
 #include "zhfunclib_global.h"
@@ -17,9 +17,10 @@ public:
 	
 	static std::string GetWorkPath();
 	static void GetTargetProcessIds(std::string inTarget, std::vector<int > &outIds);
-	static bool TerminateProcessExceptCurrentOne(std::string inTarget); // ·µ»ØÖµ±íÊ¾ÊÇ·ñÒÑ¾­ÓĞÆäËû½ø³Ì´ò¿ª
+	static void GetAllProcesses(std::wstring inTarget, int &outTargetIndex, std::vector<std::wstring > &outAllProcess, std::vector<int > &outIds);
+	static bool TerminateProcessExceptCurrentOne(std::string inTarget); // è¿”å›å€¼è¡¨ç¤ºæ˜¯å¦å·²ç»æœ‰å…¶ä»–è¿›ç¨‹æ‰“å¼€
 	static void NativeLog(const char *extname, const char *content, char *mode);
-	static bool SendProcessMessage(HWND selfWnd, HWND targetWnd, ULONG_PTR dataType, std::string willSendData); // ·µ»ØÖµÊÇ·ñ·¢ËÍÏûÏ¢³É¹¦
+	static bool SendProcessMessage(HWND selfWnd, HWND targetWnd, ULONG_PTR dataType, std::string willSendData); // è¿”å›å€¼æ˜¯å¦å‘é€æ¶ˆæ¯æˆåŠŸ
 	static std::wstring StringToWstring(const std::string str);
 	static std::string WstringToString(const std::wstring str);
 };
