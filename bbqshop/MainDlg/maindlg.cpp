@@ -196,6 +196,17 @@ inline void MainDlg::initFrame()
 	}
 	ui.cboCashTool->setCurrentIndex(cursel);
 	connect(ui.cboCashTool, SIGNAL(currentIndexChanged(int)), this, SLOT(cashToolChanged(int)));
+			// 所有进程名称及id
+	std::wstring targetName;
+	int targetIndex;
+	std::vector<std::wstring > allProcess;
+	std::vector<int > allIds;
+	ZHFuncLib::GetAllProcesses(targetName, targetIndex, allProcess, allIds);
+	int processSZ = allProcess.size();
+	for (int i =  0; i < processSZ; ++i)
+	{
+		ui.cboToolexe->addItem(QString::fromStdWString(allProcess[i]) + "  " + QString::number(allIds[i]));
+	}
 	cashToolChanged(cursel != 0);
 	// 是否使用支付扫码枪
 	ui.chbStartGun->setChecked(shopInfo.isUsePayGun == 1);
@@ -248,14 +259,10 @@ inline void MainDlg::initFrame()
 	// 快捷键界面
 	QStringList hotkeyLs;
 	codeSetIO::HOTKEYS &pHotKeys = mZHSetting.hotKeys;
-	//int oriAscii[2], curIndexs[2];
-	//oriAscii[0] = pHotKeys.hWXKey.qtkey;
-	//oriAscii[1] = pHotKeys.hAlipayKey.qtkey;
 	ui.ledtWXKey->setText(QString::number(pHotKeys.hWXKey.qtkey));
 	ui.ledtWXKey->setEnabled(false);
 	ui.ledtAlipayKey->setText(QString::number(pHotKeys.hAlipayKey.qtkey));
 	ui.ledtAlipayKey->setEnabled(false);
-	//asciiIntoIndex(hotkeyLs, 2, oriAscii, curIndexs);
 
 	// 按钮控件的信号
 	connect(ui.btnGetScreen, SIGNAL(pressed()), this, SLOT(catchScreen()));
@@ -302,6 +309,7 @@ void MainDlg::cashToolChanged(int newIndex)
 	bool hasCashTool = (newIndex != 0);
 	ui.btnCheck->setEnabled(hasCashTool);
 	ui.gbMoneyPos->setEnabled(hasCashTool);
+	ui.cboToolexe->setEnabled(!hasCashTool);
 }
 
 void MainDlg::printerChanged(int newIndex)
@@ -839,6 +847,16 @@ void MainDlg::saveSetting()
 	ui.ledtAlipayKey->setEnabled(false);
 	ui.ledtWXKey->setEnabled(false);
 	editPayKey(Finished_AlipayKey);
+
+	// 保存exe名称
+	QString exeName = ui.cboToolexe->currentText();
+	int exeIndex = exeName.indexOf(".exe");
+	QString pureExeName = exeName.left(exeIndex + 4);
+	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
+	memcpy(carishInfo.exeName, pureExeName.toStdString().c_str(), pureExeName.length());
+	carishInfo.exeName[pureExeName.length()] = 0;
+			//点击保存后启动监视
+
 
 	SaveAllSetting();
 }
