@@ -17,13 +17,13 @@
 #include "ProcessProtocal.h"
 using namespace std;
 
-bool SendProcessMessage(std::string willSendData)
+bool SendProcessMessage( ULONG_PTR dataType, std::string willSendData)
 {
 	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
 	char *cstr = new char[willSendData.length() + 1];
 	strcpy(cstr, willSendData.c_str());
 	COPYDATASTRUCT copydata;
-	copydata.dwData = ZHIHUI_CODE_MSG;  // 用户定义数据
+	copydata.dwData = dataType;  // 用户定义数据
 	copydata.lpData = cstr;  //数据大小
 	copydata.cbData = willSendData.length();  // 指向数据的指针
 	::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(hwnd), reinterpret_cast<LPARAM>(&copydata));
@@ -41,10 +41,7 @@ bool SendProcessMessage(std::string willSendData)
 BOOL (WINAPI *SysWriteFile)(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped) = WriteFile;
 BOOL WINAPI HookWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
-	//Json::Value mValData;
-	//mValData[PRO_HEAD] = TO_MAINDLG_IMPORTANTDATA;
-
-	SendProcessMessage("hellotest");
+	SendProcessMessage(ZHIHUI_CODE_MSG, "hellotest");
 	MessageBox(NULL, L"HookWriteFile!", L"Warnning!", MB_OK);
 
 	return SysWriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
