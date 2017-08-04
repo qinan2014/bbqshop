@@ -203,6 +203,7 @@ inline void MainDlg::initFrame()
 	std::vector<int > allIds;
 	ZHFuncLib::GetAllProcesses(targetName, targetIndex, allProcess, allIds);
 	int processSZ = allProcess.size();
+	ui.cboToolexe->addItem(QString::fromLocal8Bit("无"));
 	for (int i =  0; i < processSZ; ++i)
 	{
 		ui.cboToolexe->addItem(QString::fromStdWString(allProcess[i]) + "  " + QString::number(allIds[i]));
@@ -425,12 +426,17 @@ void MainDlg::catchScreen(const QRect &inselect)
 	ZHFuncLib::GetTargetProcessIds(OCREXE, ids);
 	if (ids.size() == 0)
 	{
-		Json::Value mValData;
-		mValData[PRO_HEAD] = TO_FLOATWIN_STARTOCR;
-
-		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
-		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+		startOCRProcess();
 	}
+}
+
+void MainDlg::startOCRProcess()
+{
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_FLOATWIN_STARTOCR;
+
+	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }
 
 bool MainDlg::checkSoft()
@@ -513,10 +519,7 @@ void MainDlg::checkPrice()
 	ZHFuncLib::GetTargetProcessIds(OCREXE, ids);
 	if (ids.size() == 0)
 	{
-		Json::Value mValData;
-		mValData[PRO_HEAD] = TO_FLOATWIN_STARTOCR;
-		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
-		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+		startOCRProcess();
 	}
 
 	catchScreenInfo();
@@ -849,16 +852,40 @@ void MainDlg::saveSetting()
 	editPayKey(Finished_AlipayKey);
 
 	// 保存exe名称
+	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
+	if (ui.cboToolexe->currentIndex() == 0)
+	{
+		carishInfo.exeName[0] = 0;
+	}
+	else
+	{
+		codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
+		QString exeName = ui.cboToolexe->currentText();
+		int exeIndex = exeName.indexOf(".exe");
+		QString pureExeName = exeName.left(exeIndex + 4);
+		memcpy(carishInfo.exeName, pureExeName.toStdString().c_str(), pureExeName.length());
+		carishInfo.exeName[pureExeName.length()] = 0;
+
+		QTimer::singleShot(400,this, SLOT(startOCRProcess()) );  // 隐藏自己
+		QTimer::singleShot(1000,this, SLOT(startCommMonitor()) );  // 隐藏自己
+	}
+	SaveAllSetting();
+}
+
+void MainDlg::startCommMonitor()
+{
+	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
 	QString exeName = ui.cboToolexe->currentText();
 	int exeIndex = exeName.indexOf(".exe");
-	QString pureExeName = exeName.left(exeIndex + 4);
-	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
-	memcpy(carishInfo.exeName, pureExeName.toStdString().c_str(), pureExeName.length());
-	carishInfo.exeName[pureExeName.length()] = 0;
-			//点击保存后启动监视
-
-
-	SaveAllSetting();
+	//点击保存后启动监视
+	QString idStr = exeName.mid(exeIndex + 5);
+	idStr = idStr.trimmed();
+	Json::Value mValData;
+	mValData[PRO_HEAD] = TO_OCR_PROCESSID;
+	mValData[PRO_OCR_FROMDLG] = PRO_OCR_FROM_MAINDLG;
+	mValData[PRO_OCR_PROCESSID] = idStr.toInt();
+	HWND hwnd = ::FindWindowW(NULL, OCRDLGTITLEW);
+	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }
 
 void MainDlg::memeryPrintName()

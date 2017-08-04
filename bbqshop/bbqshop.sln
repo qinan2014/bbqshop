@@ -29,6 +29,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MainDlg", "MainDlg\MainDlg.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Relogin", "Relogin\Relogin.vcxproj", "{2F337594-D4CB-441D-B838-3E8F214D9233}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ApiHook", "ApiHook\ApiHook.vcxproj", "{75B382A6-8F15-4AC4-91E7-E7A7B8457F97}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DetourInjection", "DetourInjection\DetourInjection.vcxproj", "{B216E138-0276-4CF8-9DF4-B020732FE0AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -91,6 +95,14 @@ Global
 		{2F337594-D4CB-441D-B838-3E8F214D9233}.Debug|Win32.Build.0 = Debug|Win32
 		{2F337594-D4CB-441D-B838-3E8F214D9233}.Release|Win32.ActiveCfg = Release|Win32
 		{2F337594-D4CB-441D-B838-3E8F214D9233}.Release|Win32.Build.0 = Release|Win32
+		{75B382A6-8F15-4AC4-91E7-E7A7B8457F97}.Debug|Win32.ActiveCfg = Debug|Win32
+		{75B382A6-8F15-4AC4-91E7-E7A7B8457F97}.Debug|Win32.Build.0 = Debug|Win32
+		{75B382A6-8F15-4AC4-91E7-E7A7B8457F97}.Release|Win32.ActiveCfg = Release|Win32
+		{75B382A6-8F15-4AC4-91E7-E7A7B8457F97}.Release|Win32.Build.0 = Release|Win32
+		{B216E138-0276-4CF8-9DF4-B020732FE0AB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B216E138-0276-4CF8-9DF4-B020732FE0AB}.Debug|Win32.Build.0 = Debug|Win32
+		{B216E138-0276-4CF8-9DF4-B020732FE0AB}.Release|Win32.ActiveCfg = Release|Win32
+		{B216E138-0276-4CF8-9DF4-B020732FE0AB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

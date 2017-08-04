@@ -29,10 +29,10 @@ Debug/KeyHook.*
 Debug/LibCurl.*
 Debug/PosPrinter.*
 Debug/PosPrinterLPT.*
-Debug/QRGenerate.*
+Debug/bbqDetourInjection.*
 Debug/ZHFuncLib.*
 Debug/ZHSettingRW.*
-Debug/bbqUpdateClientIcon.*
+Debug/ApiHook.*
 Debug/*.xml
 Debug/*.bmp
 Debug/*.ico
@@ -56,10 +56,10 @@ Release/KeyHook.*
 Release/LibCurl.*
 Release/PosPrinter.*
 Release/PosPrinterLPT.*
-Release/QRGenerate.*
+Release/bbqDetourInjection.*
 Release/ZHFuncLib.*
 Release/ZHSettingRW.*
-Release/bbqUpdateClientIcon.*
+Release/ApiHook.*
 Release/*.xml
 Release/*.bmp
 Release/*.ico
