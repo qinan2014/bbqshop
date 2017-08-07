@@ -113,6 +113,52 @@ void ZHFuncLib::GetAllProcesses(std::wstring inTarget, int &outTargetIndex, std:
 	CloseHandle(hProcessSnap);
 }
 
+void ZHFuncLib::InjectDllByProcessID(const std::wstring dllPath, unsigned long inProcessID)
+{
+	wchar_t* DirPath = new wchar_t[MAX_PATH];
+	wchar_t* FullPath = new wchar_t[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, DirPath);
+	swprintf_s(FullPath, MAX_PATH, dllPath.c_str(), DirPath);
+
+	HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
+		PROCESS_VM_WRITE, FALSE, inProcessID);
+
+	LPVOID LoadLibraryAddr = (LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"),
+		"LoadLibraryW");
+
+	LPVOID LLParam = (LPVOID)VirtualAllocEx(hProcess, NULL, (wcslen(FullPath) + 1) * sizeof(wchar_t),
+		MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	WriteProcessMemory(hProcess, LLParam, FullPath, (wcslen(FullPath) + 1)* sizeof(wchar_t), NULL);
+
+	HANDLE hRemoteThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryAddr,
+		LLParam, NULL, NULL);
+	CloseHandle(hProcess); 
+	delete[] DirPath;
+	delete[] FullPath;
+}
+
+bool ZHFuncLib::InjectDllByProcessName(const std::wstring dllPath, const std::wstring inProcessName)
+{
+	PROCESSENTRY32 pe32;
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+	HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
+	BOOL bProcess = Process32First(hsnap, &pe32);
+	bool flag = false;
+	if (bProcess == TRUE)
+	{
+		while (Process32Next(hsnap, &pe32) == TRUE)
+		{
+			if (wcscmp(pe32.szExeFile, inProcessName.c_str()) == 0)
+			{
+				flag = true;
+				InjectDllByProcessID(dllPath, pe32.th32ParentProcessID);
+				break;
+			}
+		}
+	}
+	return flag;
+}
+
 bool ZHFuncLib::TerminateProcessExceptCurrentOne(std::string inTarget)
 {
 	std::vector<int > ids;

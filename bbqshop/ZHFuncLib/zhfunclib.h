@@ -23,6 +23,8 @@ public:
 	static bool SendProcessMessage(HWND selfWnd, HWND targetWnd, ULONG_PTR dataType, std::string willSendData); // 返回值是否发送消息成功
 	static std::wstring StringToWstring(const std::string str);
 	static std::string WstringToString(const std::wstring str);
+	static void InjectDllByProcessID(const std::wstring dllPath, unsigned long inProcessID);
+	static bool InjectDllByProcessName(const std::wstring dllPath, const std::wstring inProcessName);
 };
 
 #endif // ZHFUNCLIB_H

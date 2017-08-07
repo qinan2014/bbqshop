@@ -85,8 +85,7 @@ BOOL WINAPI HookWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesTo
 	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\processmessage.txt", "w");
 	if(fp != NULL)
 	{
-		fwrite("hook write file test \r\n", strlen("hook write file test \r\n"), 1, fp);
-		fwrite(lpBuffer, *lpNumberOfBytesWritten, 1, fp);
+		fwrite(lpBuffer, nNumberOfBytesToWrite, 1, fp);
 		fclose(fp);
 		fp = NULL;
 	}
