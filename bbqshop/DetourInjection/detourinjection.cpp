@@ -26,6 +26,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 				flag = true;
 				GetCurrentDirectory(MAX_PATH, DirPath);
 				swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\ApiHook.dll", DirPath);
+				//swprintf_s(FullPath, MAX_PATH, L"C:\\Users\\Boboqi\\Desktop\\shopbincpy\\ApiHook.dll", DirPath);
 				//std::wcout << L"find the target process ..." << endl;
 				//wcout << L"the dir of dll is: " << FullPath << endl;
 				HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
@@ -47,6 +48,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 				CloseHandle(hProcess); 
 				delete[] DirPath;
 				delete[] FullPath;
+				break;
 			}
 		}
 	}

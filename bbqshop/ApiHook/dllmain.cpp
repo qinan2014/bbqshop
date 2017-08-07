@@ -17,19 +17,88 @@
 #include "ProcessProtocal.h"
 using namespace std;
 
-bool SendProcessMessage( ULONG_PTR dataType, std::string willSendData)
+FILE * fp = NULL;
+char bbqPath[MAX_PATH];
+
+char *GetWorkPath()
 {
-	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
-	char *cstr = new char[willSendData.length() + 1];
-	strcpy(cstr, willSendData.c_str());
-	COPYDATASTRUCT copydata;
-	copydata.dwData = dataType;  // 用户定义数据
-	copydata.lpData = cstr;  //数据大小
-	copydata.cbData = willSendData.length();  // 指向数据的指针
-	::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(hwnd), reinterpret_cast<LPARAM>(&copydata));
-	delete [] cstr;
-	return true;
+	if (strlen(bbqPath) > 0)
+		return bbqPath;
+	HKEY hAppKey = 0;
+	if (ERROR_SUCCESS != RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_READ, &hAppKey))
+		return "";
+	DWORD dataType;
+	DWORD dataSize;
+	LONG res = RegQueryValueEx(hAppKey, L"bbqpay", 0, &dataType, 0, &dataSize);
+	if (res != ERROR_SUCCESS) 
+	{
+		RegCloseKey(hAppKey);
+		return "";
+	}
+	if (dataType == REG_SZ || dataType == REG_EXPAND_SZ)
+		dataSize += 2;
+	else if (dataType == REG_MULTI_SZ)
+		dataSize += 4;
+	static unsigned char *odata = new unsigned char[dataSize];
+	res = RegQueryValueEx(hAppKey, L"bbqpay", 0, 0, odata, &dataSize);
+	if (res != ERROR_SUCCESS) {
+		RegCloseKey(hAppKey);
+		delete []odata;
+		return "";
+	}
+	// 去除空格
+	int charpos = 0;
+	for (int i = 0; i < dataSize; ++i)
+	{
+		if (odata[i] != '\0' && odata[i] != ' ')
+		{
+			bbqPath[charpos] = odata[i];
+			++charpos;
+		}
+	}
+	bbqPath[charpos] = 0;
+	// 找到路径
+	int namePos = -1;
+	for (int i = 0; i < strlen(bbqPath); ++i)
+	{
+
+		if (bbqPath[i] == '\\')
+			namePos = i;
+	}
+	bbqPath[namePos] = 0;
+
+	//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\processmessage.txt", "a");
+	//if(fp != NULL)
+	//{
+	//	char tmpbuf[100];
+	//	sprintf(tmpbuf, "name pos : %d\r\n", namePos);
+	//	fwrite(tmpbuf, strlen(tmpbuf), 1, fp);
+	//	sprintf(tmpbuf, "bbqPath length : %d\r\n", strlen(bbqPath));
+	//	fwrite(tmpbuf, strlen(tmpbuf), 1, fp);
+	//	fwrite(bbqPath, strlen(bbqPath), 1, fp);
+	//	fwrite("\r\n", strlen("\r\n"), 1, fp);
+	//	fclose(fp);
+	//	fp = NULL;
+	//}
+
+	RegCloseKey(hAppKey);
+	delete []odata;
+	return bbqPath;
 }
+
+//bool SendProcessMessage( ULONG_PTR dataType, std::string willSendData)
+//{
+//	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+//	char *cstr = new char[willSendData.length() + 1];
+//	strcpy(cstr, willSendData.c_str());
+//	COPYDATASTRUCT copydata;
+//	copydata.dwData = dataType;  // 用户定义数据
+//	copydata.lpData = cstr;  //数据大小
+//	copydata.cbData = willSendData.length();  // 指向数据的指针
+//	::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(hwnd), reinterpret_cast<LPARAM>(&copydata));
+//	delete [] cstr;
+//	return true;
+//}
 
 
 //int (WINAPI *SysMessageBox)(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType) = MessageBox;
@@ -41,8 +110,17 @@ bool SendProcessMessage( ULONG_PTR dataType, std::string willSendData)
 BOOL (WINAPI *SysWriteFile)(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped) = WriteFile;
 BOOL WINAPI HookWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
-	SendProcessMessage(ZHIHUI_CODE_MSG, "hellotest");
-	MessageBox(NULL, L"HookWriteFile!", L"Warnning!", MB_OK);
+	//SendProcessMessage(ZHIHUI_CODE_MSG_HOOK_WRITEFILE, "hello test hook write file");
+	
+	//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\processmessage.txt", "a");
+	//if(fp != NULL)
+	//{
+	//	fwrite("lpBuffer", strlen("HookWriteFile test\r\n"), 1, fp);
+	//	fwrite("\r\n", strlen("\r\n"), 1, fp);
+	//	fclose(fp);
+	//	fp = NULL;
+	//}
+	GetWorkPath();
 
 	return SysWriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
 }
@@ -61,6 +139,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 		//DetourAttach(&(PVOID&)SysMessageBox, HookMessageBox);
 		DetourAttach(&(PVOID&)SysWriteFile, HookWriteFile);
 		DetourTransactionCommit();
+		bbqPath[0] = 0;
 		break;
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
