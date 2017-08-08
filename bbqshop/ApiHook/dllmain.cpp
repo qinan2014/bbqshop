@@ -15,10 +15,10 @@
 #include "AllWindowTitle.h"
 #include "HookKeyChar.h"
 
-using namespace std;
-FILE * fp = NULL;
+static FILE * fp = NULL;
 
 char bbqPath[MAX_PATH];
+char logBuff[255];
 
 #define PROJECTREGIEDT L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
 #define PROJCETNAME L"bbqpay"
@@ -85,6 +85,8 @@ BOOL WINAPI HookWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesTo
 	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFile.txt", "w");
 	if(fp != NULL)
 	{
+		//sprintf(logBuff, "write file toWrite: %d, byte written: %d\r\n", nNumberOfBytesToWrite, *lpNumberOfBytesWritten);
+		//fwrite(logBuff, strlen(logBuff), 1, fp);
 		fwrite(lpBuffer, nNumberOfBytesToWrite, 1, fp);
 		fclose(fp);
 		fp = NULL;
@@ -93,30 +95,32 @@ BOOL WINAPI HookWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesTo
 	return SysWriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
 }
 
+FILE * fp1 = NULL;
 HANDLE (WINAPI *SysCreateFileA)(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) = CreateFileA;
 HANDLE WINAPI HookCreateFileA(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
-	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCriteFileA.txt", "w");
-	if(fp != NULL)
+	fopen_s(&fp1, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCriteFileA.txt", "w");
+	if(fp1 != NULL)
 	{
-		fwrite(lpFileName, strlen(lpFileName), 1, fp);
-		fclose(fp);
-		fp = NULL;
+		fwrite(lpFileName, strlen(lpFileName), 1, fp1);
+		fclose(fp1);
+		fp1 = NULL;
 	}
 	
 	return SysCreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 }
 
-HANDLE (WINAPI *SysCreateFileW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) = CreateFile;
+FILE * fp2 = NULL;
+HANDLE (WINAPI *SysCreateFileW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) = CreateFileW;
 HANDLE WINAPI HookCreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
-	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCriteFileW.txt", "w");
-	if(fp != NULL)
+	fopen_s(&fp2, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCriteFileW.txt", "w");
+	if(fp2 != NULL)
 	{
 
-		fwrite(lpFileName, wcslen(lpFileName), 1, fp);
-		fclose(fp);
-		fp = NULL;
+		fwrite(lpFileName, wcslen(lpFileName), 1, fp2);
+		fclose(fp2);
+		fp2 = NULL;
 	}
 
 	return SysCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
@@ -132,7 +136,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	case DLL_PROCESS_ATTACH:
 	case DLL_THREAD_ATTACH:
 		{
-			DisableThreadLibraryCalls(hModule);
+			//DisableThreadLibraryCalls(hModule);
 			DetourTransactionBegin();
 			DetourUpdateThread(GetCurrentThread());
 			LONG errNo1 = DetourAttach(&(PVOID&)SysWriteFile, HookWriteFile);
@@ -142,9 +146,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 			fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllmain.txt", "w");
 			if(fp != NULL)
 			{
-				char tmpbuf[100];
-				sprintf(tmpbuf, "DetourAttach errNo1: %d; errNo2: %d; errNo3: %d,errNoCommit: %d", errNo1, errNo2, 0, errNo);
-				fwrite(tmpbuf, strlen(tmpbuf), 1, fp);
+				sprintf(logBuff, "DetourAttach errNo1: %d; errNo2: %d; errNo3: %d, no errNoCommit: %d", errNo1, errNo2, -1, errNo);
+				fwrite(logBuff, strlen(logBuff), 1, fp);
 				fclose(fp);
 				fp = NULL;
 			}
