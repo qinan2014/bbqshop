@@ -16,8 +16,8 @@
 #include "HookKeyChar.h"
 
 using namespace std;
-
 FILE * fp = NULL;
+
 char bbqPath[MAX_PATH];
 
 #define PROJECTREGIEDT L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
@@ -77,12 +77,12 @@ char *GetWorkPath()
 BOOL (WINAPI *SysWriteFile)(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped) = WriteFile;
 BOOL WINAPI HookWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
-	std::string workpath = GetWorkPath();
-	workpath += "/";
-	workpath += HOOKAPIDIR;
-	workpath += "/";
-	workpath += HOOKWRITEFUNC;
-	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\processmessage.txt", "w");
+	//std::string workpath = GetWorkPath();
+	//workpath += "/";
+	//workpath += HOOKAPIDIR;
+	//workpath += "/";
+	//workpath += HOOKWRITEFUNC;
+	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFile.txt", "w");
 	if(fp != NULL)
 	{
 		fwrite(lpBuffer, nNumberOfBytesToWrite, 1, fp);
@@ -93,6 +93,35 @@ BOOL WINAPI HookWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesTo
 	return SysWriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
 }
 
+HANDLE (WINAPI *SysCreateFileA)(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) = CreateFileA;
+HANDLE WINAPI HookCreateFileA(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
+{
+	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCriteFileA.txt", "w");
+	if(fp != NULL)
+	{
+		fwrite(lpFileName, strlen(lpFileName), 1, fp);
+		fclose(fp);
+		fp = NULL;
+	}
+	
+	return SysCreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+}
+
+HANDLE (WINAPI *SysCreateFileW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) = CreateFile;
+HANDLE WINAPI HookCreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
+{
+	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCriteFileW.txt", "w");
+	if(fp != NULL)
+	{
+
+		fwrite(lpFileName, wcslen(lpFileName), 1, fp);
+		fclose(fp);
+		fp = NULL;
+	}
+
+	return SysCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+}
+
 BOOL APIENTRY DllMain( HMODULE hModule,
 					  DWORD  ul_reason_for_call,
 					  LPVOID lpReserved
@@ -101,21 +130,34 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
-		DisableThreadLibraryCalls(hModule);
-		DetourTransactionBegin();
-		DetourUpdateThread(GetCurrentThread());
-		//DetourAttach(&(PVOID&)SysMessageBox, HookMessageBox);
-		DetourAttach(&(PVOID&)SysWriteFile, HookWriteFile);
-		DetourTransactionCommit();
-		bbqPath[0] = 0;
-		break;
 	case DLL_THREAD_ATTACH:
+		{
+			DisableThreadLibraryCalls(hModule);
+			DetourTransactionBegin();
+			DetourUpdateThread(GetCurrentThread());
+			LONG errNo1 = DetourAttach(&(PVOID&)SysWriteFile, HookWriteFile);
+			LONG errNo2 = DetourAttach(&(PVOID&)SysCreateFileA, HookCreateFileA);
+			//LONG errNo3 = DetourAttach(&(PVOID&)SysCreateFileW, HookCreateFileW);
+			LONG errNo = DetourTransactionCommit();
+			fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllmain.txt", "w");
+			if(fp != NULL)
+			{
+				char tmpbuf[100];
+				sprintf(tmpbuf, "DetourAttach errNo1: %d; errNo2: %d; errNo3: %d,errNoCommit: %d", errNo1, errNo2, 0, errNo);
+				fwrite(tmpbuf, strlen(tmpbuf), 1, fp);
+				fclose(fp);
+				fp = NULL;
+			}
+			bbqPath[0] = 0;
+		}
+		break;
 	case DLL_THREAD_DETACH:
 	case DLL_PROCESS_DETACH:
 		DetourTransactionBegin();	//Detach
 		DetourUpdateThread(GetCurrentThread());
-		//DetourDetach(&(PVOID&)SysMessageBox, SysMessageBox);
 		DetourDetach(&(PVOID&)SysWriteFile, HookWriteFile);
+		DetourDetach(&(PVOID&)SysCreateFileA, HookCreateFileA);
+		//DetourDetach(&(PVOID&)SysCreateFileW, HookCreateFileW);
 		DetourTransactionCommit();
 		break;
 	}
