@@ -75,28 +75,6 @@ char *GetWorkPath()
 	return bbqPath;
 }
 
-//BOOL (WINAPI *SysWriteFile)(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped) = WriteFile;
-//BOOL WINAPI HookWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
-//{
-//	//std::string workpath = GetWorkPath();
-//	//workpath += "/";
-//	//workpath += HOOKAPIDIR;
-//	//workpath += "/";
-//	//workpath += HOOKWRITEFUNC;
-//	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFile.txt", "w");
-//	if(fp != NULL)
-//	{
-//		sprintf(logBuff, "write file toWrite: %d, byte written: %d\r\n", nNumberOfBytesToWrite, *lpNumberOfBytesWritten);
-//		fwrite(logBuff, strlen(logBuff), 1, fp);
-//
-//		fwrite(lpBuffer, nNumberOfBytesToWrite, 1, fp);
-//		fclose(fp);
-//		fp = NULL;
-//	}
-//
-//	return SysWriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
-//}
-
 BOOL UnhookSpecifyApi(PRECALL_API_INFO pRecallApiInfo)
 {
 	BOOL bRet = FALSE;	
@@ -233,69 +211,20 @@ BOOL HookSpecifyApi(PRECALL_API_INFO pRecallApiInfo)
 
 void HookAPI()
 {
-	PCONTENT_FILE_MAPPING pContent = NULL;
-	// the file-mapping NAME_FILE_MAPPING has the infomation about hook or unhook apis
-	HANDLE hMap = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, NAME_FILE_MAPPING);
-	do 
+	for (int i = 0; i < sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]); i++)
 	{
-		if(!hMap)
-		{
-			break ;
-		}
+		// hook the api
+		HookSpecifyApi(&g_arHookAPIs[i]);
+	}
+}
 
-		// alloc a new console of attach a exist console
-		AllocConsole();
-		COORD coordDest = {300, 3000}; 
-		SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coordDest);
-
-		pContent = (PCONTENT_FILE_MAPPING)MapViewOfFile(
-			hMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(CONTENT_FILE_MAPPING));
-		if(!pContent)
-		{
-			break ;
-		}
-
-		DWORD64 dw64ApiFlags = pContent->dw64FlagNeedHook;
-		BOOL bHook = bHook = pContent->bHook;
-		for (int i = 0; i < sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]); i++)
-		{
-			// hook the api
-			if (pContent->dw64FlagNeedHook & g_arHookAPIs[i].dw64Flag)
-			{
-				if (bHook ? HookSpecifyApi(&g_arHookAPIs[i]) : UnhookSpecifyApi(&g_arHookAPIs[i]))
-				{
-					//PrintMsg(bHook ? _T("dll Hook %s(%s) successful!\n") : _T("Unhook %s(%s) successful!\n"), 
-					//	g_arHookAPIs[i].lpFunctionName, g_arHookAPIs[i].lpDllName);
-					pContent->dw64FlagHookReturn |= (pContent->dw64FlagNeedHook & g_arHookAPIs[i].dw64Flag);
-				}
-				else
-				{
-					//PrintMsg(bHook ? _T("dll Unhook %s(%s) failed!\n") : _T("Unhook %s(%s) failed!\n"), 
-					//	g_arHookAPIs[i].lpFunctionName, g_arHookAPIs[i].lpDllName);
-				}
-			}
-		}
-
-		if (!bHook)
-		{
-			int i;
-			for (i = 0; i < sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]); i++)
-			{
-				if (g_arHookAPIs[i].pOrgfnMem)
-				{
-					break;
-				}
-			}
-
-			// if no apis hooked, we should free the console, this operation will shutdown the console
-			if (i == sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]))
-			{
-				pContent->bAllUnhooked = TRUE;
-			}
-		}
-	} while (FALSE);
-
-	CLOSE_HANDLE(hMap);
+void UnHookApi()
+{
+	for (int i = 0; i < sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]); i++)
+	{
+		// hook the api
+		UnhookSpecifyApi(&g_arHookAPIs[i]);
+	}
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
@@ -308,11 +237,6 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	case DLL_PROCESS_ATTACH:
 	case DLL_THREAD_ATTACH:
 		{
-			//DisableThreadLibraryCalls(hModule);
-			//DetourTransactionBegin();
-			//DetourUpdateThread(GetCurrentThread());
-			//LONG errNo1 = DetourAttach(&(PVOID&)SysWriteFile, HookWriteFile);
-			//LONG errNo = DetourTransactionCommit();
 			bbqPath[0] = 0;
 			fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllmain.txt", "w");
 			if(fp != NULL)
@@ -321,14 +245,13 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 				fclose(fp);
 				fp = NULL;
 			}
+
+			HookAPI();
 		}
 		break;
 	case DLL_THREAD_DETACH:
 	case DLL_PROCESS_DETACH:
-		//DetourTransactionBegin();	//Detach
-		//DetourUpdateThread(GetCurrentThread());
-		//DetourDetach(&(PVOID&)SysWriteFile, HookWriteFile);
-		//DetourTransactionCommit();
+		UnHookApi();
 		break;
 	}
 	return TRUE;

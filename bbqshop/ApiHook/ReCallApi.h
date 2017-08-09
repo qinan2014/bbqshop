@@ -4,7 +4,8 @@
 #include <tchar.h>
 #include <windows.h>
 
-#define NAME_FILE_MAPPING		_T("Dll_INJECTION")	
+#define NAME_FILE_MAPPINGL		L"Dll_INJECTION"
+#define NAME_FILE_MAPPINGT		_T("Dll_INJECTION")
 										// name of file-mapping object that share with the dll and process
 
 typedef struct  
