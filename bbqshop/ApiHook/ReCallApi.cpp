@@ -1,7 +1,16 @@
-#include "stdafx.h"
-#include <AtlBase.h>
+﻿#include "stdafx.h"
+#include <cstdio>
+#include <windows.h>
+#include <cstring>
+#include <fstream>
+#include <stdio.h>
+#include <iostream>
 #include "ReCallApi.h"
 #include <strsafe.h>
+#include <string>
+
+
+FILE *fp = NULL;
 
 // hook apis infomation
 RECALL_API_INFO g_arHookAPIs[] = 
@@ -42,13 +51,9 @@ int WINAPI MyMessageBoxA(IN HWND hWnd, IN LPCSTR lpText, IN LPCSTR lpCaption, IN
 	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//USES_CONVERSION;
-		//PrintMsgA("%-18s %08d : 0x%08x \"%s\" \"%s\" 0x%08x\n",
-		//	T2CA(g_arHookAPIs[nOrderHookApi].lpFunctionName),
-		//	i++, hWnd, VALID_CHAR(lpText), VALID_CHAR(lpCaption), uType);
 
 		nRet = ((pfnMessageBoxA)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
-			hWnd, "HelloWorld", "Caption", MB_OKCANCEL);
+			hWnd, lpText, lpCaption, MB_OKCANCEL);
 	}
 	return nRet;
 }
@@ -61,13 +66,9 @@ int WINAPI MyMessageBoxW(IN HWND hWnd, IN LPCWSTR lpText, IN LPCWSTR lpCaption, 
 	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//USES_CONVERSION;
-		//PrintMsgW(L"%-18s %08d : 0x%08x \"%s\" \"%s\" 0x%08x\n",
-		//	T2CW(g_arHookAPIs[nOrderHookApi].lpFunctionName),
-		//	i++, hWnd, VALID_WCHAR(lpText), VALID_WCHAR(lpCaption), uType);
 		
 		nRet = ((pfnMessageBoxW)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
-			hWnd, L"Wide HelloWorld", L"Wide Caption", MB_OKCANCEL);
+			hWnd, lpText, lpCaption, MB_OKCANCEL);
 	}
 	return nRet;
 }
@@ -87,8 +88,6 @@ BOOL WINAPI MyDeviceIoControl(	HANDLE hDevice,
 	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//PrintMsg(_T("%-18s %08d : 0x%08x %d\n"), g_arHookAPIs[nOrderHookApi].lpFunctionName,
-		//	i++, hDevice, dwIoControlCode);
 	
 		bRet = ((pfnDeviceIoControl)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hDevice, dwIoControlCode, lpInBuffer, nInBufferSize, lpOutBuffer, nOutBufferSize,
@@ -111,10 +110,14 @@ HANDLE WINAPI MyCreateFileA(LPCSTR lpFileName,
 	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//USES_CONVERSION;
-		//PrintMsgA("%-18s %08d : \"%s\" \n", T2CA(g_arHookAPIs[nOrderHookApi].lpFunctionName), 
-		//	i++, lpFileName);
-		//
+		fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllcreateFileA.txt", "w");
+		if(fp != NULL)
+		{
+			fwrite("MyCreateFileA \r\n", strlen("MyCreateFileA \r\n"), 1, fp);
+			fclose(fp);
+			fp = NULL;
+		}
+
 		hFile = ((pfnCreateFileA)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, 
 			dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
@@ -131,18 +134,26 @@ HANDLE WINAPI MyCreateFileW(LPCWSTR lpFileName,
 							HANDLE hTemplateFile)
 {
 	int nOrderHookApi = ORDER_CREATEFILEW;
-	
+
 	HANDLE hFile = NULL;
-	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//USES_CONVERSION;
-		//PrintMsgW(L"%-18s %08d : \"%s\" \n", T2CW(g_arHookAPIs[nOrderHookApi].lpFunctionName), 
-		//	i++, lpFileName);
-		
 		hFile = ((pfnCreateFileW)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, 
 			dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+
+		//USES_CONVERSION;
+		//::MessageBox(GetActiveWindow(), A2CW(lpFileName), "警告", 0);
+		HWND hwnd = ::FindWindowW(NULL, L"DetourInjectDlg");
+		//std::string willSendData = "MyCreateFileW";
+		//char *cstr = new char[willSendData.length() + 1];
+		//strcpy(cstr, willSendData.c_str());
+		COPYDATASTRUCT copydata;
+		copydata.dwData = 8888;  // 用户定义数据
+		copydata.lpData = "MyCreateFileW";  //数据大小
+		copydata.cbData = strlen("MyCreateFileW");  // 指向数据的指针
+		::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(GetActiveWindow()), reinterpret_cast<LPARAM>(&copydata));
+		//delete [] cstr;
 	}
 	return hFile;
 }
@@ -159,8 +170,14 @@ BOOL WINAPI MyReadFile(	HANDLE hFile,
 	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//PrintMsg(_T("%-18s %08d : 0x%08x %d\n"), g_arHookAPIs[nOrderHookApi].lpFunctionName,
-		//	i++, hFile, nNumberOfBytesToRead);
+		fopen_s(&fp, "d:\\qinan\\companyprogram\\gitproj\\bbqshop\\bbqshop\\debug\\hookdllreadfile.txt", "w");
+		if(fp != NULL)
+		{
+			fwrite("myreadfile \r\n", strlen("myreadfile \r\n"), 1, fp);
+			fclose(fp);
+			fp = NULL;
+		}
+
 		bRet = ((pfnReadFile)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped);
 	}
@@ -179,8 +196,13 @@ BOOL WINAPI MyReadFileEx(HANDLE hFile,
 	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//PrintMsg(_T("%-18s %08d : 0x%08x %d\n"), g_arHookAPIs[nOrderHookApi].lpFunctionName,
-		//	i++, hFile, nNumberOfBytesToRead);
+		fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllreadFileEx.txt", "w");
+		if(fp != NULL)
+		{
+			fwrite("MyReadFileEx \r\n", strlen("MyReadFileEx \r\n"), 1, fp);
+			fclose(fp);
+			fp = NULL;
+		}
 		
 		bRet = ((pfnReadFileEx)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToRead, lpOverlapped, lpCompletionRoutine);
@@ -200,8 +222,13 @@ BOOL WINAPI MyWriteFile(HANDLE hFile,
 	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//PrintMsg(_T("%-18s %08d : 0x%08x %d\n"), g_arHookAPIs[nOrderHookApi].lpFunctionName,
-		//	i++, hFile, nNumberOfBytesToWrite);
+		fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllwritefile.txt", "w");
+		if(fp != NULL)
+		{
+			fwrite("MyWriteFile \r\n", strlen("MyWriteFile \r\n"), 1, fp);
+			fclose(fp);
+			fp = NULL;
+		}
 		
 		bRet = ((pfnWriteFile)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
@@ -221,9 +248,14 @@ BOOL WINAPI MyWriteFileEx(HANDLE hFile,
 	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
-		//PrintMsg(_T("%-18s %08d : 0x%08x %d\n"), g_arHookAPIs[nOrderHookApi].lpFunctionName,
-		//	i++, hFile, nNumberOfBytesToWrite);
-		
+		fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllwritefileEx.txt", "w");
+		if(fp != NULL)
+		{
+			fwrite("MyWriteFileEx \r\n", strlen("MyWriteFileEx \r\n"), 1, fp);
+			fclose(fp);
+			fp = NULL;
+		}
+
 		bRet = ((pfnWriteFileEx)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpOverlapped, lpCompletionRoutine);
 	}
