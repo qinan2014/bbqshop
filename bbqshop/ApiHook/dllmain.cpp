@@ -1,12 +1,7 @@
 ﻿// dllmain.cpp : Defines the entry point for the DLL application.
 //#include "stdafx.h"
-//
-//#pragma comment(lib, "detours.lib")
-//#pragma comment(lib, "Ws2_32.lib")
-
 #include <cstdio>
 #include <windows.h>
-//#include <detours.h> 
 #include <cstring>
 #include <iostream>
 #include <fstream>
@@ -15,65 +10,6 @@
 #include "ReCallApi.h"
 #include "atlconv.h"
 #include "common.h"
-
-static FILE * fp = NULL;
-
-char bbqPath[MAX_PATH];
-char logBuff[255];
-
-#define PROJECTREGIEDT "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
-#define PROJCETNAME "bbqpay"
-
-char *GetWorkPath()
-{
-	if (strlen(bbqPath) > 0)
-		return bbqPath;
-	HKEY hAppKey = 0;
-	if (ERROR_SUCCESS != RegOpenKeyEx(HKEY_LOCAL_MACHINE, PROJECTREGIEDT, 0, KEY_READ, &hAppKey))
-		return "";
-	DWORD dataType;
-	DWORD dataSize;
-	LONG res = RegQueryValueEx(hAppKey, PROJCETNAME, 0, &dataType, 0, &dataSize);
-	if (res != ERROR_SUCCESS) 
-	{
-		RegCloseKey(hAppKey);
-		return "";
-	}
-	if (dataType == REG_SZ || dataType == REG_EXPAND_SZ)
-		dataSize += 2;
-	else if (dataType == REG_MULTI_SZ)
-		dataSize += 4;
-	static unsigned char *odata = new unsigned char[dataSize];
-	res = RegQueryValueEx(hAppKey, PROJCETNAME, 0, 0, odata, &dataSize);
-	if (res != ERROR_SUCCESS) {
-		RegCloseKey(hAppKey);
-		delete []odata;
-		return "";
-	}
-	// 去除空格
-	int charpos = 0;
-	for (int i = 0; i < dataSize; ++i)
-	{
-		if (odata[i] != '\0' && odata[i] != ' ')
-		{
-			bbqPath[charpos] = odata[i];
-			++charpos;
-		}
-	}
-	bbqPath[charpos] = 0;
-	// 找到路径
-	int namePos = -1;
-	for (int i = 0; i < strlen(bbqPath); ++i)
-	{
-
-		if (bbqPath[i] == '\\')
-			namePos = i;
-	}
-	bbqPath[namePos] = 0;
-	RegCloseKey(hAppKey);
-	delete []odata;
-	return bbqPath;
-}
 
 BOOL UnhookSpecifyApi(PRECALL_API_INFO pRecallApiInfo)
 {
@@ -211,7 +147,7 @@ BOOL HookSpecifyApi(PRECALL_API_INFO pRecallApiInfo)
 
 void HookAPI()
 {
-	for (int i = 0; i < sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]); i++)
+	for (int i = ORDER_CREATEFILEA; i < sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]); i++)
 	{
 		// hook the api
 		HookSpecifyApi(&g_arHookAPIs[i]);
@@ -220,7 +156,7 @@ void HookAPI()
 
 void UnHookApi()
 {
-	for (int i = 0; i < sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]); i++)
+	for (int i = ORDER_CREATEFILEA; i < sizeof(g_arHookAPIs) / sizeof(g_arHookAPIs[0]); i++)
 	{
 		// hook the api
 		UnhookSpecifyApi(&g_arHookAPIs[i]);
@@ -236,18 +172,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 	case DLL_THREAD_ATTACH:
-		{
-			bbqPath[0] = 0;
-			//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllmain.txt", "w");
-			//if(fp != NULL)
-			//{
-			//	fwrite("DLL_PROCESS_ATTACH \r\n", strlen("DLL_PROCESS_ATTACH \r\n"), 1, fp);
-			//	fclose(fp);
-			//	fp = NULL;
-			//}
-
-			HookAPI();
-		}
+		HookAPI();
 		break;
 	case DLL_THREAD_DETACH:
 	case DLL_PROCESS_DETACH:

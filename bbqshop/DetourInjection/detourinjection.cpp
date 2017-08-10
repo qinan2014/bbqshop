@@ -9,25 +9,6 @@
 #include <Strsafe.h>
 #include "HookApi.h"
 
-void EnableDebugPrivilege()
-{
-	HANDLE			 hToken;
-	TOKEN_PRIVILEGES tp;
-	LUID			 luid;
-	if(::OpenProcessToken(GetCurrentProcess(),
-		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
-	{
-		::LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid);
-
-		tp.PrivilegeCount		    = 1;
-		tp.Privileges[0].Luid	    = luid;
-		tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-		::AdjustTokenPrivileges(hToken, FALSE, &tp,
-			sizeof(TOKEN_PRIVILEGES), NULL, NULL);
-	}
-}
-
 DetourInjection::DetourInjection(QWidget *parent)
 	: QWidget(parent)
 {
@@ -51,7 +32,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 				flag = true;
 				GetCurrentDirectory(MAX_PATH, DirPath);
 				swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\ApiHook.dll", DirPath);
-				EnableDebugPrivilege();
+				//EnableDebugPrivilege();
 				HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
 					PROCESS_VM_WRITE, FALSE, pe32.th32ProcessID);
 				LPVOID LoadLibraryAddr = (LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"),
@@ -92,15 +73,18 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 		{
 			COPYDATASTRUCT *cds = reinterpret_cast<COPYDATASTRUCT*>(param->lParam);
 			std::string logtxt;
+			std::string writemode = "w";
 			bool recvData = false;
 			switch (cds->dwData)
 			{
 			case HOOKAPI_CREATEFILEA:
 				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCreateFileA.txt";
+				writemode = "a";
 				recvData = true;
 				break;
 			case HOOKAPI_CREATEFILEW:
 				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCreateFileW.txt";
+				writemode = "a";
 				recvData = true;
 				break;
 			case HOOKAPI_READFILE:
@@ -126,7 +110,7 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 			if (recvData)
 			{
 				FILE * fp = NULL;
-				if((fp = fopen(logtxt.c_str(), "a")) != NULL)
+				if((fp = fopen(logtxt.c_str(), writemode.c_str())) != NULL)
 				{
 					fwrite(cds->lpData, cds->cbData, 1, fp);
 					fwrite("\r\n\r\n", strlen("\r\n\r\n"), 1, fp);
@@ -155,143 +139,4 @@ void DetourInjection::readHookFile()
 		fclose(fp);
 		fp = NULL;
 	}
-}
-
-
-
-// allocatte a memory in remote process, and write the dll name in it
-LPVOID WriteProcessMem(HANDLE hProcess, LPCTSTR lpText)
-{
-	LPVOID pRemoteMem = NULL;
-	do 
-	{
-		if(!hProcess)
-		{
-			break;
-		}
-
-		size_t cchLength = 0;
-		HRESULT hr = StringCbLength(lpText, MAX_PATH, &cchLength);
-		cchLength += sizeof(TCHAR);
-		if (FAILED(hr))
-		{
-			break;
-		}
-
-		pRemoteMem = VirtualAllocEx(hProcess, NULL, cchLength, MEM_COMMIT, PAGE_READWRITE);
-		if(!pRemoteMem)
-		{
-			break;
-		}
-		if(!WriteProcessMemory(hProcess, pRemoteMem, (LPVOID)lpText, cchLength, NULL))
-		{
-			VirtualFreeEx(hProcess, pRemoteMem, 0, MEM_RELEASE);
-			pRemoteMem = NULL;
-			break;
-		}
-	} while (FALSE);
-	return pRemoteMem;
-}
-
-LPTHREAD_START_ROUTINE GetLoadLibraryAddr()
-{
-	LPTHREAD_START_ROUTINE pfnStartAddr = NULL;
-
-	HMODULE hModule = LoadLibrary(L"Kernel32.dll");
-	do 
-	{
-		if (!hModule)
-		{
-			break;
-		}
-		pfnStartAddr = (LPTHREAD_START_ROUTINE)GetProcAddress(hModule, "LoadLibraryA");
-		if(!pfnStartAddr)
-		{
-		}
-	} while (FALSE);
-	if (hModule)
-	{
-		FreeLibrary(hModule);
-		hModule = NULL;
-	}
-	return pfnStartAddr;
-}
-
-LPVOID WriteFileMapping(HANDLE hMap, CONTENT_FILE_MAPPING content)
-{
-	LPVOID pContent = NULL;
-	do 
-	{
-		if(!hMap)
-		{
-			break;
-		}
-		pContent = MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(content));
-		if(!pContent)
-		{
-			break;
-		}
-		memcpy(pContent, &content, sizeof(content));
-	} while (FALSE);
-	return pContent;
-}
-
-BOOL CreateRemoteThreadEX(HANDLE hProcess, LPTHREAD_START_ROUTINE pfnStartAddr, LPVOID pRemoteMem)
-{
-	BOOL bRet = FALSE;
-	HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0, pfnStartAddr, pRemoteMem, 0, NULL);
-	do 
-	{
-		if(!hThread)
-		{
-			break;
-		}
-		WaitForSingleObject(hThread, INFINITE);
-		CloseHandle(hThread);
-		hThread = NULL;
-		bRet = TRUE;
-	} while (FALSE);
-	return bRet;
-}
-
-void DetourInjection::injectDll(unsigned long processID, unsigned long long hookApiFlag, wchar_t *dllPath)
-{
-	DWORD	dwProcessID	= processID;
-	HANDLE	hProcess	= NULL;
-	LPVOID	pRemoteMem	= NULL;
-	HANDLE	hMap		= NULL;
-	BOOL	bHook		= FALSE;
-
-	do 
-	{
-		DWORD64 dw64ApiFlags = hookApiFlag;
-
-		EnableDebugPrivilege();
-		hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwProcessID);
-		pRemoteMem = WriteProcessMem(hProcess, dllPath);
-
-		LPTHREAD_START_ROUTINE pfnStartAddr = GetLoadLibraryAddr();
-
-		CONTENT_FILE_MAPPING content;
-		memset(&content, 0, sizeof(content));
-		content.dw64FlagNeedHook = dw64ApiFlags;
-		content.bHook = bHook;
-
-		hMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(content), NAME_FILE_MAPPINGL);
-	
-		LPVOID pContent = WriteFileMapping(hMap, content);
-		CreateRemoteThreadEX(hProcess, pfnStartAddr, pRemoteMem);
-
-	} while (FALSE);
-
-	if (hProcess)
-	{
-		if (pRemoteMem)
-		{
-			VirtualFreeEx(hProcess, pRemoteMem, 0, MEM_RELEASE);
-			pRemoteMem = NULL;
-		}
-		CLOSE_HANDLE(hProcess);
-	}
-	CLOSE_HANDLE(hMap);
 }
