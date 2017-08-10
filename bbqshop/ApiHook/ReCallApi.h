@@ -41,6 +41,7 @@ typedef enum
 	ORDER_READFILEEX,					// HOOK ReadFileEx in Kernel32.dll
 	ORDER_WRITEFILE,					// HOOK WriteFile in Kernel32.dll
 	ORDER_WRITEFILEEX,					// HOOK WriteFileEx in Kernel32.dll
+	ORDER_CLOSEHANDLE,					// HOOK CloseHandle in Kernel32.dll
 	ORDER_MAX
 } ENUM_ORDER_HOOK_API;
 
@@ -154,5 +155,9 @@ BOOL WINAPI MyWriteFileEx(HANDLE hFile,
 						  DWORD nNumberOfBytesToWrite,
 						  LPOVERLAPPED lpOverlapped,
                           LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+
+// HOOK CloseHandle in Kernel32.dll
+typedef BOOL (WINAPI *pfnCloseHandle)(HANDLE hFile);
+BOOL WINAPI MyCloseHandle(HANDLE hFile);
 
 #endif // _RECALL_API_H_

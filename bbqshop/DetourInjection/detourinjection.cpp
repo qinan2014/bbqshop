@@ -74,46 +74,59 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 			COPYDATASTRUCT *cds = reinterpret_cast<COPYDATASTRUCT*>(param->lParam);
 			std::string logtxt;
 			std::string writemode = "w";
+			std::string hooktype;
 			bool recvData = false;
 			switch (cds->dwData)
 			{
 			case HOOKAPI_CREATEFILEA:
 				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCreateFileA.txt";
 				writemode = "a";
+				hooktype = "CreateFileA";
 				recvData = true;
 				break;
 			case HOOKAPI_CREATEFILEW:
 				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCreateFileW.txt";
 				writemode = "a";
+				hooktype = "CreateFileW";
 				recvData = true;
 				break;
-			case HOOKAPI_READFILE:
-				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookReadFile.txt";
-				recvData = true;
-				break;
-			case HOOKAPI_READFILEEX:
-				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookReadFileEX.txt";
-				recvData = true;
-				break;
+			//case HOOKAPI_READFILE:
+			//	logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookReadFile.txt";
+			//	recvData = true;
+			//	break;
+			//case HOOKAPI_READFILEEX:
+			//	logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookReadFileEX.txt";
+			//	recvData = true;
+			//	break;
 			case HOOKAPI_WRITEFILE:
 				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFile.txt";
+				hooktype = "WriteFile";
 				recvData = true;
 				break;
 			case HOOKAPI_WRITEFILEEX:
 				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFileEX.txt";
+				hooktype = "WriteFileEX";
+				recvData = true;
+				break;
+			case HOOKAPI_CLOSEHANDLE:
+				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCloseHandle.txt";
+				hooktype = "CloseHandle";
 				recvData = true;
 				break;
 			default:
 				break;
 			}
 
-			if (recvData)
+			if (recvData && cds->cbData < 100)
 			{
 				FILE * fp = NULL;
-				if((fp = fopen(logtxt.c_str(), writemode.c_str())) != NULL)
+				if((fp = fopen("D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdata.txt", "a")) != NULL)
 				{
 					fwrite(cds->lpData, cds->cbData, 1, fp);
-					fwrite("\r\n\r\n", strlen("\r\n\r\n"), 1, fp);
+					char tmpbuf[100];
+					static int tms = 0;
+					sprintf(tmpbuf, "\r\nhook time %d, operate type: %s \r\n\r\n", tms++, hooktype.c_str());
+					fwrite(tmpbuf, strlen(tmpbuf), 1, fp);
 					fclose(fp);
 				}
 

@@ -10,7 +10,7 @@
 #include <string>
 #include "HookApi.h"
 
-FILE *fp = NULL;
+//#define HANDLELENGTH 10
 
 // hook apis infomation
 RECALL_API_INFO g_arHookAPIs[] = 
@@ -40,7 +40,10 @@ RECALL_API_INFO g_arHookAPIs[] =
 		MyWriteFile,		WriteFile,			NULL,	0,
 
 	FLAG_HOOK_API(ORDER_WRITEFILEEX),		_T("WriteFileEx"),		_T("Kernel32.dll"), 
-		MyWriteFileEx,		WriteFileEx,		NULL,	0
+		MyWriteFileEx,		WriteFileEx,		NULL,	0,
+
+	FLAG_HOOK_API(ORDER_CLOSEHANDLE),		_T("CloseHandle"),		_T("Kernel32.dll"), 
+		MyCloseHandle,		CloseHandle,		NULL,	0
 };
 
 void SendMessageToMain(PVOID lpContent, int pContentSize, int selfType)
@@ -49,7 +52,7 @@ void SendMessageToMain(PVOID lpContent, int pContentSize, int selfType)
 	COPYDATASTRUCT copydata;
 	copydata.dwData = selfType;  // 用户定义数据
 	copydata.lpData = lpContent;  //指向数据的指针
-	copydata.cbData = pContentSize * 2;  // 数据大小
+	copydata.cbData = pContentSize;  // 数据大小
 	::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(GetActiveWindow()), reinterpret_cast<LPARAM>(&copydata));
 }
 
@@ -124,6 +127,14 @@ HANDLE WINAPI MyCreateFileA(LPCSTR lpFileName,
 			lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, 
 			dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
+		//int fileNameLen = strlen(lpFileName);
+		//char *tmpbuf = new char[fileNameLen + HANDLELENGTH];
+		//memcpy(tmpbuf, lpFileName, fileNameLen);
+		//memset(tmpbuf + fileNameLen, 0, HANDLELENGTH);
+		//sprintf_s(tmpbuf + fileNameLen, HANDLELENGTH, "+%d", hFile);
+		//SendMessageToMain((PVOID)tmpbuf, fileNameLen + HANDLELENGTH, HOOKAPI_CREATEFILEA);
+		//delete []tmpbuf;
+
 		SendMessageToMain((PVOID)lpFileName, strlen(lpFileName), HOOKAPI_CREATEFILEA);
 	}
 	return hFile;
@@ -146,7 +157,14 @@ HANDLE WINAPI MyCreateFileW(LPCWSTR lpFileName,
 			lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, 
 			dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
-		SendMessageToMain((PVOID)lpFileName, wcslen(lpFileName), HOOKAPI_CREATEFILEW);
+		//int fileNameLen = wcslen(lpFileName) * 2;
+		//char *tmpbuf = new char[fileNameLen + HANDLELENGTH];
+		//memcpy(tmpbuf, lpFileName, fileNameLen);
+		//memset(tmpbuf + fileNameLen, 0, HANDLELENGTH);
+		//sprintf_s(tmpbuf + fileNameLen, HANDLELENGTH, "+%d", hFile);
+		//SendMessageToMain((PVOID)tmpbuf, fileNameLen + HANDLELENGTH, HOOKAPI_CREATEFILEW);
+		//delete []tmpbuf;
+		SendMessageToMain((PVOID)lpFileName, wcslen(lpFileName) * 2, HOOKAPI_CREATEFILEW);
 	}
 	return hFile;
 }
@@ -204,6 +222,14 @@ BOOL WINAPI MyWriteFile(HANDLE hFile,
 		bRet = ((pfnWriteFile)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
 		SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILE);
+
+		//int fileNameLen = nNumberOfBytesToWrite;
+		//char *tmpbuf = new char[fileNameLen + HANDLELENGTH];
+		//memcpy(tmpbuf, lpBuffer, fileNameLen);
+		//memset(tmpbuf + fileNameLen, 0, HANDLELENGTH);
+		//sprintf_s(tmpbuf + fileNameLen, HANDLELENGTH, "+%d", hFile);
+		//SendMessageToMain((PVOID)tmpbuf, fileNameLen + HANDLELENGTH, HOOKAPI_WRITEFILE);
+		//delete []tmpbuf;
 	}
 	return bRet;
 }
@@ -217,12 +243,33 @@ BOOL WINAPI MyWriteFileEx(HANDLE hFile,
 	int nOrderHookApi = ORDER_WRITEFILEEX;
 	
 	BOOL bRet = FALSE;
-	static int i = 1;
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
 		bRet = ((pfnWriteFileEx)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpOverlapped, lpCompletionRoutine);
 		SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILEEX);
+
+		//int fileNameLen = nNumberOfBytesToWrite;
+		//char *tmpbuf = new char[fileNameLen + HANDLELENGTH];
+		//memcpy(tmpbuf, lpBuffer, fileNameLen);
+		//memset(tmpbuf + fileNameLen, 0, HANDLELENGTH);
+		//sprintf_s(tmpbuf + fileNameLen, HANDLELENGTH, "+%d", hFile);
+		//SendMessageToMain((PVOID)tmpbuf, fileNameLen + HANDLELENGTH, HOOKAPI_WRITEFILEEX);
+		//delete []tmpbuf;
+	}
+	return bRet;
+}
+
+BOOL WINAPI MyCloseHandle(HANDLE hObject)
+{
+	int nOrderHookApi = ORDER_CLOSEHANDLE;
+	BOOL bRet = FALSE;
+	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
+	{
+		bRet = ((pfnCloseHandle)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(hObject);
+		char tmpbuf[100];
+		sprintf_s(tmpbuf, "Handle %d", hObject);
+		SendMessageToMain(tmpbuf, strlen(tmpbuf), HOOKAPI_CLOSEHANDLE);
 	}
 	return bRet;
 }
