@@ -14,7 +14,7 @@ enum HookChars
 
 #define HOOKCHARSNUM 6
 
-#define HOOKAPIDIR "hookapi"
-#define HOOKWRITEFUNC "writefile.info"
+//#define HOOKAPIDIR "hookapi"
+//#define HOOKWRITEFUNC "writefile.info"
 
 #endif

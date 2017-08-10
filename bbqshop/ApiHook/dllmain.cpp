@@ -238,13 +238,13 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	case DLL_THREAD_ATTACH:
 		{
 			bbqPath[0] = 0;
-			fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllmain.txt", "w");
-			if(fp != NULL)
-			{
-				fwrite("DLL_PROCESS_ATTACH \r\n", strlen("DLL_PROCESS_ATTACH \r\n"), 1, fp);
-				fclose(fp);
-				fp = NULL;
-			}
+			//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllmain.txt", "w");
+			//if(fp != NULL)
+			//{
+			//	fwrite("DLL_PROCESS_ATTACH \r\n", strlen("DLL_PROCESS_ATTACH \r\n"), 1, fp);
+			//	fclose(fp);
+			//	fp = NULL;
+			//}
 
 			HookAPI();
 		}

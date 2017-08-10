@@ -7,6 +7,7 @@
 #include "ReCallApi.h"
 #include "common.h"
 #include <Strsafe.h>
+#include "HookApi.h"
 
 void EnableDebugPrivilege()
 {
@@ -90,13 +91,44 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 	case WM_COPYDATA:
 		{
 			COPYDATASTRUCT *cds = reinterpret_cast<COPYDATASTRUCT*>(param->lParam);
-			if (cds->dwData == 8888)
+			std::string logtxt;
+			bool recvData = false;
+			switch (cds->dwData)
 			{
-				QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(cds->lpData), cds->cbData);
+			case HOOKAPI_CREATEFILEA:
+				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCreateFileA.txt";
+				recvData = true;
+				break;
+			case HOOKAPI_CREATEFILEW:
+				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookCreateFileW.txt";
+				recvData = true;
+				break;
+			case HOOKAPI_READFILE:
+				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookReadFile.txt";
+				recvData = true;
+				break;
+			case HOOKAPI_READFILEEX:
+				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookReadFileEX.txt";
+				recvData = true;
+				break;
+			case HOOKAPI_WRITEFILE:
+				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFile.txt";
+				recvData = true;
+				break;
+			case HOOKAPI_WRITEFILEEX:
+				logtxt = "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFileEX.txt";
+				recvData = true;
+				break;
+			default:
+				break;
+			}
+
+			if (recvData)
+			{
 				FILE * fp = NULL;
-				if((fp = fopen("D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\nativeevent.txt", "a")) != NULL)
+				if((fp = fopen(logtxt.c_str(), "a")) != NULL)
 				{
-					fwrite(strMessage.toStdString().c_str(), strMessage.length(), 1, fp);
+					fwrite(cds->lpData, cds->cbData, 1, fp);
 					fwrite("\r\n\r\n", strlen("\r\n\r\n"), 1, fp);
 					fclose(fp);
 				}

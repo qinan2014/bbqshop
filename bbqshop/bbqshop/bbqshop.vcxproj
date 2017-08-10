@@ -215,6 +215,7 @@
   <ItemGroup>
     <ClInclude Include="..\NativeProtocal\AllExeName.h" />
     <ClInclude Include="..\NativeProtocal\AllWindowTitle.h" />
+    <ClInclude Include="..\NativeProtocal\HookApi.h" />
     <ClInclude Include="..\NativeProtocal\HookKeyChar.h" />
     <ClInclude Include="..\NativeProtocal\PayCodeNode.h" />
     <ClInclude Include="..\NativeProtocal\ProcessProtocal.h" />
