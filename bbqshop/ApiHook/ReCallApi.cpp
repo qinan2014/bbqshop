@@ -9,6 +9,7 @@
 #include <strsafe.h>
 #include <string>
 #include "HookApi.h"
+#include "AllWindowTitle.h"
 
 //#define HANDLELENGTH 10
 
@@ -48,6 +49,7 @@ RECALL_API_INFO g_arHookAPIs[] =
 
 void SendMessageToMain(PVOID lpContent, int pContentSize, int selfType)
 {
+	//HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
 	HWND hwnd = ::FindWindowW(NULL, L"DetourInjectDlg");
 	COPYDATASTRUCT copydata;
 	copydata.dwData = selfType;  // 用户定义数据
@@ -135,7 +137,7 @@ HANDLE WINAPI MyCreateFileA(LPCSTR lpFileName,
 		//SendMessageToMain((PVOID)tmpbuf, fileNameLen + HANDLELENGTH, HOOKAPI_CREATEFILEA);
 		//delete []tmpbuf;
 
-		SendMessageToMain((PVOID)lpFileName, strlen(lpFileName), HOOKAPI_CREATEFILEA);
+		//SendMessageToMain((PVOID)lpFileName, strlen(lpFileName), HOOKAPI_CREATEFILEA);
 	}
 	return hFile;
 }
@@ -164,7 +166,7 @@ HANDLE WINAPI MyCreateFileW(LPCWSTR lpFileName,
 		//sprintf_s(tmpbuf + fileNameLen, HANDLELENGTH, "+%d", hFile);
 		//SendMessageToMain((PVOID)tmpbuf, fileNameLen + HANDLELENGTH, HOOKAPI_CREATEFILEW);
 		//delete []tmpbuf;
-		SendMessageToMain((PVOID)lpFileName, wcslen(lpFileName) * 2, HOOKAPI_CREATEFILEW);
+		//SendMessageToMain((PVOID)lpFileName, wcslen(lpFileName) * 2, HOOKAPI_CREATEFILEW);
 	}
 	return hFile;
 }
@@ -183,7 +185,7 @@ BOOL WINAPI MyReadFile(	HANDLE hFile,
 	{
 		bRet = ((pfnReadFile)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped);
-		SendMessageToMain(lpBuffer, nNumberOfBytesToRead, HOOKAPI_READFILE);
+		//SendMessageToMain(lpBuffer, nNumberOfBytesToRead, HOOKAPI_READFILE);
 	}
 	return bRet;
 }
@@ -202,7 +204,7 @@ BOOL WINAPI MyReadFileEx(HANDLE hFile,
 	{
 		bRet = ((pfnReadFileEx)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToRead, lpOverlapped, lpCompletionRoutine);
-		SendMessageToMain(lpBuffer, nNumberOfBytesToRead, HOOKAPI_READFILEEX);
+		//SendMessageToMain(lpBuffer, nNumberOfBytesToRead, HOOKAPI_READFILEEX);
 	}
 	return bRet;
 }
@@ -267,9 +269,9 @@ BOOL WINAPI MyCloseHandle(HANDLE hObject)
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
 		bRet = ((pfnCloseHandle)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(hObject);
-		char tmpbuf[100];
-		sprintf_s(tmpbuf, "Handle %d", hObject);
-		SendMessageToMain(tmpbuf, strlen(tmpbuf), HOOKAPI_CLOSEHANDLE);
+		//char tmpbuf[100];
+		//sprintf_s(tmpbuf, "Handle %d", hObject);
+		//SendMessageToMain(tmpbuf, strlen(tmpbuf), HOOKAPI_CLOSEHANDLE);
 	}
 	return bRet;
 }

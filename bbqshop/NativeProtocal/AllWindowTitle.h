@@ -9,10 +9,6 @@
 #define MAINDLGTITLEW L"MainDlg"
 #define OCRDLGTITLE "OCRDlg"
 #define OCRDLGTITLEW L"OCRDlg"
-#define UPGRADEDLGTITLE "UpgradeDlg"
-#define UPGRADEDLGTITLEW L"UpgradeDlg"
-#define UPGRADEICONTITLE "UpgradeClientIcon"
-#define UPGRADEICONTITLEW L"UpgradeClientIcon"
 
 #define ZHCLIENTVERSION "v1.0.1"
 
