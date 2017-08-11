@@ -1,4 +1,4 @@
-#include <Windows.h>
+﻿#include <Windows.h>
 #include "detourinjection.h"
 #pragma comment(lib ,"user32.lib")
 #include <Tlhelp32.h>
@@ -35,18 +35,30 @@ DetourInjection::DetourInjection(QWidget *parent)
 				//EnableDebugPrivilege();
 				HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
 					PROCESS_VM_WRITE, FALSE, pe32.th32ProcessID);
+				if (hProcess == NULL)
+					break;
 				LPVOID LoadLibraryAddr = (LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"),
 					"LoadLibraryW");
+				if (LoadLibraryAddr == NULL)
+				{
+					CloseHandle(hProcess);
+					break;
+				}
 				LPVOID LLParam = (LPVOID)VirtualAllocEx(hProcess, NULL, (wcslen(FullPath) + 1) * sizeof(wchar_t),
 					MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 				BOOL SUC = WriteProcessMemory(hProcess, LLParam, FullPath, (wcslen(FullPath) + 1)* sizeof(wchar_t), NULL);
 				HANDLE hRemoteThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryAddr,
 					LLParam, NULL, NULL);
-				CloseHandle(hProcess); 
+
+				// 等待远程线程结束    
+				::WaitForSingleObject(hRemoteThread, INFINITE);    
+				// 清理    
+				::VirtualFreeEx(hProcess, LLParam, (wcslen(FullPath) + 1), MEM_DECOMMIT);    
+				::CloseHandle(hRemoteThread);    
+				::CloseHandle(hProcess);
+
 				delete[] DirPath;
 				delete[] FullPath;
-
-				//injectDll(pe32.th32ProcessID, 511, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\ApiHook.dll");
 				break;
 			}
 		}
