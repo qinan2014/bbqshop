@@ -163,63 +163,6 @@ void UnHookApi()
 	}
 }
 
-FILE *fp = NULL;
-char bbqPath[MAX_PATH];
-#define PROJECTREGIEDT "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
-#define PROJCETNAME "bbqpay"
-char *GetWorkPath()
-{
-	if (strlen(bbqPath) > 0)
-		return bbqPath;
-	HKEY hAppKey = 0;
-	if (ERROR_SUCCESS != RegOpenKeyEx(HKEY_LOCAL_MACHINE, PROJECTREGIEDT, 0, KEY_READ, &hAppKey))
-		return "";
-	DWORD dataType;
-	DWORD dataSize;
-	LONG res = RegQueryValueEx(hAppKey, PROJCETNAME, 0, &dataType, 0, &dataSize);
-	if (res != ERROR_SUCCESS) 
-	{
-		RegCloseKey(hAppKey);
-		return "";
-	}
-	if (dataType == REG_SZ || dataType == REG_EXPAND_SZ)
-		dataSize += 2;
-	else if (dataType == REG_MULTI_SZ)
-		dataSize += 4;
-	static unsigned char *odata = new unsigned char[dataSize];
-	res = RegQueryValueEx(hAppKey, PROJCETNAME, 0, 0, odata, &dataSize);
-	if (res != ERROR_SUCCESS) {
-		RegCloseKey(hAppKey);
-		delete []odata;
-		return "";
-	}
-	// 去除空格
-	int charpos = 0;
-	for (int i = 0; i < dataSize; ++i)
-	{
-		if (odata[i] != '\0' && odata[i] != ' ')
-		{
-			bbqPath[charpos] = odata[i];
-			++charpos;
-		}
-	}
-	bbqPath[charpos] = 0;
-	// 找到路径
-	int namePos = -1;
-	for (int i = 0; i < strlen(bbqPath); ++i)
-	{
-
-		if (bbqPath[i] == '\\')
-			namePos = i;
-	}
-	bbqPath[namePos] = 0;
-	RegCloseKey(hAppKey);
-	delete []odata;
-	return bbqPath;
-}
-
-
-
 BOOL APIENTRY DllMain( HMODULE hModule,
 					  DWORD  ul_reason_for_call,
 					  LPVOID lpReserved
@@ -228,50 +171,9 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
-		{
-			//std::string infoPath = GetWorkPath();
-			//infoPath += "\\hookdll.info";
-			//fopen_s(&fp, infoPath.c_str(), "w");
-			//if(fp != NULL)
-			//{
-			//	BOOL isAttach = 1;
-			//	fwrite(&isAttach, sizeof(BOOL), 1, fp);
-			//	fclose(fp);
-			//	fp = NULL;
-			//}
-
-			fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllmain.txt", "a");
-			if(fp != NULL)
-			{
-				fwrite("DLL_PROCESS_ATTACH \r\n", strlen("DLL_PROCESS_ATTACH \r\n"), 1, fp);
-				fclose(fp);
-				fp = NULL;
-			}
-
-		}
 		HookAPI();
 		break;
 	case DLL_PROCESS_DETACH:
-		{
-			//std::string infoPath = GetWorkPath();
-			//infoPath += "\\hookdll.info";
-			//fopen_s(&fp, infoPath.c_str(), "w");
-			//if(fp != NULL)
-			//{
-			//	BOOL isAttach = 0;
-			//	fwrite(&isAttach, sizeof(BOOL), 1, fp);
-			//	fclose(fp);
-			//	fp = NULL;
-			//}
-
-			fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllmain.txt", "a");
-			if(fp != NULL)
-			{
-				fwrite("DLL_PROCESS_DETACH \r\n", strlen("DLL_PROCESS_DETACH \r\n"), 1, fp);
-				fclose(fp);
-				fp = NULL;
-			}
-		}
 		UnHookApi();
 		break;
 	default:
