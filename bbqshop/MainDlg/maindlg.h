@@ -92,7 +92,6 @@ private slots:
 	void clickModifyAlipayKey();
 	void clickFinishAlipayKey();
 	void startOCRProcess();
-	void startCommMonitor();
 
 signals:
 	void showBindTipSig(bool );

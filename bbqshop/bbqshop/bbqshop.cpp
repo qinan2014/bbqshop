@@ -304,12 +304,26 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 	case WM_COPYDATA:
 		{
 			COPYDATASTRUCT *cds = reinterpret_cast<COPYDATASTRUCT*>(msg->lParam);
-			if (cds->dwData == ZHIHUI_CODE_MSG)
+			switch (cds->dwData)
 			{
-				QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(cds->lpData), cds->cbData);
-				parseProcessJsonData(strMessage);
-				*result = 1;
-				return true;
+			case ZHIHUI_CODE_MSG:
+				{
+					QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(cds->lpData), cds->cbData);
+					parseProcessJsonData(strMessage);
+					*result = 1;
+					return true;
+				}
+				break;
+			case HOOKAPI_WRITEFILE:
+			case HOOKAPI_WRITEFILEEX:
+				{
+					hookApiWriteFileData(cds->lpData, cds->cbData);
+					*result = 1;
+					return true;
+				}
+				break;
+			default:
+				break;
 			}
 		}
 		break;
@@ -567,6 +581,8 @@ inline void bbqshop::processJsonRereadSetting()
 	else
 		ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
 
+	autoInjectDll();
+
 	if (mZHSetting.shopCashdestInfo.isUsePayGun == 1)
 	{
 		startHook();
@@ -577,6 +593,12 @@ inline void bbqshop::processJsonRereadSetting()
 	}
 
 	ShowTipString(QString::fromLocal8Bit("保存完成！"));
+}
+
+void bbqshop::autoInjectDll()
+{
+	if (strlen(mZHSetting.carishInfo.exeName) == 0)
+		return;
 }
 
 inline void bbqshop::processJsonShowPrice(const Json::Value &inJson)
@@ -1342,4 +1364,27 @@ inline void bbqshop::setHookPayKeyValueFromZHSetting()
 #ifdef USEKEYHOOK
 	mKeyHook.SetPayKey(mZHSetting.hotKeys.hWXKey.qtkey, mZHSetting.hotKeys.hAlipayKey.qtkey);
 #endif
+}
+
+void bbqshop::hookApiWriteFileData(void *inData, int dataLen)
+{
+	if (dataLen > 100)
+		return;
+	time_t t = time(NULL);
+	struct tm *local = localtime(&t);
+	char logbuftxt[200];
+	sprintf(logbuftxt, "%s/logdata%s-%d-%d-%d-%d.txt", ZHFuncLib::GetWorkPath().c_str(), "hapi", local->tm_year, local->tm_mon + 1, local->tm_mday, local->tm_hour);
+
+	FILE * fp = NULL;
+	if((fp = fopen(logbuftxt, "a")) != NULL)
+	{
+		char buf[30];
+		sprintf(buf, "time %d:%d:%d------- \r\n", local->tm_hour, local->tm_min, local->tm_sec);
+		fwrite(buf, strlen(buf), 1, fp);
+		fwrite(inData, dataLen, 1, fp);
+		fwrite("\r\n\r\n", strlen("\r\n\r\n"), 1, fp);
+		fclose(fp);
+	}
+
+	QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(inData), dataLen);
 }

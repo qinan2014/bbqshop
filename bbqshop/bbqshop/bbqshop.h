@@ -87,7 +87,7 @@ private:
 	void hookSettingPayKey(PKBDLLHOOKSTRUCT p);
 	inline void setHookPayKeyValueFromZHSetting();
 	inline void printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee);
-
+	void hookApiWriteFileData(void *inData, int dataLen);
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);
@@ -129,6 +129,7 @@ private slots:
 	void saveCurrentTradeNo(QString tradeNo);
 	void checkPayResultSlot();
 	void tradeNoResult(const Json::Value & inData);
+	void autoInjectDll();
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);

@@ -8,7 +8,7 @@
 #include "ReCallApi.h"
 #include <strsafe.h>
 #include <string>
-#include "HookApi.h"
+#include "ZhuiHuiMsg.h"
 #include "AllWindowTitle.h"
 
 //#define HANDLELENGTH 10
@@ -49,8 +49,8 @@ RECALL_API_INFO g_arHookAPIs[] =
 
 void SendMessageToMain(PVOID lpContent, int pContentSize, int selfType)
 {
-	//HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
-	HWND hwnd = ::FindWindowW(NULL, L"DetourInjectDlg");
+	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+	//HWND hwnd = ::FindWindowW(NULL, L"DetourInjectDlg");
 	COPYDATASTRUCT copydata;
 	copydata.dwData = selfType;  // 用户定义数据
 	copydata.lpData = lpContent;  //指向数据的指针

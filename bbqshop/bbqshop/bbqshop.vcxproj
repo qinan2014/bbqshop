@@ -74,6 +74,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <IgnoreSpecificDefaultLibraries>ApiHook.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -148,9 +149,6 @@
     <ProjectReference Include="..\BbqUrlServer\BbqUrlServer.vcxproj">
       <Project>{29a2176b-76cc-4056-8e8b-b7ae63409c8b}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\DetourInjection\DetourInjection.vcxproj">
-      <Project>{b216e138-0276-4cf8-9df4-b020732fe0ab}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\JSON\JSON.vcxproj">
       <Project>{51f4ef1c-46ed-4a96-82a3-f5b3d1d5ad4c}</Project>
     </ProjectReference>
@@ -215,7 +213,6 @@
   <ItemGroup>
     <ClInclude Include="..\NativeProtocal\AllExeName.h" />
     <ClInclude Include="..\NativeProtocal\AllWindowTitle.h" />
-    <ClInclude Include="..\NativeProtocal\HookApi.h" />
     <ClInclude Include="..\NativeProtocal\HookKeyChar.h" />
     <ClInclude Include="..\NativeProtocal\PayCodeNode.h" />
     <ClInclude Include="..\NativeProtocal\ProcessProtocal.h" />

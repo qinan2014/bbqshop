@@ -865,27 +865,8 @@ void MainDlg::saveSetting()
 		QString pureExeName = exeName.left(exeIndex + 4);
 		memcpy(carishInfo.exeName, pureExeName.toStdString().c_str(), pureExeName.length());
 		carishInfo.exeName[pureExeName.length()] = 0;
-
-		QTimer::singleShot(400,this, SLOT(startOCRProcess()) );  // 隐藏自己
-		QTimer::singleShot(1000,this, SLOT(startCommMonitor()) );  // 隐藏自己
 	}
 	SaveAllSetting();
-}
-
-void MainDlg::startCommMonitor()
-{
-	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
-	QString exeName = ui.cboToolexe->currentText();
-	int exeIndex = exeName.indexOf(".exe");
-	//点击保存后启动监视
-	QString idStr = exeName.mid(exeIndex + 5);
-	idStr = idStr.trimmed();
-	Json::Value mValData;
-	mValData[PRO_HEAD] = TO_OCR_PROCESSID;
-	mValData[PRO_OCR_FROMDLG] = PRO_OCR_FROM_MAINDLG;
-	mValData[PRO_OCR_PROCESSID] = idStr.toInt();
-	HWND hwnd = ::FindWindowW(NULL, OCRDLGTITLEW);
-	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 }
 
 void MainDlg::memeryPrintName()

@@ -7,7 +7,7 @@
 #include "ReCallApi.h"
 #include "common.h"
 #include <Strsafe.h>
-#include "HookApi.h"
+#include "ZhuiHuiMsg.h"
 
 DetourInjection::DetourInjection(QWidget *parent)
 	: QWidget(parent)
@@ -39,7 +39,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 					"LoadLibraryW");
 				LPVOID LLParam = (LPVOID)VirtualAllocEx(hProcess, NULL, (wcslen(FullPath) + 1) * sizeof(wchar_t),
 					MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-				WriteProcessMemory(hProcess, LLParam, FullPath, (wcslen(FullPath) + 1)* sizeof(wchar_t), NULL);
+				BOOL SUC = WriteProcessMemory(hProcess, LLParam, FullPath, (wcslen(FullPath) + 1)* sizeof(wchar_t), NULL);
 				HANDLE hRemoteThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryAddr,
 					LLParam, NULL, NULL);
 				CloseHandle(hProcess); 
