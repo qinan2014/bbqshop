@@ -30,6 +30,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	getOCRPriceTimes = 0;
 	isShowingHandoverDlg = false;
 	isCtrlKeyDown = false;
+	qaPrice = "0.00";
 	// 定时器
 	QTimer::singleShot(100,this, SLOT(hide()) );  // 隐藏自己
 	// 创建托盘
@@ -795,9 +796,17 @@ void bbqshop::showPayDialog()
 		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(saveCurrentTradeNo(QString )));
 		connect(this, SIGNAL(netError(QString, int, int)), dlg, SLOT(onNetError(QString, int, int)));
 		hookNum(true);
+		//dlg->SetMoney(qaPrice);
 		startGetOCRPrice();
+		if (mZHSetting.shopCashdestInfo.isGetPriceActualTime != 1)
+		{
+			// 显示客显数据
+			dlg->SetMoney(qaPrice);
+		}
 		dlg->show();
 	}
+	//ZHFuncLib::NativeLog("", "bbqshop::showPayDialog", "a");
+	//dlg->SetMoney(qaPrice);
 }
 
 void bbqshop::onClosePayDlg(bool haspayed)
@@ -1441,4 +1450,9 @@ void bbqshop::hookApiWriteFileData(void *inData, int dataLen)
 	}
 
 	QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(inData), dataLen);
+	int qapos = strMessage.indexOf("QA");
+	if (qapos != -1) // 表示获取到了价格
+	{
+		qaPrice = strMessage.mid(qapos + 2).trimmed();
+	}
 }

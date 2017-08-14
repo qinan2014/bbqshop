@@ -60,6 +60,7 @@ private:
 	QString curTradeNo;
 	bool isShowingHandoverDlg;
 	bool isCtrlKeyDown;
+	QString qaPrice;
 
 	void createTray();
 	

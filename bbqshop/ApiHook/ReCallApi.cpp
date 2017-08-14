@@ -293,9 +293,9 @@ BOOL WINAPI MyCloseHandle(HANDLE hObject)
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
 		bRet = ((pfnCloseHandle)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(hObject);
-		char tmpbuf[100];
-		sprintf_s(tmpbuf, "Handle %d", hObject);
-		SendMessageToMain(tmpbuf, strlen(tmpbuf), HOOKAPI_CLOSEHANDLE);
+		//char tmpbuf[100];
+		//sprintf_s(tmpbuf, "Handle %d", hObject);
+		//SendMessageToMain(tmpbuf, strlen(tmpbuf), HOOKAPI_CLOSEHANDLE);
 
 		//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdlldata.txt", "a");
 		//if(fp != NULL)
