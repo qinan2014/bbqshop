@@ -47,15 +47,39 @@ RECALL_API_INFO g_arHookAPIs[] =
 		MyCloseHandle,		CloseHandle,		NULL,	0
 };
 
+//FILE *fp = NULL;
 void SendMessageToMain(PVOID lpContent, int pContentSize, int selfType)
 {
 	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
-	//HWND hwnd = ::FindWindowW(NULL, L"DetourInjectDlg");
-	COPYDATASTRUCT copydata;
-	copydata.dwData = selfType;  // 用户定义数据
-	copydata.lpData = lpContent;  //指向数据的指针
-	copydata.cbData = pContentSize;  // 数据大小
-	::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(GetActiveWindow()), reinterpret_cast<LPARAM>(&copydata));
+	//HWND hwnd = ::FindWindowW(NULL, L"DetourInjectDialog");
+	if (::IsWindow(hwnd))
+	{
+		COPYDATASTRUCT copydata;
+		copydata.dwData = selfType;  // 用户定义数据
+		copydata.lpData = lpContent;  //指向数据的指针
+		copydata.cbData = pContentSize;  // 数据大小
+		LRESULT res = ::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(GetActiveWindow()), reinterpret_cast<LPARAM>(&copydata));
+
+		//char tmpbuf[140];
+		//sprintf_s(tmpbuf, 140, "DetourInjectDialog is window sendmsg result: %d, last error %d.\r\n", res, GetLastError());
+		//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\hookdllsendmsg.txt", "a");
+		//if(fp != NULL)
+		//{
+		//	fwrite(tmpbuf, strlen(tmpbuf), 1, fp);
+		//	fclose(fp);
+		//	fp = NULL;
+		//}
+	}
+	else
+	{
+		//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllsendmsg.txt", "a");
+		//if(fp != NULL)
+		//{
+		//	fwrite("DetourInjectDialog isnot window \r\n", strlen("DetourInjectDialog isnot window \r\n"), 1, fp);
+		//	fclose(fp);
+		//	fp = NULL;
+		//}
+	}
 }
 
 int WINAPI MyMessageBoxA(IN HWND hWnd, IN LPCSTR lpText, IN LPCSTR lpCaption, IN UINT uType)
@@ -269,9 +293,18 @@ BOOL WINAPI MyCloseHandle(HANDLE hObject)
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
 		bRet = ((pfnCloseHandle)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(hObject);
-		//char tmpbuf[100];
-		//sprintf_s(tmpbuf, "Handle %d", hObject);
-		//SendMessageToMain(tmpbuf, strlen(tmpbuf), HOOKAPI_CLOSEHANDLE);
+		char tmpbuf[100];
+		sprintf_s(tmpbuf, "Handle %d", hObject);
+		SendMessageToMain(tmpbuf, strlen(tmpbuf), HOOKAPI_CLOSEHANDLE);
+
+		//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdlldata.txt", "a");
+		//if(fp != NULL)
+		//{
+		//	fwrite("MyCloseHandle \r\n", strlen("MyCloseHandle \r\n"), 1, fp);
+		//	fclose(fp);
+		//	fp = NULL;
+		//}
+
 	}
 	return bRet;
 }

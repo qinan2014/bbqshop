@@ -316,6 +316,7 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 				break;
 			case HOOKAPI_WRITEFILE:
 			case HOOKAPI_WRITEFILEEX:
+			case HOOKAPI_CLOSEHANDLE:
 				{
 					hookApiWriteFileData(cds->lpData, cds->cbData);
 					*result = 1;
@@ -336,7 +337,7 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 	default:
 		break;
 	}
-	return false;
+	return QWidget::nativeEvent(eventType, message, result);
 }
 
 inline void bbqshop::parseProcessJsonData(QString inJson)
@@ -534,6 +535,7 @@ inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 	settingRW.ReadZHSetting();
 	setHookPayKeyValueFromZHSetting();
 
+	autoInjectDll();
 	emit returnFocusToCashier();
 }
 
@@ -599,6 +601,58 @@ void bbqshop::autoInjectDll()
 {
 	if (strlen(mZHSetting.carishInfo.exeName) == 0)
 		return;
+	std::string dllpath = ZHFuncLib::GetWorkPath();
+	dllpath += "/ApiHook.dll";
+	ZHFuncLib::InjectDllByProcessName(ZHFuncLib::StringToWstring(dllpath), ZHFuncLib::StringToWstring(mZHSetting.carishInfo.exeName));
+
+	//PROCESSENTRY32 pe32;
+	//pe32.dwSize = sizeof(PROCESSENTRY32);
+	//HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
+	//BOOL bProcess = Process32First(hsnap, &pe32);
+	//bool flag = false;
+	//if (bProcess == TRUE)
+	//{
+	//	while (Process32Next(hsnap, &pe32) == TRUE)
+	//	{
+	//		if (wcscmp(pe32.szExeFile, L"PosTouch.exe") == 0)
+	//			//if (wcscmp(pe32.szExeFile, L"PCommTest.exe") == 0)
+	//		{
+	//			wchar_t* DirPath = new wchar_t[MAX_PATH];
+	//			wchar_t* FullPath = new wchar_t[MAX_PATH];
+	//			flag = true;
+	//			GetCurrentDirectory(MAX_PATH, DirPath);
+	//			swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\ApiHook.dll", DirPath);
+	//			//EnableDebugPrivilege();
+	//			HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
+	//				PROCESS_VM_WRITE, FALSE, pe32.th32ProcessID);
+	//			if (hProcess == NULL)
+	//				break;
+	//			LPVOID LoadLibraryAddr = (LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"),
+	//				"LoadLibraryW");
+	//			if (LoadLibraryAddr == NULL)
+	//			{
+	//				CloseHandle(hProcess);
+	//				break;
+	//			}
+	//			LPVOID LLParam = (LPVOID)VirtualAllocEx(hProcess, NULL, (wcslen(FullPath) + 1) * sizeof(wchar_t),
+	//				MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	//			BOOL SUC = WriteProcessMemory(hProcess, LLParam, FullPath, (wcslen(FullPath) + 1)* sizeof(wchar_t), NULL);
+	//			HANDLE hRemoteThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryAddr,
+	//				LLParam, NULL, NULL);
+
+	//			// 等待远程线程结束    
+	//			::WaitForSingleObject(hRemoteThread, INFINITE);    
+	//			// 清理    
+	//			::VirtualFreeEx(hProcess, LLParam, (wcslen(FullPath) + 1), MEM_DECOMMIT);    
+	//			::CloseHandle(hRemoteThread);    
+	//			::CloseHandle(hProcess);
+
+	//			delete[] DirPath;
+	//			delete[] FullPath;
+	//			break;
+	//		}
+	//	}
+	//}
 }
 
 inline void bbqshop::processJsonShowPrice(const Json::Value &inJson)

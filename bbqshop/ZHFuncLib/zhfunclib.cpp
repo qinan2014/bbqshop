@@ -113,7 +113,7 @@ void ZHFuncLib::GetAllProcesses(std::wstring inTarget, int &outTargetIndex, std:
 	CloseHandle(hProcessSnap);
 }
 
-void ZHFuncLib::InjectDllByProcessID(const std::wstring dllPath, unsigned long inProcessID)
+bool ZHFuncLib::InjectDllByProcessID(const std::wstring dllPath, unsigned long inProcessID)
 {
 	wchar_t* DirPath = new wchar_t[MAX_PATH];
 	wchar_t* FullPath = new wchar_t[MAX_PATH];
@@ -122,9 +122,22 @@ void ZHFuncLib::InjectDllByProcessID(const std::wstring dllPath, unsigned long i
 
 	HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
 		PROCESS_VM_WRITE, FALSE, inProcessID);
+	if (hProcess == NULL)
+	{
+		delete[] DirPath;
+		delete[] FullPath;
+		return false;
+	}
 
 	LPVOID LoadLibraryAddr = (LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"),
 		"LoadLibraryW");
+	if (LoadLibraryAddr == NULL)
+	{
+		CloseHandle(hProcess);
+		delete[] DirPath;
+		delete[] FullPath;
+		return false;
+	}
 
 	LPVOID LLParam = (LPVOID)VirtualAllocEx(hProcess, NULL, (wcslen(FullPath) + 1) * sizeof(wchar_t),
 		MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
@@ -132,9 +145,17 @@ void ZHFuncLib::InjectDllByProcessID(const std::wstring dllPath, unsigned long i
 
 	HANDLE hRemoteThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryAddr,
 		LLParam, NULL, NULL);
-	CloseHandle(hProcess); 
+
+	// 等待远程线程结束    
+	::WaitForSingleObject(hRemoteThread, INFINITE);    
+	// 清理    
+	::VirtualFreeEx(hProcess, LLParam, (wcslen(FullPath) + 1), MEM_DECOMMIT);    
+	::CloseHandle(hRemoteThread);    
+	::CloseHandle(hProcess);
+
 	delete[] DirPath;
 	delete[] FullPath;
+	return true;
 }
 
 bool ZHFuncLib::InjectDllByProcessName(const std::wstring dllPath, const std::wstring inProcessName)

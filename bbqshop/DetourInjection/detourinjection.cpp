@@ -13,7 +13,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
-	setWindowTitle("DetourInjectDlg");
+	setWindowTitle("DetourInjectDialog");
 
 	PROCESSENTRY32 pe32;
 	pe32.dwSize = sizeof(PROCESSENTRY32);
@@ -31,7 +31,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 				wchar_t* FullPath = new wchar_t[MAX_PATH];
 				flag = true;
 				GetCurrentDirectory(MAX_PATH, DirPath);
-				swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\ApiHook.dll", DirPath);
+				swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\ApiHook.dll", DirPath);
 				//EnableDebugPrivilege();
 				HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
 					PROCESS_VM_WRITE, FALSE, pe32.th32ProcessID);
@@ -132,7 +132,7 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 			if (recvData && cds->cbData < 100)
 			{
 				FILE * fp = NULL;
-				if((fp = fopen("D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdata.txt", "a")) != NULL)
+				if((fp = fopen("D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\hookdata.txt", "a")) != NULL)
 				{
 					fwrite(cds->lpData, cds->cbData, 1, fp);
 					char tmpbuf[100];
