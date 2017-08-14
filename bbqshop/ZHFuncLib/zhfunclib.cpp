@@ -83,29 +83,18 @@ void ZHFuncLib::GetAllProcesses(std::wstring inTarget, int &outTargetIndex, std:
 	if(hProcessSnap == INVALID_HANDLE_VALUE)
 		return;
 	BOOL bProcess = Process32First(hProcessSnap, &pe32);
-	int targetNameLen = inTarget.length();
 	int indextarget = 0;
 	while(bProcess)
 	{
 		outAllProcess.push_back(pe32.szExeFile);
 		outIds.push_back(pe32.th32ProcessID);
 
-		int searchLen = wcslen(pe32.szExeFile);
-		if (targetNameLen == searchLen)
+		//NativeLog("", WstringToString(pe32.szExeFile).c_str(), "a");
+		//NativeLog("", WstringToString(inTarget).c_str(), "a");
+		if (wcscmp(pe32.szExeFile, inTarget.c_str()) == 0)
 		{
-			bool isEqualName = true;
-			for (int i = 0; i < targetNameLen; ++i)
-			{
-				if (inTarget[i] != pe32.szExeFile[i])
-				{
-					isEqualName = false;
-					break;
-				}
-			}
-			if (isEqualName)
-				outTargetIndex = indextarget;
+			outTargetIndex = indextarget;
 		}
-
 		++indextarget;
 		// 继续查找
 		bProcess = Process32Next(hProcessSnap,&pe32);

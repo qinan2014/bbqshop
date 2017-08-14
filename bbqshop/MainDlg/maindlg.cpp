@@ -197,8 +197,8 @@ inline void MainDlg::initFrame()
 	ui.cboCashTool->setCurrentIndex(cursel);
 	connect(ui.cboCashTool, SIGNAL(currentIndexChanged(int)), this, SLOT(cashToolChanged(int)));
 			// 所有进程名称及id
-	std::wstring targetName;
-	int targetIndex;
+	std::wstring targetName = ZHFuncLib::StringToWstring(carishInfo.exeName);
+	int targetIndex = -1;
 	std::vector<std::wstring > allProcess;
 	std::vector<int > allIds;
 	ZHFuncLib::GetAllProcesses(targetName, targetIndex, allProcess, allIds);
@@ -209,6 +209,8 @@ inline void MainDlg::initFrame()
 		ui.cboToolexe->addItem(QString::fromStdWString(allProcess[i]) + "  " + QString::number(allIds[i]));
 	}
 	cashToolChanged(cursel != 0);
+	if (targetIndex != -1)
+		ui.cboToolexe->setCurrentIndex(targetIndex + 1);
 	// 是否使用支付扫码枪
 	ui.chbStartGun->setChecked(shopInfo.isUsePayGun == 1);
 	// 获取pos打印机
