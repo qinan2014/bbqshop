@@ -20,6 +20,7 @@
 #include <time.h>
 #include <QSettings>
 
+LPVOID pComFileMappingContent;
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
 {
@@ -31,6 +32,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	isShowingHandoverDlg = false;
 	isCtrlKeyDown = false;
 	qaPrice = "0.00";
+	pComFileMappingContent = NULL;
 	// 定时器
 	QTimer::singleShot(100,this, SLOT(hide()) );  // 隐藏自己
 	// 创建托盘
@@ -602,6 +604,7 @@ void bbqshop::autoInjectDll()
 {
 	if (strlen(mZHSetting.carishInfo.exeName) == 0)
 		return;
+	createComFileMapping();
 	std::string dllpath = ZHFuncLib::GetWorkPath();
 	dllpath += "/ApiHook.dll";
 	ZHFuncLib::InjectDllByProcessName(ZHFuncLib::StringToWstring(dllpath), ZHFuncLib::StringToWstring(mZHSetting.carishInfo.exeName));
@@ -654,6 +657,27 @@ void bbqshop::autoInjectDll()
 	//		}
 	//	}
 	//}
+}
+
+void bbqshop::createComFileMapping()
+{
+	if (pComFileMappingContent != NULL)
+		return;
+	CONTENT_FILE_MAPPING content;
+	memset(&content, 0, sizeof(CONTENT_FILE_MAPPING));
+	HANDLE hMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(content), NAME_FILE_MAPPINGL);
+	if(!hMap)
+	{
+		//PrintError(_T("CreateFileMapping"), GetLastError(), __MYFILE__, __LINE__);
+	}
+	pComFileMappingContent = MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(content));
+	if(!pComFileMappingContent)
+	{
+		//PrintError(_T("MapViewOfFile"), GetLastError(), __MYFILE__, __LINE__);
+		//break;
+	}
+	memcpy(content.priceCMD, "QA", strlen("QA"));
+	memcpy(pComFileMappingContent, &content, sizeof(content));
 }
 
 inline void bbqshop::processJsonShowPrice(const Json::Value &inJson)
@@ -801,7 +825,10 @@ void bbqshop::showPayDialog()
 		if (mZHSetting.shopCashdestInfo.isGetPriceActualTime != 1)
 		{
 			// 显示客显数据
-			dlg->SetMoney(qaPrice);
+			if (pComFileMappingContent != NULL)
+				dlg->SetMoney(getComPriceFromMapping());
+			else
+				dlg->SetMoney(qaPrice);	
 		}
 		dlg->show();
 	}
@@ -1449,10 +1476,22 @@ void bbqshop::hookApiWriteFileData(void *inData, int dataLen)
 		fclose(fp);
 	}
 
+	qaPrice = comDataToPrice(inData, dataLen);
+}
+
+QString bbqshop::comDataToPrice(void *inData, int dataLen)
+{
 	QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(inData), dataLen);
 	int qapos = strMessage.indexOf("QA");
 	if (qapos != -1) // 表示获取到了价格
 	{
-		qaPrice = strMessage.mid(qapos + 2).trimmed();
+		return strMessage.mid(qapos + 2).trimmed();
 	}
+	return "";
+}
+
+inline QString bbqshop::getComPriceFromMapping()
+{
+	CONTENT_FILE_MAPPING *maping = (CONTENT_FILE_MAPPING *)pComFileMappingContent;
+	return comDataToPrice(maping->comGetPriceStr, maping->comGetPriceLen);
 }

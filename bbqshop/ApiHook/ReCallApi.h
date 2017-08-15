@@ -4,19 +4,6 @@
 #include <tchar.h>
 #include <windows.h>
 
-#define NAME_FILE_MAPPINGL		L"Dll_INJECTION"
-#define NAME_FILE_MAPPINGT		_T("Dll_INJECTION")
-										// name of file-mapping object that share with the dll and process
-
-typedef struct  
-{
-	DWORD64		dw64FlagNeedHook;		// flag of the recall apis these need to be hooked, can use
-										// combinatio of the flags
-	DWORD64		dw64FlagHookReturn;		// specify the results of all recall apis
-	BOOL		bHook;					// true to hook, or to unhook
-	BOOL		bAllUnhooked;			// is all unhooked, if true can freelibrary the dll
-} CONTENT_FILE_MAPPING, *PCONTENT_FILE_MAPPING;
-
 typedef struct 
 {
 	DWORD64				dw64Flag;		// flag of hook api, must occupy one bit

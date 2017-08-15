@@ -10,6 +10,9 @@
 #include "ReCallApi.h"
 #include "atlconv.h"
 #include "common.h"
+#include "ZhuiHuiMsg.h"
+PCONTENT_FILE_MAPPING pFileMapContent = NULL;
+HANDLE hFileMapping = NULL;
 
 BOOL UnhookSpecifyApi(PRECALL_API_INFO pRecallApiInfo)
 {
@@ -152,6 +155,15 @@ void HookAPI()
 		// hook the api
 		HookSpecifyApi(&g_arHookAPIs[i]);
 	}
+
+	// 创建共享内存
+	hFileMapping = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, NAME_FILE_MAPPINGT);
+	if(!hFileMapping)
+	{
+		//PrintError(_T("CreateFileMapping"), GetLastError(), __MYFILE__, __LINE__);
+		//break ;
+	}
+	pFileMapContent = (PCONTENT_FILE_MAPPING)MapViewOfFile(hFileMapping, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(CONTENT_FILE_MAPPING));
 }
 
 void UnHookApi()
@@ -160,6 +172,11 @@ void UnHookApi()
 	{
 		// hook the api
 		UnhookSpecifyApi(&g_arHookAPIs[i]);
+	}
+	if (pFileMapContent != NULL)
+	{
+		UnmapViewOfFile(pFileMapContent); //解除映射
+		CloseHandle(hFileMapping); //一个指定的文件映射对象
 	}
 }
 

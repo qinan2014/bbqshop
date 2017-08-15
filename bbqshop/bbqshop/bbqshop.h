@@ -89,6 +89,8 @@ private:
 	inline void setHookPayKeyValueFromZHSetting();
 	inline void printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee);
 	void hookApiWriteFileData(void *inData, int dataLen);
+	QString comDataToPrice(void *inData, int dataLen);
+	inline QString getComPriceFromMapping();
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);
@@ -106,6 +108,7 @@ private:
 	void PrintHandoverStatementRequest();
 	void PrintHandoverStatement(const Json::Value & inVal);
 	void setAutoRun(bool isAuto = true); // boot auto
+	void createComFileMapping();
 
 signals:
 	void showTipStringSig(const QString &, const QString &);

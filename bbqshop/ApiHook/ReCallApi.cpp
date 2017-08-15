@@ -11,6 +11,7 @@
 #include "ZhuiHuiMsg.h"
 #include "AllWindowTitle.h"
 
+extern PCONTENT_FILE_MAPPING pFileMapContent;
 //#define HANDLELENGTH 10
 
 // hook apis infomation
@@ -47,40 +48,64 @@ RECALL_API_INFO g_arHookAPIs[] =
 		MyCloseHandle,		CloseHandle,		NULL,	0
 };
 
-//FILE *fp = NULL;
-void SendMessageToMain(PVOID lpContent, int pContentSize, int selfType)
+bool isPriceTag(PVOID lpContent, int pContentSize)
 {
-	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
-	//HWND hwnd = ::FindWindowW(NULL, L"DetourInjectDialog");
-	if (::IsWindow(hwnd))
+	if (pContentSize > COMGETPRICECHARLEN)
+		return false;
+	char *pChar = (char *)lpContent;
+	int priceTagSZ = strlen(pFileMapContent->priceCMD);
+	// 找到价格标志的初始位置
+	int priceTagBeginPos = -1;
+	for (int i = 0; i < pContentSize; ++i)
 	{
-		COPYDATASTRUCT copydata;
-		copydata.dwData = selfType;  // 用户定义数据
-		copydata.lpData = lpContent;  //指向数据的指针
-		copydata.cbData = pContentSize;  // 数据大小
-		LRESULT res = ::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(GetActiveWindow()), reinterpret_cast<LPARAM>(&copydata));
-
-		//char tmpbuf[140];
-		//sprintf_s(tmpbuf, 140, "DetourInjectDialog is window sendmsg result: %d, last error %d.\r\n", res, GetLastError());
-		//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\hookdllsendmsg.txt", "a");
-		//if(fp != NULL)
-		//{
-		//	fwrite(tmpbuf, strlen(tmpbuf), 1, fp);
-		//	fclose(fp);
-		//	fp = NULL;
-		//}
+		if (pChar[i] == pFileMapContent->priceCMD[0])
+		{
+			priceTagBeginPos = i;
+			break;
+		}
 	}
-	else
+	for (int i = 0; i < priceTagSZ; ++i)
 	{
-		//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllsendmsg.txt", "a");
-		//if(fp != NULL)
-		//{
-		//	fwrite("DetourInjectDialog isnot window \r\n", strlen("DetourInjectDialog isnot window \r\n"), 1, fp);
-		//	fclose(fp);
-		//	fp = NULL;
-		//}
+		if (pChar[priceTagBeginPos++] != pFileMapContent->priceCMD[i])
+			return false;
 	}
+	return true;
 }
+
+//FILE *fp = NULL;
+//void SendMessageToMain(PVOID lpContent, int pContentSize, int selfType)
+//{
+//	//HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+//	HWND hwnd = ::FindWindowW(NULL, L"DetourInjectDialog");
+//	if (::IsWindow(hwnd))
+//	{
+//		COPYDATASTRUCT copydata;
+//		copydata.dwData = selfType;  // 用户定义数据
+//		copydata.lpData = lpContent;  //指向数据的指针
+//		copydata.cbData = pContentSize;  // 数据大小
+//		LRESULT res = ::SendMessage(hwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(GetActiveWindow()), reinterpret_cast<LPARAM>(&copydata));
+//
+//		//char tmpbuf[140];
+//		//sprintf_s(tmpbuf, 140, "DetourInjectDialog is window sendmsg result: %d, last error %d.\r\n", res, GetLastError());
+//		//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\hookdllsendmsg.txt", "a");
+//		//if(fp != NULL)
+//		//{
+//		//	fwrite(tmpbuf, strlen(tmpbuf), 1, fp);
+//		//	fclose(fp);
+//		//	fp = NULL;
+//		//}
+//	}
+//	else
+//	{
+//		//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdllsendmsg.txt", "a");
+//		//if(fp != NULL)
+//		//{
+//		//	fwrite("DetourInjectDialog isnot window \r\n", strlen("DetourInjectDialog isnot window \r\n"), 1, fp);
+//		//	fclose(fp);
+//		//	fp = NULL;
+//		//}
+//	}
+//}
 
 int WINAPI MyMessageBoxA(IN HWND hWnd, IN LPCSTR lpText, IN LPCSTR lpCaption, IN UINT uType)
 {
@@ -247,7 +272,7 @@ BOOL WINAPI MyWriteFile(HANDLE hFile,
 	{
 		bRet = ((pfnWriteFile)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
-		SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILE);
+		//SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILE);
 
 		//int fileNameLen = nNumberOfBytesToWrite;
 		//char *tmpbuf = new char[fileNameLen + HANDLELENGTH];
@@ -256,6 +281,11 @@ BOOL WINAPI MyWriteFile(HANDLE hFile,
 		//sprintf_s(tmpbuf + fileNameLen, HANDLELENGTH, "+%d", hFile);
 		//SendMessageToMain((PVOID)tmpbuf, fileNameLen + HANDLELENGTH, HOOKAPI_WRITEFILE);
 		//delete []tmpbuf;
+		if (isPriceTag((PVOID)lpBuffer, nNumberOfBytesToWrite))
+		{
+			pFileMapContent->comGetPriceLen = nNumberOfBytesToWrite;
+			memcpy(pFileMapContent->comGetPriceStr, lpBuffer, nNumberOfBytesToWrite);
+		}
 	}
 	return bRet;
 }
@@ -273,7 +303,7 @@ BOOL WINAPI MyWriteFileEx(HANDLE hFile,
 	{
 		bRet = ((pfnWriteFileEx)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpOverlapped, lpCompletionRoutine);
-		SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILEEX);
+		//SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILEEX);
 
 		//int fileNameLen = nNumberOfBytesToWrite;
 		//char *tmpbuf = new char[fileNameLen + HANDLELENGTH];
@@ -282,6 +312,11 @@ BOOL WINAPI MyWriteFileEx(HANDLE hFile,
 		//sprintf_s(tmpbuf + fileNameLen, HANDLELENGTH, "+%d", hFile);
 		//SendMessageToMain((PVOID)tmpbuf, fileNameLen + HANDLELENGTH, HOOKAPI_WRITEFILEEX);
 		//delete []tmpbuf;
+		if (isPriceTag((PVOID)lpBuffer, nNumberOfBytesToWrite))
+		{
+			pFileMapContent->comGetPriceLen = nNumberOfBytesToWrite;
+			memcpy(pFileMapContent->comGetPriceStr, lpBuffer, nNumberOfBytesToWrite);
+		}
 	}
 	return bRet;
 }

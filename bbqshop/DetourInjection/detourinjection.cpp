@@ -9,11 +9,30 @@
 #include <Strsafe.h>
 #include "ZhuiHuiMsg.h"
 
+LPVOID pContent;
+
 DetourInjection::DetourInjection(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
 	setWindowTitle("DetourInjectDialog");
+
+	// 开启内存共享
+	CONTENT_FILE_MAPPING content;
+	memzero(&content, sizeof(content));
+	HANDLE hMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(content), NAME_FILE_MAPPINGL);
+	if(!hMap)
+	{
+		//PrintError(_T("CreateFileMapping"), GetLastError(), __MYFILE__, __LINE__);
+	}
+	pContent = MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(content));
+	if(!pContent)
+	{
+		//PrintError(_T("MapViewOfFile"), GetLastError(), __MYFILE__, __LINE__);
+		//break;
+	}
+	memcpy(pContent, &content, sizeof(content));
+
 
 	PROCESSENTRY32 pe32;
 	pe32.dwSize = sizeof(PROCESSENTRY32);
@@ -24,14 +43,14 @@ DetourInjection::DetourInjection(QWidget *parent)
 	{
 		while (Process32Next(hsnap, &pe32) == TRUE)
 		{
-			if (wcscmp(pe32.szExeFile, L"PosTouch.exe") == 0)
+			if (wcscmp(pe32.szExeFile, L"xyJxcEasy.exe") == 0)
 			//if (wcscmp(pe32.szExeFile, L"PCommTest.exe") == 0)
 			{
 				wchar_t* DirPath = new wchar_t[MAX_PATH];
 				wchar_t* FullPath = new wchar_t[MAX_PATH];
 				flag = true;
 				GetCurrentDirectory(MAX_PATH, DirPath);
-				swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\ApiHook.dll", DirPath);
+				swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\ApiHook.dll", DirPath);
 				//EnableDebugPrivilege();
 				HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
 					PROCESS_VM_WRITE, FALSE, pe32.th32ProcessID);
@@ -151,17 +170,47 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 	return QWidget::nativeEvent(eventType, message, result);
 }
 
+bool isPriceTag(PVOID lpContent, int pContentSize)
+{
+	char *priceCMD = "QA";
+	if (pContentSize > COMGETPRICECHARLEN)
+		return false;
+	char *pChar = (char *)lpContent;
+	int priceTagSZ = strlen(priceCMD);
+	// 找到价格标志的初始位置
+	int priceTagBeginPos = -1;
+	for (int i = 0; i < pContentSize; ++i)
+	{
+		if (pChar[i] == priceCMD[0])
+		{
+			priceTagBeginPos = i;
+			break;
+		}
+	}
+	for (int i = 0; i < priceTagSZ; ++i)
+	{
+		if (pChar[priceTagBeginPos++] != priceCMD[i])
+			return false;
+	}
+	return true;
+}
+
 void DetourInjection::readHookFile()
 {
-	FILE *fp = NULL;
-	char tmpbuf[255];
-	fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFile.txt", "w");
-	if(fp != NULL)
-	{
-		//sprintf(logBuff, "write file toWrite: %d, byte written: %d\r\n", nNumberOfBytesToWrite, *lpNumberOfBytesWritten);
-		//fwrite(logBuff, strlen(logBuff), 1, fp);
-		fread(tmpbuf, 100, 1, fp);
-		fclose(fp);
-		fp = NULL;
-	}
+	CONTENT_FILE_MAPPING *maping = (CONTENT_FILE_MAPPING *)pContent;
+
+	//char *price = "1QA0.01";
+	//bool ispc = isPriceTag(price, 10);
+
+	//FILE *fp = NULL;
+	//char tmpbuf[255];
+	//fopen_s(&fp, "D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookWriteFile.txt", "w");
+	//if(fp != NULL)
+	//{
+	//	//sprintf(logBuff, "write file toWrite: %d, byte written: %d\r\n", nNumberOfBytesToWrite, *lpNumberOfBytesWritten);
+	//	//fwrite(logBuff, strlen(logBuff), 1, fp);
+	//	fread(tmpbuf, 100, 1, fp);
+	//	fclose(fp);
+	//	fp = NULL;
+	//}
 }
