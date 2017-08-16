@@ -298,7 +298,7 @@ BOOL WINAPI MyWriteFile(HANDLE hFile,
 	{
 		bRet = ((pfnWriteFile)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
-		if (pirceHandle != NULL)
+		if (pirceHandle == hFile)
 		{
 			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILE);
 		}
@@ -327,7 +327,7 @@ BOOL WINAPI MyWriteFileEx(HANDLE hFile,
 	{
 		bRet = ((pfnWriteFileEx)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpOverlapped, lpCompletionRoutine);
-		if (pirceHandle != NULL)
+		if (pirceHandle == hFile)
 		{
 			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILEEX);
 		}
