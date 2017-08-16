@@ -20,6 +20,8 @@
 #include <time.h>
 #include <QSettings>
 
+typedef BOOL (WINAPI *PFN_CHANGEWINDOWMESSAGEFILTER) (UINT, DWORD);
+
 LPVOID pComFileMappingContent;
 bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	: QWidget(parent), mainApp(pApp)
@@ -54,6 +56,14 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	showLoginDialog();
 	// 开启启动
 	setAutoRun();
+	// 使宿主进程通过SendMessage方法反馈数据，考虑的xp系统中没有ChangeWindowMessageFilter函数
+	HMODULE hModule = LoadLibrary(L"user32.dll");
+	if (hModule)
+	{
+		PFN_CHANGEWINDOWMESSAGEFILTER pfnChangeWindowMessageFilter = (PFN_CHANGEWINDOWMESSAGEFILTER) GetProcAddress (hModule, "ChangeWindowMessageFilter");
+		if (pfnChangeWindowMessageFilter != NULL)
+			pfnChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
+	}
 }
 
 bbqshop::~bbqshop()
@@ -320,6 +330,8 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 			case HOOKAPI_WRITEFILE:
 			case HOOKAPI_WRITEFILEEX:
 			case HOOKAPI_CLOSEHANDLE:
+			case HOOKAPI_CREATEFILEA:
+			case HOOKAPI_CREATEFILEW:
 				{
 					hookApiWriteFileData(cds->lpData, cds->cbData);
 					*result = 1;
@@ -676,7 +688,7 @@ void bbqshop::createComFileMapping()
 		//PrintError(_T("MapViewOfFile"), GetLastError(), __MYFILE__, __LINE__);
 		//break;
 	}
-	memcpy(content.priceCMD, "QA", strlen("QA"));
+	memcpy(content.priceCom, "COM1", strlen("COM1"));
 	memcpy(pComFileMappingContent, &content, sizeof(content));
 }
 
@@ -825,10 +837,7 @@ void bbqshop::showPayDialog()
 		if (mZHSetting.shopCashdestInfo.isGetPriceActualTime != 1)
 		{
 			// 显示客显数据
-			if (pComFileMappingContent != NULL)
-				dlg->SetMoney(getComPriceFromMapping());
-			else
-				dlg->SetMoney(qaPrice);	
+			dlg->SetMoney(qaPrice);	
 		}
 		dlg->show();
 	}
@@ -1479,7 +1488,7 @@ void bbqshop::hookApiWriteFileData(void *inData, int dataLen)
 	qaPrice = comDataToPrice(inData, dataLen);
 }
 
-QString bbqshop::comDataToPrice(void *inData, int dataLen)
+inline QString bbqshop::comDataToPrice(void *inData, int dataLen)
 {
 	QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(inData), dataLen);
 	int qapos = strMessage.indexOf("QA");
@@ -1488,10 +1497,4 @@ QString bbqshop::comDataToPrice(void *inData, int dataLen)
 		return strMessage.mid(qapos + 2).trimmed();
 	}
 	return "";
-}
-
-inline QString bbqshop::getComPriceFromMapping()
-{
-	CONTENT_FILE_MAPPING *maping = (CONTENT_FILE_MAPPING *)pComFileMappingContent;
-	return comDataToPrice(maping->comGetPriceStr, maping->comGetPriceLen);
 }

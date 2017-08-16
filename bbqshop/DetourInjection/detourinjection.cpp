@@ -33,6 +33,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 	}
 	memcpy(pContent, &content, sizeof(content));
 
+	ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
 
 	PROCESSENTRY32 pe32;
 	pe32.dwSize = sizeof(PROCESSENTRY32);
@@ -151,7 +152,7 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 			if (recvData && cds->cbData < 100)
 			{
 				FILE * fp = NULL;
-				if((fp = fopen("D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\hookdata.txt", "a")) != NULL)
+				if((fp = fopen("D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdata.txt", "a")) != NULL)
 				{
 					fwrite(cds->lpData, cds->cbData, 1, fp);
 					char tmpbuf[100];

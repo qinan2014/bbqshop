@@ -89,8 +89,7 @@ private:
 	inline void setHookPayKeyValueFromZHSetting();
 	inline void printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee);
 	void hookApiWriteFileData(void *inData, int dataLen);
-	QString comDataToPrice(void *inData, int dataLen);
-	inline QString getComPriceFromMapping();
+	inline QString comDataToPrice(void *inData, int dataLen);
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);

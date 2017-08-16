@@ -47,14 +47,11 @@
 #define HOOKAPI_WRITEFILEEX 6006
 #define HOOKAPI_CLOSEHANDLE 6007
 
-#define NAME_FILE_MAPPINGL		L"Dll_INJECTION"
-#define NAME_FILE_MAPPINGT		_T("Dll_INJECTION")
+#define NAME_FILE_MAPPINGL		L"bbq_Dll_INJECTION"
+#define NAME_FILE_MAPPINGT		_T("bbq_Dll_INJECTION")
 // name of file-mapping object that share with the dll and process
-#define COMGETPRICECHARLEN 100
-#define PRICETAGLEN 5
+#define PRICECOMTAG 5
 typedef struct  
 {
-	char comGetPriceStr[COMGETPRICECHARLEN];
-	int comGetPriceLen;
-	char priceCMD[PRICETAGLEN];
+	char priceCom[PRICECOMTAG];
 } CONTENT_FILE_MAPPING, *PCONTENT_FILE_MAPPING;
