@@ -74,6 +74,7 @@ protected:
 private slots:
 	void closeMainDlg();
 	void cashToolChanged(int newIndex);
+	void comChanged(int newIndex);
 	void printerChanged(int newIndex);
 	void catchScreen();
 	void catchScreen(const QRect &inselect);

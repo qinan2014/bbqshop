@@ -211,6 +211,26 @@ inline void MainDlg::initFrame()
 	cashToolChanged(cursel != 0);
 	if (targetIndex != -1)
 		ui.cboToolexe->setCurrentIndex(targetIndex + 1);
+	connect(ui.cboToolexe, SIGNAL(currentIndexChanged(int)), this, SLOT(comChanged(int)));
+	comChanged(targetIndex != -1);
+	// 列出所有的串口
+	for (int i = 0; i <= 9; ++i)
+	{
+		char szPort[50];  
+		sprintf_s(szPort, "COM%d", i);
+		HANDLE m_hComm = CreateFileA(szPort,  /** 设备名,COM1,COM2等 */   
+			GENERIC_READ | GENERIC_WRITE, /** 访问模式,可同时读写 */     
+			0,                            /** 共享模式,0表示不共享 */   
+			NULL,                         /** 安全性设置,一般使用NULL */   
+			OPEN_EXISTING,                /** 该参数表示设备必须存在,否则创建失败 */   
+			0,      
+			0);
+		if (m_hComm != INVALID_HANDLE_VALUE)  
+		{  
+			ui.cboCOMs->addItem(szPort);
+		} 
+	}
+
 	// 是否使用支付扫码枪
 	ui.chbStartGun->setChecked(shopInfo.isUsePayGun == 1);
 	// 获取pos打印机
@@ -312,7 +332,13 @@ void MainDlg::cashToolChanged(int newIndex)
 	bool hasCashTool = (newIndex != 0);
 	ui.btnCheck->setEnabled(hasCashTool);
 	ui.gbMoneyPos->setEnabled(hasCashTool);
-	ui.cboToolexe->setEnabled(!hasCashTool);
+	ui.gbComInfo->setEnabled(!hasCashTool);
+}
+
+void MainDlg::comChanged(int newIndex)
+{
+	bool useCom = (newIndex != 0) && ui.gbComInfo->isEnabled();
+	ui.cboCOMs->setEnabled(useCom);
 }
 
 void MainDlg::printerChanged(int newIndex)
