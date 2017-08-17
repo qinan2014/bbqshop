@@ -48,22 +48,22 @@ void PosPrinter::GetAllPrinters(std::vector<std::wstring > &outPrinters, const s
 	EnumPrinters(dwFlag, NULL, 4, (PBYTE)p4, dwNeeded, &dwNeeded, &dwReturn);  
 	std::wstring tmpName;
 	//outOriIndex = 0;
-	outPrinters.push_back(L"不配置打印机");
+	//outPrinters.push_back(L"不配置打印机");
 	for (int i = 0; i<(int)dwReturn; i++){
 		if (p4[i].pPrinterName == NULL)
 			continue;
 
-		char tmpbuf[500];
-		sprintf(tmpbuf, "printname500 len %d", wcslen(p4[i].pPrinterName));
-		ZHFuncLib::NativeLog("", tmpbuf, "a");
+		//char tmpbuf[500];
+		//sprintf(tmpbuf, "printname500 len %d", wcslen(p4[i].pPrinterName));
+		//ZHFuncLib::NativeLog("", tmpbuf, "a");
 
-		sprintf(tmpbuf, "printname500 %s", ZHFuncLib::WstringToString(p4[i].pPrinterName).c_str());
-		ZHFuncLib::NativeLog("", tmpbuf, "a");
+		//sprintf(tmpbuf, "printname500 %s", ZHFuncLib::WstringToString(p4[i].pPrinterName).c_str());
+		//ZHFuncLib::NativeLog("", tmpbuf, "a");
 
 		tmpName = p4[i].pPrinterName;
 		outPrinters.push_back(p4[i].pPrinterName);
 		if (tmpName.compare(oriPrinter) == 0)
-			outOriIndex = i + 1;
+			outOriIndex = i;
 	}
 
 	delete []p4;  

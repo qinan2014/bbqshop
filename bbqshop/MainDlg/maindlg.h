@@ -78,7 +78,6 @@ private slots:
 	void closeMainDlg();
 	void cashToolChanged(int newIndex);
 	void comChanged(int newIndex);
-	void printerChanged(int newIndex);
 	void catchScreen();
 	void catchScreen(const QRect &inselect);
 	void checkPrice();
@@ -97,6 +96,7 @@ private slots:
 	void clickFinishAlipayKey();
 	void startOCRProcess();
 	void onPriceImageBtnToggled(bool isChecked);
+	void onPrinterStartToggled(bool isChecked);
 
 signals:
 	void showBindTipSig(bool );

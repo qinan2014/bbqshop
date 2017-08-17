@@ -69,6 +69,7 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	// 初始化数据
 	//initFrame();
 	connect(this, SIGNAL(settingInfoFinished()), this, SLOT(onSettingInfoFinished()));
+	//QTimer::singleShot(100,this, SLOT(hide()) );
 
 #ifdef INDEPENDENTLOGIN
 	login();
@@ -170,9 +171,7 @@ inline void MainDlg::initFrame()
 	ui.shopNumTxt->setText(QString::number(shopInfo.shopid));
 	char cashdes[150];
 	sprintf(cashdes, "(%s) %s", shopInfo.cashdeskId, shopInfo.cashdeskName);
-	ZHFuncLib::NativeLog("", "MainDlg::initFrame 11", "a");
 	ui.cboCashNo->addItem(cashdes);
-	ZHFuncLib::NativeLog("", "MainDlg::initFrame 12", "a");
 	ui.cboCashNo->setCurrentIndex(0);
 	// 收银软件信息
 	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
@@ -207,6 +206,7 @@ inline void MainDlg::initFrame()
 	std::wstring targetName = ZHFuncLib::StringToWstring(carishInfo.exeName);
 	int targetIndex = -1;
 	std::vector<int > allIds;
+	mAllProcessNames.clear();
 	ZHFuncLib::GetAllProcesses(targetName, targetIndex, mAllProcessNames, allIds);
 	int processSZ = mAllProcessNames.size();
 	ui.cboToolexe->addItem(QString::fromLocal8Bit("无"));
@@ -269,7 +269,8 @@ inline void MainDlg::initFrame()
 	sz = allPrinters.size();
 	for (int i = 0; i < sz; ++i)
 	{
-		ui.cboPrinter->addItem(QString::fromStdWString(allPrinters[i]));
+		QString printName = QString::fromStdWString(allPrinters[i]);
+		ui.cboPrinter->addItem(printName);
 	}
 	// 获取 LPT printer
 	char lptlastchar = 0;
@@ -296,15 +297,22 @@ inline void MainDlg::initFrame()
 		}
 	}
 	if (printIndex < 0)
+	{
+		ui.rbStopPrinter->setChecked(true);
 		printIndex = 0;
+		onPrinterStartToggled(false);
+	}
+	else
+	{
+		ui.rbStartPrinter->setChecked(true);
+		onPrinterStartToggled(true);
+	}
 	ui.cboPrinter->setCurrentIndex(printIndex);
-	connect(ui.cboPrinter, SIGNAL(currentIndexChanged(int)), this, SLOT(printerChanged(int)));
-	printerChanged(printIndex);
 	// 打印设置
 	ui.cboSize->setCurrentIndex(carishInfo.printerType);
 	ui.printFont->setValue(carishInfo.commentFontSZ);
 	// 是否自动打印
-	ui.chbAutioPrint->setChecked(shopInfo.isAutoPrint == 1);
+	//ui.chbAutioPrint->setChecked(shopInfo.isAutoPrint == 1);
 
 	// 快捷键界面
 	QStringList hotkeyLs;
@@ -330,6 +338,7 @@ inline void MainDlg::initFrame()
 	connect(ui.pbtAlipayModify, SIGNAL(pressed()), this, SLOT(clickModifyAlipayKey()));
 	connect(ui.pbtAlipayFinish, SIGNAL(pressed()), this, SLOT(clickFinishAlipayKey()));
 	connect(ui.rbPriceImage, SIGNAL(toggled(bool )), this, SLOT(onPriceImageBtnToggled(bool )));
+	connect(ui.rbStartPrinter, SIGNAL(toggled(bool )), this, SLOT(onPrinterStartToggled(bool )));
 }
 
 inline QString MainDlg::getWindowNameByProcessId(int processID)
@@ -378,13 +387,6 @@ void MainDlg::comChanged(int newIndex)
 {
 	//bool useCom = (newIndex != 0) && ui.gbComInfo->isEnabled();
 	//ui.cboCOMs->setEnabled(useCom);
-}
-
-void MainDlg::printerChanged(int newIndex)
-{
-	bool userPrinter = (newIndex != 0);
-	ui.gbPrinter->setEnabled(userPrinter);
-	ui.btnPrinterTest->setEnabled(userPrinter);
 }
 
 inline void MainDlg::asciiIntoIndex(QStringList &ioHotkeyLs, int tabNum, int *inASCII, int *outIndex)
@@ -658,7 +660,9 @@ inline void MainDlg::parseProcessJsonData(QString inJson)
 		break;
 	case TO_MAINDLG_IMPORTANTDATA:
 		saveLoginData(value);
+#ifndef INDEPENDENTLOGIN
 		emit settingInfoFinished();
+#endif // ! INDEPENDENTLOGIN
 		break;
 	case TO_MAINDLG_SET_PAYKEY:
 		currentInputPaykey(value);
@@ -909,7 +913,7 @@ void MainDlg::saveSetting()
 	// 是否使用支付扫码枪
 	cashdesk.isUsePayGun = ui.chbStartGun->isChecked() ? 1 : 0;
 	// 是否自动打印
-	cashdesk.isAutoPrint = ui.chbAutioPrint->isChecked() ? 1 : 0;
+	cashdesk.isAutoPrint = 1;
 
 	// 保存快捷键
 	//int indexs[2], asciis[2];
@@ -946,7 +950,7 @@ void MainDlg::saveSetting()
 void MainDlg::memeryPrintName()
 {
 	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
-	if (ui.cboPrinter->currentIndex() > 0)
+	if (ui.rbStartPrinter->isChecked())
 	{
 		QString printerName = ui.cboPrinter->currentText();
 		memcpy(carishInfo.printerName, printerName.toStdString().c_str(), printerName.length());
@@ -1239,4 +1243,11 @@ void MainDlg::onPriceImageBtnToggled(bool isChecked)
 {
 	ui.gpwPaySetting1->setEnabled(isChecked);
 	ui.gpwPaySetting2->setEnabled(!isChecked);
+}
+
+void MainDlg::onPrinterStartToggled(bool isChecked)
+{
+	ui.gpPrinterSelect->setEnabled(isChecked);
+	ui.gbPrinter->setEnabled(isChecked);
+	ui.btnPrinterTest->setEnabled(isChecked);
 }
