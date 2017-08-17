@@ -893,10 +893,10 @@ void MainDlg::cashNoChanged(int newIndex)
 
 void MainDlg::showTipSlot(bool isShow)
 {
-	if (isShow)
-		ui.labBindTip->setText(QString::fromLocal8Bit("未绑定"));
-	else
-		ui.labBindTip->hide();
+	//if (isShow)
+	//	ui.labBindTip->setText(QString::fromLocal8Bit("未绑定"));
+	//else
+	//	ui.labBindTip->hide();
 }
 
 void MainDlg::saveSetting()
