@@ -22,6 +22,8 @@ public:
 
 	std::vector<QString > mWinClassNames;
 	std::vector<QString > mWinWindowNames;
+	std::vector<int > mWinProcessIds;
+	std::vector<std::wstring > mAllProcessNames;
 
 private:
 	Ui::MainDlgClass ui;
@@ -56,6 +58,7 @@ private:
 	int GetPrinterDeviceWidth();
 	void editPayKey(int paykeyStatus);
 	inline void currentInputPaykey(const Json::Value &inData);
+	inline QString getWindowNameByProcessId(int processID);
 
 #ifdef INDEPENDENTLOGIN
 	void login();

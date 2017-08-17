@@ -31,11 +31,16 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 		::GetWindowText(pWnd->GetSafeHwnd(), tmpName, 256);
 		windowTitle = QString::fromWCharArray(tmpName);
 
+		DWORD  dwProcessID = 0;  
+		// 通过窗口句柄取得进程ID  
+		::GetWindowThreadProcessId(hwnd, &dwProcessID);  
+
 		if (!windowTitle.isEmpty())
 		{
 			MainDlg *parWidget = (MainDlg *)lParam;
 			parWidget->mWinClassNames.push_back(className);
 			parWidget->mWinWindowNames.push_back(windowTitle);
+			parWidget->mWinProcessIds.push_back(dwProcessID);
 		}
 	}
 
@@ -185,6 +190,7 @@ inline void MainDlg::initFrame()
 	mWinWindowNames.clear();
 	mWinClassNames.push_back(QString::fromLocal8Bit("不开启自动识别"));
 	mWinWindowNames.push_back(QString::fromLocal8Bit("不开启自动识别"));
+	mWinProcessIds.push_back(0);
 	EnumWindows(EnumWindowsProc, (LPARAM)this);//遍历窗口程序
 	int sz = mWinWindowNames.size();
 	int cursel = 0;
@@ -199,14 +205,16 @@ inline void MainDlg::initFrame()
 			// 所有进程名称及id
 	std::wstring targetName = ZHFuncLib::StringToWstring(carishInfo.exeName);
 	int targetIndex = -1;
-	std::vector<std::wstring > allProcess;
 	std::vector<int > allIds;
-	ZHFuncLib::GetAllProcesses(targetName, targetIndex, allProcess, allIds);
-	int processSZ = allProcess.size();
+	ZHFuncLib::GetAllProcesses(targetName, targetIndex, mAllProcessNames, allIds);
+	int processSZ = mAllProcessNames.size();
 	ui.cboToolexe->addItem(QString::fromLocal8Bit("无"));
 	for (int i =  0; i < processSZ; ++i)
 	{
-		ui.cboToolexe->addItem(QString::fromStdWString(allProcess[i]) + "  " + QString::number(allIds[i]));
+		QString windowName = getWindowNameByProcessId(allIds[i]);
+		if (windowName.isEmpty())
+			windowName = QString::fromStdWString(mAllProcessNames[i]);
+		ui.cboToolexe->addItem(windowName);
 	}
 	cashToolChanged(cursel != 0);
 	if (targetIndex != -1)
@@ -302,6 +310,17 @@ inline void MainDlg::initFrame()
 	connect(ui.pbtWXFinish, SIGNAL(pressed()), this, SLOT(clickFinishWXKey()));
 	connect(ui.pbtAlipayModify, SIGNAL(pressed()), this, SLOT(clickModifyAlipayKey()));
 	connect(ui.pbtAlipayFinish, SIGNAL(pressed()), this, SLOT(clickFinishAlipayKey()));
+}
+
+inline QString MainDlg::getWindowNameByProcessId(int processID)
+{
+	int sz = mWinProcessIds.size();
+	for (int i = 0; i < sz; ++i)
+	{
+		if (mWinProcessIds[i] == processID)
+			return mWinWindowNames[i];
+	}
+	return "";
 }
 
 int MainDlg::getImageScaleTag(float &outScale)
