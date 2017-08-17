@@ -222,6 +222,9 @@ inline void MainDlg::initFrame()
 	connect(ui.cboToolexe, SIGNAL(currentIndexChanged(int)), this, SLOT(comChanged(int)));
 	comChanged(targetIndex != -1);
 	// 列出所有的串口
+	int comIndex = 0;
+	int savecomLen = strlen(carishInfo.priceCom);
+	int comV = 0;
 	for (int i = 0; i <= 9; ++i)
 	{
 		char szPort[50];  
@@ -234,11 +237,17 @@ inline void MainDlg::initFrame()
 			0,      
 			0);
 		if (m_hComm != INVALID_HANDLE_VALUE)  
-		{  
+		{
 			ui.cboCOMs->addItem(szPort);
+
+			int curComLen = strlen(szPort);
+			int cmpRes = memcmp(carishInfo.priceCom, szPort, savecomLen > curComLen ? savecomLen : curComLen);
+			if (cmpRes == 0)
+				comIndex = comV;
+			++comV;
 		} 
 	}
-
+	ui.cboCOMs->setCurrentIndex(comIndex);
 	// 是否使用支付扫码枪
 	ui.chbStartGun->setChecked(shopInfo.isUsePayGun == 1);
 	// 获取pos打印机
@@ -911,6 +920,9 @@ void MainDlg::saveSetting()
 		QString pureExeName = QString::fromStdWString(mAllProcessNames[exeIndex - 1]);
 		memcpy(carishInfo.exeName, pureExeName.toStdString().c_str(), pureExeName.length());
 		carishInfo.exeName[pureExeName.length()] = 0;
+		QString curComStr = ui.cboCOMs->currentText();
+		memcpy(carishInfo.priceCom, curComStr.toStdString().c_str(), curComStr.length());
+		carishInfo.priceCom[curComStr.length()] = 0;
 	}
 	SaveAllSetting();
 }

@@ -11,6 +11,7 @@
 #define NUMLEN "NumLength"
 #define CARISHER "Carisher"
 #define EXENAME "exe"
+#define PRICECOM "PriceCom"
 #define WINDOWNAME "WindowMame"
 #define PRINTERNAME "PrinterName"
 #define MONEYPOS "MoneyPos"
@@ -185,6 +186,7 @@ void ZHSettingRW::readEleVal(TiXmlElement *txtEle, char *outVal)
 bool ZHSettingRW::readCarishSetting(TiXmlElement *carishEle, codeSetIO::CarishDesk &outSetting)
 {
 	readEleVal(carishEle->FirstChildElement(EXENAME), outSetting.exeName);
+	readEleVal(carishEle->FirstChildElement(PRICECOM), outSetting.priceCom);
 	readEleVal(carishEle->FirstChildElement(WINDOWNAME), outSetting.windowName);
 	readEleVal(carishEle->FirstChildElement(PRINTERNAME), outSetting.printerName);
 	TiXmlElement *moneyEle = carishEle->FirstChildElement(MONEYPOS);
@@ -342,6 +344,7 @@ TiXmlElement *ZHSettingRW::writeCarishSetting(codeSetIO::CarishDesk &inSetting)
 #define NUMCHARLEN 32
 	TiXmlElement *carisherEle = new TiXmlElement(CARISHER);
 	createEleText(carisherEle, EXENAME, inSetting.exeName);
+	createEleText(carisherEle, PRICECOM, inSetting.priceCom);
 	createEleText(carisherEle, WINDOWNAME, inSetting.windowName);
 	createEleText(carisherEle, PRINTERNAME, inSetting.printerName);
 

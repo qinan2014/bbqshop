@@ -44,6 +44,7 @@ namespace codeSetIO
 	struct CarishDesk
 	{
 		char exeName[NUMLEN];
+		char priceCom[NUMLEN];
 		char windowName[NAMELEN];
 		char printerName[NAMELEN];
 		SelectRange selectRange;
@@ -54,6 +55,7 @@ namespace codeSetIO
 		int commentFontSZ;
 		CarishDesk()
 		{
+			priceCom[0] = 0;
 			memset(exeName, 0, NUMLEN);
 			memset(windowName, 0, NAMELEN);
 			memset(printerName, 0, NAMELEN);

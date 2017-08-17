@@ -688,7 +688,7 @@ void bbqshop::createComFileMapping()
 		//PrintError(_T("MapViewOfFile"), GetLastError(), __MYFILE__, __LINE__);
 		//break;
 	}
-	memcpy(content.priceCom, "COM1", strlen("COM1"));
+	memcpy(content.priceCom, mZHSetting.carishInfo.priceCom, strlen(mZHSetting.carishInfo.priceCom));
 	memcpy(pComFileMappingContent, &content, sizeof(content));
 }
 
