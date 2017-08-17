@@ -202,7 +202,8 @@ inline void MainDlg::initFrame()
 	}
 	ui.cboCashTool->setCurrentIndex(cursel);
 	connect(ui.cboCashTool, SIGNAL(currentIndexChanged(int)), this, SLOT(cashToolChanged(int)));
-			// 所有进程名称及id
+	cashToolChanged(cursel != 0);
+	// 所有进程名称及id
 	std::wstring targetName = ZHFuncLib::StringToWstring(carishInfo.exeName);
 	int targetIndex = -1;
 	std::vector<int > allIds;
@@ -216,9 +217,18 @@ inline void MainDlg::initFrame()
 			windowName = QString::fromStdWString(mAllProcessNames[i]);
 		ui.cboToolexe->addItem(windowName);
 	}
-	cashToolChanged(cursel != 0);
+	
 	if (targetIndex != -1)
+	{
 		ui.cboToolexe->setCurrentIndex(targetIndex + 1);
+		ui.rbPriceCom->setChecked(true);
+		ui.gpwPaySetting1->setEnabled(false);
+	}
+	else
+	{
+		ui.rbPriceImage->setChecked(true);
+		ui.gpwPaySetting2->setEnabled(false);
+	}
 	connect(ui.cboToolexe, SIGNAL(currentIndexChanged(int)), this, SLOT(comChanged(int)));
 	comChanged(targetIndex != -1);
 	// 列出所有的串口
@@ -319,6 +329,7 @@ inline void MainDlg::initFrame()
 	connect(ui.pbtWXFinish, SIGNAL(pressed()), this, SLOT(clickFinishWXKey()));
 	connect(ui.pbtAlipayModify, SIGNAL(pressed()), this, SLOT(clickModifyAlipayKey()));
 	connect(ui.pbtAlipayFinish, SIGNAL(pressed()), this, SLOT(clickFinishAlipayKey()));
+	connect(ui.rbPriceImage, SIGNAL(toggled(bool )), this, SLOT(onPriceImageBtnToggled(bool )));
 }
 
 inline QString MainDlg::getWindowNameByProcessId(int processID)
@@ -360,13 +371,13 @@ void MainDlg::cashToolChanged(int newIndex)
 	bool hasCashTool = (newIndex != 0);
 	ui.btnCheck->setEnabled(hasCashTool);
 	ui.gbMoneyPos->setEnabled(hasCashTool);
-	ui.gbComInfo->setEnabled(!hasCashTool);
+	//ui.gbComInfo->setEnabled(!hasCashTool);
 }
 
 void MainDlg::comChanged(int newIndex)
 {
-	bool useCom = (newIndex != 0) && ui.gbComInfo->isEnabled();
-	ui.cboCOMs->setEnabled(useCom);
+	//bool useCom = (newIndex != 0) && ui.gbComInfo->isEnabled();
+	//ui.cboCOMs->setEnabled(useCom);
 }
 
 void MainDlg::printerChanged(int newIndex)
@@ -498,7 +509,7 @@ void MainDlg::startOCRProcess()
 bool MainDlg::checkSoft()
 {
 	int nIndex = ui.cboCashTool->currentIndex();
-	setActualTimeGetPrice(nIndex != 0);
+	setActualTimeGetPrice(nIndex != 0 && ui.rbPriceImage->isChecked());
 	if (mZHSetting.shopCashdestInfo.isGetPriceActualTime == 1)
 	{
 		QString strWinName = mWinWindowNames[nIndex];
@@ -523,15 +534,20 @@ bool MainDlg::checkSoft()
 			showTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("窗口隐藏"));
 			return false;
 		}
-		ui.labSoftTag->setText(QString::fromLocal8Bit("正确"));
-		ui.labSoftTag->show();
+		//ui.labSoftTag->setText(QString::fromLocal8Bit("正确"));
+		//ui.labSoftTag->show();
 		codeSetIO::CarishDesk &deskInfo = mZHSetting.carishInfo;
-
 		std::string namcchar = ZHFuncLib::WstringToString(strWinName.toStdWString());
 		int namelen = namcchar.length();
 		memcpy(deskInfo.windowName, namcchar.c_str(), namelen);
 		deskInfo.windowName[namelen] = 0;
-		QTimer::singleShot(3000, ui.labSoftTag, SLOT(hide()) ); 
+		//QTimer::singleShot(3000, ui.labSoftTag, SLOT(hide()) ); 
+
+		Json::Value mValData;
+		mValData[PRO_HEAD] = TO_SHOWTIP;
+		mValData[PRO_TIPSTR] = (QString::fromLocal8Bit("收银软件打开正确。").toStdString());
+		hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 	}
 
 	return true;
@@ -910,7 +926,7 @@ void MainDlg::saveSetting()
 	// 保存exe名称
 	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
 	int exeIndex = ui.cboToolexe->currentIndex();
-	if (exeIndex == 0)
+	if (!ui.rbPriceCom->isChecked() || exeIndex == 0)
 	{
 		carishInfo.exeName[0] = 0;
 	}
@@ -1217,4 +1233,10 @@ void MainDlg::editPayKey(int paykeyStatus)
 	mValData[PRO_PAYKEY_EDIT] = paykeyStatus;  
 	HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
 	ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+}
+
+void MainDlg::onPriceImageBtnToggled(bool isChecked)
+{
+	ui.gpwPaySetting1->setEnabled(isChecked);
+	ui.gpwPaySetting2->setEnabled(!isChecked);
 }

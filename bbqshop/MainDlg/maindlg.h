@@ -96,6 +96,7 @@ private slots:
 	void clickModifyAlipayKey();
 	void clickFinishAlipayKey();
 	void startOCRProcess();
+	void onPriceImageBtnToggled(bool isChecked);
 
 signals:
 	void showBindTipSig(bool );
