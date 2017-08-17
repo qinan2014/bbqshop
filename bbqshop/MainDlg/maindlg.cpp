@@ -900,16 +900,15 @@ void MainDlg::saveSetting()
 
 	// 保存exe名称
 	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
-	if (ui.cboToolexe->currentIndex() == 0)
+	int exeIndex = ui.cboToolexe->currentIndex();
+	if (exeIndex == 0)
 	{
 		carishInfo.exeName[0] = 0;
 	}
 	else
 	{
 		codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
-		QString exeName = ui.cboToolexe->currentText();
-		int exeIndex = exeName.indexOf(".exe");
-		QString pureExeName = exeName.left(exeIndex + 4);
+		QString pureExeName = QString::fromStdWString(mAllProcessNames[exeIndex - 1]);
 		memcpy(carishInfo.exeName, pureExeName.toStdString().c_str(), pureExeName.length());
 		carishInfo.exeName[pureExeName.length()] = 0;
 	}
