@@ -6,31 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>296</width>
-    <height>467</height>
+    <width>263</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>PayDialog</string>
   </property>
-  <widget class="QLabel" name="labIcon">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>0</y>
-     <width>161</width>
-     <height>171</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QWidget" name="moneyWid" native="true">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>230</y>
+     <x>10</x>
+     <y>60</y>
      <width>241</width>
      <height>51</height>
     </rect>
@@ -88,86 +75,82 @@ color: rgb(90, 162, 0);</string>
     </property>
    </widget>
   </widget>
-  <widget class="QLabel" name="labPayTip">
+  <widget class="QLabel" name="shopNameTxt">
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>280</y>
-     <width>280</width>
-     <height>21</height>
+     <y>10</y>
+     <width>211</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>北京养生堂(霍营店)</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="cashNoTxt">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>40</y>
+     <width>211</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>1号收银台</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="ledtScancode">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>120</y>
+     <width>241</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(255, 0, 0);
-font: 12pt &quot;Arial&quot;;</string>
+    <string notr="true">font: 75 17pt &quot;Arial&quot;;</string>
    </property>
    <property name="text">
-    <string>请确认支付金额后点击支付</string>
+    <string/>
    </property>
-   <property name="alignment">
-    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+   <property name="readOnly">
+    <bool>true</bool>
    </property>
   </widget>
-  <widget class="QWidget" name="payBtnWidget" native="true">
+  <widget class="QPushButton" name="pbtPay">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>310</y>
+     <x>10</x>
+     <y>370</y>
      <width>241</width>
-     <height>141</height>
+     <height>41</height>
     </rect>
    </property>
-   <widget class="QLineEdit" name="ledtPrice">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>241</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">font: 75 17pt &quot;Arial&quot;;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="ledtScancode">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>50</y>
-      <width>241</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">font: 75 17pt &quot;Arial&quot;;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbtPay">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>100</y>
-      <width>241</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Arial&quot;;</string>
-    </property>
-    <property name="text">
-     <string>已确认金额并支付(Enter)</string>
-    </property>
-   </widget>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Arial&quot;;</string>
+   </property>
+   <property name="text">
+    <string>已确认金额并支付(Enter)</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="widgetNum" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>160</y>
+     <width>241</width>
+     <height>201</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

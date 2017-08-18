@@ -19,8 +19,8 @@ public:
 	void SetMoney(QString inMoney);
 	bool hasPayed;
 
-protected:
-	virtual void resizeEvent(QResizeEvent *event);
+//protected:
+//	virtual void resizeEvent(QResizeEvent *event);
 
 private:
 	Ui::PayDialog ui;
@@ -33,6 +33,8 @@ private:
 	
 	PayDialog(QString imgPath, QWidget *parent = 0);
 	static PayDialog* instance;
+	void moneyChanged(const QString &newMoney);
+	void addNumBtn();
 
 signals:
 	void enablePaySig(bool enablePay);
@@ -40,7 +42,7 @@ signals:
 	void micropaySucess(QString payTradeNo);
 
 	private slots:
-		void moneyChanged(const QString &newMoney);
+		
 		void EnablePay(bool enablePay);
 
 public slots:

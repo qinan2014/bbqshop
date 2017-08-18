@@ -5,6 +5,7 @@
 #include <QDesktopWidget>
 #include "bbqshop.h"
 #include <QMessageBox>
+#include <QSignalMapper>
 
 PayDialog* PayDialog::instance = NULL;
 
@@ -29,10 +30,10 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 	this->setGeometry(posx, posy, iWidth, iHeight);
 	
 	// 金额
-	QRegExp rx("^([0-9]{0,5}\.[0-9]{1,2})$");
-	QValidator *validator = new QRegExpValidator(rx,0);
-	ui.ledtPrice->setValidator(validator);
-	connect(ui.ledtPrice, SIGNAL(textChanged(const QString &)), this, SLOT(moneyChanged(const QString &)));
+	//QRegExp rx("^([0-9]{0,5}\.[0-9]{1,2})$");
+	//QValidator *validator = new QRegExpValidator(rx,0);
+	//ui.ledtPrice->setValidator(validator);
+	//connect(ui.ledtPrice, SIGNAL(textChanged(const QString &)), this, SLOT(moneyChanged(const QString &)));
 
 	setWindowTitle(QString::fromLocal8Bit("支付"));
 
@@ -42,13 +43,15 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 
 	setStyleSheet("QDialog{background-color: #F0F0F0}");
 
-	ui.ledtPrice->setFocus();
+	//ui.ledtPrice->setFocus();
 	// 支付按钮
 	connect(ui.pbtPay, SIGNAL(released()), this, SLOT(ClickPay()));
 	connect(this, SIGNAL(enablePaySig(bool )), this, SLOT(EnablePay(bool )));
 	//bbqpay *parWid = (bbqpay *)parWidget;
 	//connect(this, SIGNAL(closeThisDlg()), parWid, SLOT(toShowFloat()));
 	hasPayed = false;
+
+	addNumBtn();
 }
 
 PayDialog::~PayDialog()
@@ -113,7 +116,8 @@ void PayDialog::SetMoney(QString inMoney)
 	{
 		if (inMoney.length() == 1 && inMoney.at(0) == '0')
 			inMoney = "0.00";
-		ui.ledtPrice->setText(inMoney);
+		//ui.labMoney->setText(inMoney);
+		moneyChanged(inMoney);
 	}
 }
 
@@ -124,7 +128,7 @@ void PayDialog::moneyChanged(const QString &newMoney)
 	if (moneyVal > MONEY_MAX_COUNT)
 	{
 		tmpPrice = QString::number(MONEY_MAX_COUNT);
-		ui.ledtPrice->setText(tmpPrice);
+		//ui.ledtPrice->setText(tmpPrice);
 	}
 	ui.labMoney->setText(tmpPrice);
 	int fontsz = ui.labMoney->fontMetrics().width(tmpPrice);
@@ -134,27 +138,27 @@ void PayDialog::moneyChanged(const QString &newMoney)
 	ui.labMoneyTag->move(moneyPos.x() + (moneyPos.width() - fontsz) - 20, moneyTagOriPos.y());
 }
 
-void PayDialog::resizeEvent(QResizeEvent *event)
-{
-	QSize parsz = event->size();
-	// 图标
-	std::string workPath = ZHFuncLib::GetWorkPath();
-	QString qworkPath = workPath.c_str();
-	qworkPath += pngPath;
-	QPixmap img(qworkPath);
-	QSize imgsz = img.size();
-	ui.labIcon->setPixmap(img);
-	int posx = (parsz.width() - imgsz.width()) * 0.5;
-	int posy = 70;
-	ui.labIcon->setGeometry(posx, posy, imgsz.width(), imgsz.height());
-}
+//void PayDialog::resizeEvent(QResizeEvent *event)
+//{
+//	QSize parsz = event->size();
+//	// 图标
+//	std::string workPath = ZHFuncLib::GetWorkPath();
+//	QString qworkPath = workPath.c_str();
+//	qworkPath += pngPath;
+//	QPixmap img(qworkPath);
+//	QSize imgsz = img.size();
+//	ui.labIcon->setPixmap(img);
+//	int posx = (parsz.width() - imgsz.width()) * 0.5;
+//	int posy = 70;
+//	ui.labIcon->setGeometry(posx, posy, imgsz.width(), imgsz.height());
+//}
 
 void PayDialog::ClickPay()
 {
 	if (!ui.pbtPay->isEnabled())
 		return;
 	bbqshop *parWid = (bbqshop *)parWidget;
-	QString pricestr = ui.ledtPrice->text();
+	QString pricestr = ui.labMoney->text();
 	if (pricestr.isEmpty())
 	{
 		parWid->ShowTipString(QString::fromLocal8Bit("价格不能为空"));
@@ -228,3 +232,47 @@ void PayDialog::CardPayQueryResult(const Json::Value & pjsonVal)
 	const char *msg = pjsonVal["return_msgs"].asCString();
 }
 
+
+void PayDialog::addNumBtn()
+{
+	// 槽函数
+	QSignalMapper *signalMapper = new QSignalMapper(this);
+	connect(signalMapper, SIGNAL(mapped(int )), this, SLOT(clickNumBtn(int )));
+
+	// 4行三列按钮
+	QRect parRect = ui.widgetNum->geometry();
+	const char txtName[12][10] = {"1","2","3", "4", "5", "6", "7", "8", "9", ".", "0", "<-"};
+	int txtIndex = 0;
+#define USERDATAINDEX 0
+#define NUMBTNWIDTH 70
+#define NUMBTNHEIGHT 40
+	// 每个按钮占有的宽度和高度
+	int perNumBtnWidth = parRect.width() / 3;
+	int perNumBtnHeight = parRect.height() / 4;
+	int xposori = (perNumBtnWidth - NUMBTNWIDTH) * 0.5;
+	int yposoir = (perNumBtnHeight - NUMBTNHEIGHT) * 0.5;
+	int xpos = xposori, ypos = yposoir;
+	for (int i = 0; i < 4; ++i)
+	{
+
+		for (int j = 0; j < 3; ++j)
+		{
+			QPushButton *numBtn = new QPushButton(ui.widgetNum);
+			numBtn->setText(QString::fromLocal8Bit(txtName[txtIndex]));
+			numBtn->setGeometry(xpos, ypos, NUMBTNWIDTH, NUMBTNHEIGHT);
+			QString sheet = "background-color: #3F72AF;border-style: outset; border-width: 1px; border-radius: 5px;";
+			sheet += "border-color: #77787b; font: bold 18px; color: #F9F7F7";
+			//sheet += "background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #BB000000);"; min-width: 5em;
+			numBtn->setStyleSheet(sheet);
+			connect(numBtn, SIGNAL(clicked()), signalMapper, SLOT(map()));  
+			signalMapper->setMapping(numBtn, txtIndex);
+			++txtIndex;
+			xpos += perNumBtnWidth;
+		}
+		xpos = xposori;
+		ypos += perNumBtnHeight;
+	}
+#undef NUMBTNWIDTH
+#undef NUMBTNHEIGHT
+#undef USERDATAINDEX
+}
