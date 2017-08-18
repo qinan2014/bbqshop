@@ -423,6 +423,8 @@ inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 	case 56:
 	case 57:
 	case '.':
+	case VK_OEM_PERIOD:
+	case VK_BACK:
 		hookManInputNum(p->vkCode);
 		break;
 	case VK_ESCAPE:
@@ -860,6 +862,14 @@ inline void bbqshop::hookManInputNum(DWORD vkCode)
 		if (vkCode == 49)
 		{
 			QTimer::singleShot(200,this, SLOT(showSettingDlg()) );
+		}
+	}
+	else
+	{
+		PayDialog *dlg = PayDialog::InitInstance(false);
+		if (dlg != NULL)
+		{
+			dlg->ClickKeyNum(vkCode);
 		}
 	}
 }

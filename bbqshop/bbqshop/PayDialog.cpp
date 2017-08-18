@@ -29,12 +29,6 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 	int posy = (screenHeight - iHeight) * 0.5;
 	this->setGeometry(posx, posy, iWidth, iHeight);
 	
-	// 金额
-	//QRegExp rx("^([0-9]{0,5}\.[0-9]{1,2})$");
-	//QValidator *validator = new QRegExpValidator(rx,0);
-	//ui.ledtPrice->setValidator(validator);
-	//connect(ui.ledtPrice, SIGNAL(textChanged(const QString &)), this, SLOT(moneyChanged(const QString &)));
-
 	setWindowTitle(QString::fromLocal8Bit("支付"));
 
 	QString tmppngPath = ZHFuncLib::GetWorkPath().c_str();
@@ -47,10 +41,14 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 	// 支付按钮
 	connect(ui.pbtPay, SIGNAL(released()), this, SLOT(ClickPay()));
 	connect(this, SIGNAL(enablePaySig(bool )), this, SLOT(EnablePay(bool )));
-	//bbqpay *parWid = (bbqpay *)parWidget;
-	//connect(this, SIGNAL(closeThisDlg()), parWid, SLOT(toShowFloat()));
 	hasPayed = false;
 
+	// 商铺名称
+	bbqshop *parWid = (bbqshop *)parWidget;
+	codeSetIO::ShopCashdeskInfo &shopInfo = parWid->GetSetting().shopCashdestInfo;
+	ui.shopNameTxt->setText((shopInfo.shopName));
+	ui.cashNoTxt->setText(shopInfo.cashdeskName);
+	// 数字键盘
 	addNumBtn();
 }
 
@@ -338,5 +336,35 @@ void PayDialog::clickNumBtn(int inNum)
 		}
 		//ui.edtMoney->setText(moneyStr);
 		moneyChanged(moneyStr);
+	}
+}
+
+void PayDialog::ClickKeyNum(unsigned long inKey)
+{
+	switch (inKey)
+	{
+	case 48:
+		clickNumBtn(10);
+		break;
+	case 49:
+	case 50:
+	case 51:
+	case 52:
+	case 53:
+	case 54:
+	case 55:
+	case 56:
+	case 57:
+		clickNumBtn(inKey - 49);
+		break;
+	case '.':
+	case VK_OEM_PERIOD:
+		clickNumBtn(9);
+		break;
+	case VK_BACK:
+		clickNumBtn(11);
+		break;
+	default:
+		break;
 	}
 }

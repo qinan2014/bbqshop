@@ -144,6 +144,8 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 		case 56:
 		case 57:
 		case '.':
+		case VK_OEM_PERIOD:
+		case VK_BACK:
 			{
 				if (hookChars[HOOK_NUM])
 				{

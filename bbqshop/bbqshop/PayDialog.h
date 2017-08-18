@@ -17,6 +17,7 @@ public:
 	static void CloseInstance(bool selfclose = false);
 	void SetScanCode(QString inCode);
 	void SetMoney(QString inMoney);
+	void ClickKeyNum(unsigned long inKey);
 	bool hasPayed;
 
 //protected:

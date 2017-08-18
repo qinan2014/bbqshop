@@ -78,7 +78,7 @@ color: rgb(90, 162, 0);</string>
   <widget class="QLabel" name="shopNameTxt">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>25</x>
      <y>10</y>
      <width>211</width>
      <height>25</height>
@@ -94,7 +94,7 @@ color: rgb(90, 162, 0);</string>
   <widget class="QLabel" name="cashNoTxt">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>25</x>
      <y>40</y>
      <width>211</width>
      <height>25</height>
