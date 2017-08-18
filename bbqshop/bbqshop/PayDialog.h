@@ -49,6 +49,7 @@ public slots:
 	void ClickPay();
 	void closeSelf();
 	void onNetError(QString url, int res, int urlTag);
+	void clickNumBtn(int inNum);
 
 public:
 	void CreatePayBillSucess(bool isReturnSuc, const Json::Value & value);

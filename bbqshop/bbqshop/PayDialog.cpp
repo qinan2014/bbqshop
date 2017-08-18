@@ -276,3 +276,67 @@ void PayDialog::addNumBtn()
 #undef NUMBTNHEIGHT
 #undef USERDATAINDEX
 }
+
+
+void PayDialog::clickNumBtn(int inNum)
+{
+#define ADDNUM(inNumstr) \
+	{ \
+	if (pointPos != -1) \
+	{   \
+	if (moneyStr == "0.00")\
+	moneyStr = ""; \
+	if (moneyStr.length() - pointPos > 2) \
+	return;  \
+} \
+	moneyStr += inNumstr; \
+	numchanged = true;  \
+}  \
+
+	QString moneyStr = ui.labMoney->text();
+	// 小数点后两位拦截住
+	int pointPos = moneyStr.indexOf('.');
+	bool numchanged = false;
+	switch (inNum)
+	{
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 6:
+	case 7:
+	case 8:
+		ADDNUM(QString::number(inNum + 1));
+		break;
+	case 10:
+		ADDNUM('0');
+		break;
+	case 9:
+		if (pointPos == -1)
+		{
+			numchanged = true;
+			moneyStr += '.';
+		}
+		break;
+	case 11:
+		moneyStr = moneyStr.remove(moneyStr.length() - 1, 1);
+		//ui.edtMoney->setText(moneyStr);
+		moneyChanged(moneyStr);
+		break;
+	}
+
+	if (numchanged)
+	{
+		// 如果超出50000直接删掉最后一位即可
+		double moneyVal = moneyStr.toDouble();
+		if (moneyVal > MONEY_MAX_COUNT)
+		{
+			moneyStr = moneyStr.remove(moneyStr.length() - 1, 1);
+			//ui.edtMoney->setText(moneyStr);
+		}
+		//ui.edtMoney->setText(moneyStr);
+		moneyChanged(moneyStr);
+	}
+}
