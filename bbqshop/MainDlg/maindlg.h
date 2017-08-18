@@ -84,7 +84,7 @@ private slots:
 	void catchScreen(const QRect &inselect);
 	void checkPrice();
 	void bindSlot();
-	void showTipSlot(bool isShow);
+	//void showTipSlot(bool isShow);
 	void saveSetting();
 	void checkCashSoftCorrect();
 	void printerTest();
@@ -99,7 +99,7 @@ private slots:
 	void onPrinterStartToggled(bool isChecked);
 
 signals:
-	void showBindTipSig(bool );
+	//void showBindTipSig(bool );
 	void settingInfoFinished();
 	void urlBack(int, const Json::Value &);
 };

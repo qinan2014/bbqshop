@@ -1,4 +1,4 @@
-#include "BindShopDlg.h"
+Ôªø#include "BindShopDlg.h"
 #include "maindlg.h"
 #include "ProcessProtocal.h"
 #include "ZhuiHuiMsg.h"
@@ -10,9 +10,19 @@ BindShopDlg::BindShopDlg(QWidget *parent)
 {
 	parWidget = parent;
 	ui.setupUi(this);
+	setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint|Qt::Popup|Qt::Tool);
 
+	MainDlg *mDlg = (MainDlg *)parWidget;
+	codeSetIO::ShopCashdeskInfo &shopInfo = mDlg->GetSetting().shopCashdestInfo;
+	ui.shopNumTxt->setText(QString::number(shopInfo.shopid));
+	char cashdes[150];
+	sprintf(cashdes, "(%s) %s", shopInfo.cashdeskId, shopInfo.cashdeskName);
+	ui.cboCashNo->addItem(cashdes);
+	ui.cboCashNo->setCurrentIndex(0);
 	connect(ui.btnCommit, SIGNAL(pressed()), this, SLOT(commitSlot()));
 	connect(ui.btnBind, SIGNAL(pressed()), this, SLOT(bindSlot()));
+	connect(ui.btnOK, SIGNAL(pressed()), this, SLOT(accept()));
+	connect(ui.btnCancel, SIGNAL(pressed()), this, SLOT(reject()));
 }
 
 BindShopDlg::~BindShopDlg()
@@ -25,7 +35,7 @@ void BindShopDlg::commitSlot()
 	MainDlg *mDlg = (MainDlg *)parWidget;
 	codeSetIO::ShopCashdeskInfo &shopInfo = mDlg->GetSetting().shopCashdestInfo;
 
-	// ªÒµ√ ‰»Îµƒ√≈≈∆∫≈
+	// Ëé∑ÂæóËæìÂÖ•ÁöÑÈó®ÁâåÂè∑
 	Json::Value item;
 	item["shopid"] = ui.shopNumTxt->text().toStdString();
 
@@ -43,7 +53,7 @@ void BindShopDlg::bindSlot()
 	MainDlg *mDlg = (MainDlg *)parWidget;
 	if (mCashNos.size() < 1)
 	{
-		showTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("æØ∏Ê"), QString::fromLocal8Bit("«Îœ»Ã·Ωª"));
+		showTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("Ë≠¶Âëä"), QString::fromLocal8Bit("ËØ∑ÂÖàÊèê‰∫§"));
 		return;
 	}
 	//emit showBindTipSig(true);
@@ -95,7 +105,7 @@ inline void BindShopDlg::urlbackOnCommit(const Json::Value &inVal)
 	{
 		Json::Value mValData;
 		mValData[PRO_HEAD] = TO_SHOWTIP;
-		mValData[PRO_TIPSTR] = (isReturnSuc ? QString::fromLocal8Bit("Ã·Ωª≥…π¶°£").toStdString() : QString::fromLocal8Bit("Ã·Ωª ß∞‹°£").toStdString());
+		mValData[PRO_TIPSTR] = (isReturnSuc ? QString::fromLocal8Bit("Êèê‰∫§ÊàêÂäü„ÄÇ").toStdString() : QString::fromLocal8Bit("Êèê‰∫§Â§±Ë¥•„ÄÇ").toStdString());
 		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
 		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
 	}
@@ -145,7 +155,8 @@ inline void BindShopDlg::urlbackOnBind(const Json::Value &inVal)
 	shopInfo.shopid = ui.shopNumTxt->text().toInt();
 	shopInfo.isBind = isReturnSuc;
 
-	//ui.cashNoTxt->setText(shopInfo.cashdeskName); // maindlg¿Ô√Ê
+	//ui.cashNoTxt->setText(shopInfo.cashdeskName); // maindlgÈáåÈù¢
+	emit cashNumFun(shopInfo.cashdeskName);
 }
 
 
@@ -158,7 +169,8 @@ void BindShopDlg::setCashInfo(const Json::Value &inData)
 	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int)), this, SLOT(cashNoChanged(int)));
 
 	const char *shopname = inData["SHOP_NAME"].asCString();
-	//ui.shopNameTxt->setText(shopname); //maindlg¿Ô√Ê
+	//ui.shopNameTxt->setText(shopname); //maindlgÈáåÈù¢
+	emit shopNameFun(shopname);
 
 	Json::Value cashObj = inData["CASH_LIST"];
 	int sz = cashObj.size();
@@ -194,7 +206,7 @@ void BindShopDlg::showTipDialogOK(int icon, const QString &inTitle, const QStrin
 {
 	QMessageBox box((QMessageBox::Icon)icon, inTitle, inTxt);
 	box.setStandardButtons (QMessageBox::Ok);
-	box.setButtonText (QMessageBox::Ok,QString::fromLocal8Bit("»∑ ∂®"));
+	box.setButtonText (QMessageBox::Ok,QString::fromLocal8Bit("Á°Æ ÂÆö"));
 	box.setWindowFlags(Qt::WindowStaysOnTopHint);
 	box.setWindowFlags(box.windowFlags()&~Qt::WindowMaximizeButtonHint&~Qt::WindowMinimizeButtonHint);
 	box.setDefaultButton(QMessageBox::Ok);

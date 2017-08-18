@@ -30,6 +30,10 @@ private slots:
 	void bindSlot();
 	void onUrlBack(int urlType, const Json::Value &inVal);
 	void cashNoChanged(int newIndex);
+
+signals:
+	void shopNameFun(const QString &);
+	void cashNumFun(const QString &);
 };
 
 #endif // BINDSHOPDLG_H

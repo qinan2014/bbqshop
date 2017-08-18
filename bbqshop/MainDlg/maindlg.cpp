@@ -189,11 +189,11 @@ inline void MainDlg::initFrame()
 	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
 	ui.shopNameTxt->setText((shopInfo.shopName));
 	ui.cashNoTxt->setText(shopInfo.cashdeskName);
-	ui.shopNumTxt->setText(QString::number(shopInfo.shopid));
-	char cashdes[150];
-	sprintf(cashdes, "(%s) %s", shopInfo.cashdeskId, shopInfo.cashdeskName);
-	ui.cboCashNo->addItem(cashdes);
-	ui.cboCashNo->setCurrentIndex(0);
+	//ui.shopNumTxt->setText(QString::number(shopInfo.shopid));
+	//char cashdes[150];
+	//sprintf(cashdes, "(%s) %s", shopInfo.cashdeskId, shopInfo.cashdeskName);
+	//ui.cboCashNo->addItem(cashdes);
+	//ui.cboCashNo->setCurrentIndex(0);
 	// 收银软件信息
 	codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
 	int mRelativeType = carishInfo.selectRange.relitiveType;
@@ -349,8 +349,8 @@ inline void MainDlg::initFrame()
 	//connect(ui.btnCommit, SIGNAL(pressed()), this, SLOT(commitSlot()));
 	connect(ui.btnBind, SIGNAL(pressed()), this, SLOT(bindSlot()));
 	connect(ui.pbtSave, SIGNAL(pressed()), this, SLOT(saveSetting()));
-	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int )), this, SLOT(cashNoChanged(int )));
-	connect(this, SIGNAL(showBindTipSig(bool )), this, SLOT(showTipSlot(bool )));
+	//connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int )), this, SLOT(cashNoChanged(int )));
+	//connect(this, SIGNAL(showBindTipSig(bool )), this, SLOT(showTipSlot(bool )));
 	connect(ui.btnCheck, SIGNAL(pressed()), this, SLOT(checkCashSoftCorrect()));
 	connect(ui.btnPrinterTest, SIGNAL(pressed()), this, SLOT(printerTest()));
 	connect(ui.pbtClear, SIGNAL(pressed()), this, SLOT(clickClear()));
@@ -759,7 +759,10 @@ inline void MainDlg::showPrice(const Json::Value &inJson)
 
 void MainDlg::bindSlot()
 {
-	BindShopDlg dlg;
+	BindShopDlg dlg(this);
+	connect(this, SIGNAL(urlBack(int, const Json::Value &)), &dlg, SLOT(onUrlBack(int, const Json::Value &)));
+	connect(&dlg, SIGNAL(shopNameFun(const QString &)), ui.shopNameTxt, SLOT(setText(const QString&)));
+	connect(&dlg, SIGNAL(cashNumFun(const QString &)), ui.cashNoTxt, SLOT(setText(const QString&)));
 	dlg.exec();
 }
 
@@ -769,14 +772,6 @@ bool MainDlg::isReturnSuccessFromeServer(const Json::Value &pjsonVal)
 	std::string resCode = pjsonVal["result_code"].asString();
 	bool isReturnSuc = !(retCode == "FAIL" || resCode == "FAIL" || retCode == "fail" || resCode == "fail" );
 	return isReturnSuc;
-}
-
-void MainDlg::showTipSlot(bool isShow)
-{
-	//if (isShow)
-	//	ui.labBindTip->setText(QString::fromLocal8Bit("未绑定"));
-	//else
-	//	ui.labBindTip->hide();
 }
 
 void MainDlg::saveSetting()
