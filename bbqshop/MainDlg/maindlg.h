@@ -54,9 +54,6 @@ private:
 	inline void parseProcessJsonData(QString inJson);
 	inline void saveLoginData(const Json::Value &inJson);
 	inline void showPrice(const Json::Value &value);
-	//inline void urlbackOnCommit(const Json::Value &value);
-	//inline void urlbackOnBind(const Json::Value &value);
-	//void setCashInfo(const Json::Value &inData);
 	void memeryPrintName();
 	void SavePrintFont(int printerType, int printerFont);
 	void SaveAllSetting();
@@ -86,8 +83,6 @@ private slots:
 	void catchScreen();
 	void catchScreen(const QRect &inselect);
 	void checkPrice();
-	//void commitSlot();
-	//void cashNoChanged(int newIndex);
 	void bindSlot();
 	void showTipSlot(bool isShow);
 	void saveSetting();
