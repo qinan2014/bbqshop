@@ -14,6 +14,7 @@
 #include "AllExeName.h"
 #include "ZBase64.h"
 #include <QDir>
+#include "BindShopDlg.h"
 
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
@@ -68,6 +69,7 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 	settingRW.ReadZHSetting();
 	// 初始化数据
 	//initFrame();
+	qRegisterMetaType<Json::Value>("Json::Value");
 	connect(this, SIGNAL(settingInfoFinished()), this, SLOT(onSettingInfoFinished()));
 	//QTimer::singleShot(100,this, SLOT(hide()) );
 
@@ -79,6 +81,26 @@ MainDlg::MainDlg(QApplication *pApp, char *account, QWidget *parent)
 MainDlg::~MainDlg()
 {
 
+}
+
+void MainDlg::GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag)
+{
+	urlServer->GetDataFromServer(inSecondAddr, inApi, inData, urlTag);
+}
+
+void MainDlg::GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag)
+{
+	urlServer->GetDataFromServer1(inUrl, inSecondAddr, inApi, ioRootVal, urlTag);
+}
+
+codeSetIO::ZHIHUISETTING &MainDlg::GetSetting()
+{
+	return mZHSetting;
+}
+
+int MainDlg::GetMAC(char *mac)
+{
+	return urlServer->GetMAC(mac);
 }
 
 inline void MainDlg::setTopBtn()
@@ -130,10 +152,9 @@ bool MainDlg::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::st
 		switch (urlTag)
 		{
 		case URL_SETTING_DLG_COMMIT:
-			urlbackOnCommit(value);
-			break;
 		case URL_SETTING_DLG_BIND:
-			urlbackOnBind(value);
+			//urlbackOnBind(value);
+			emit urlBack(urlTag, value);
 			break;
 #ifdef INDEPENDENTLOGIN
 		case URL_LOGIN_DLG:
@@ -325,7 +346,7 @@ inline void MainDlg::initFrame()
 	// 按钮控件的信号
 	connect(ui.btnGetScreen, SIGNAL(pressed()), this, SLOT(catchScreen()));
 	connect(ui.btnCheckPrice, SIGNAL(pressed()), this, SLOT(checkPrice()));
-	connect(ui.btnCommit, SIGNAL(pressed()), this, SLOT(commitSlot()));
+	//connect(ui.btnCommit, SIGNAL(pressed()), this, SLOT(commitSlot()));
 	connect(ui.btnBind, SIGNAL(pressed()), this, SLOT(bindSlot()));
 	connect(ui.pbtSave, SIGNAL(pressed()), this, SLOT(saveSetting()));
 	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int )), this, SLOT(cashNoChanged(int )));
@@ -736,48 +757,51 @@ inline void MainDlg::showPrice(const Json::Value &inJson)
 	ui.txtPrice->setText(pricestr);
 }
 
-void MainDlg::commitSlot()
-{
-	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
-
-	// 获得输入的门牌号
-	Json::Value item;
-	item["shopid"] = ui.shopNumTxt->text().toStdString();
-
-	std::string itemVal = item.toStyledString();
-	std::string::size_type rePos;
-	while ((rePos = itemVal.find(" ")) != -1) {
-		itemVal.replace(rePos, 1, "");
-	}
-
-	urlServer->GetDataFromServer("api/app/v1", SETTINGCOMMITAPI, itemVal, URL_SETTING_DLG_COMMIT);
-}
+//void MainDlg::commitSlot()
+//{
+//	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+//
+//	// 获得输入的门牌号
+//	Json::Value item;
+//	item["shopid"] = ui.shopNumTxt->text().toStdString();
+//
+//	std::string itemVal = item.toStyledString();
+//	std::string::size_type rePos;
+//	while ((rePos = itemVal.find(" ")) != -1) {
+//		itemVal.replace(rePos, 1, "");
+//	}
+//
+//	urlServer->GetDataFromServer("api/app/v1", SETTINGCOMMITAPI, itemVal, URL_SETTING_DLG_COMMIT);
+//}
 
 void MainDlg::bindSlot()
 {
-	if (mCashNos.size() < 1)
-	{
-		showTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("请先提交"));
-		return;
-	}
-	emit showBindTipSig(true);
+	//if (mCashNos.size() < 1)
+	//{
+	//	showTipDialogOK(QMessageBox::Warning, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("请先提交"));
+	//	return;
+	//}
+	//emit showBindTipSig(true);
 
-	// shop id
-	QString shopID = ui.shopNumTxt->text();
-	Json::Value root;
-	root["shop_id"] = shopID.toStdString();
-	char str[25];
-	int cashNo = mCashNos[ui.cboCashNo->currentIndex()];
-	itoa(cashNo, str, 10);
-	root["cashdesk_id"] = str;
-	root["android_type"] = "1";
-	char  mac[MACADDRLEN];  
-	ZHFuncLib::NativeLog("", "SettingWidget::bindSlot", "a");
-	urlServer->GetMAC(mac);
-	root["android_no"] = mac;
-	codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
-	root["cashier_account"] = deskInfo.account;
-	urlServer->GetDataFromServer1(URLCLOUND, SETTINGBINDAPI, "", root, URL_SETTING_DLG_BIND);
+	//// shop id
+	//QString shopID = ui.shopNumTxt->text();
+	//Json::Value root;
+	//root["shop_id"] = shopID.toStdString();
+	//char str[25];
+	//int cashNo = mCashNos[ui.cboCashNo->currentIndex()];
+	//itoa(cashNo, str, 10);
+	//root["cashdesk_id"] = str;
+	//root["android_type"] = "1";
+	//char  mac[MACADDRLEN];  
+	//ZHFuncLib::NativeLog("", "SettingWidget::bindSlot", "a");
+	//urlServer->GetMAC(mac);
+	//root["android_no"] = mac;
+	//codeSetIO::ShopCashdeskInfo &deskInfo = mZHSetting.shopCashdestInfo;
+	//root["cashier_account"] = deskInfo.account;
+	//urlServer->GetDataFromServer1(URLCLOUND, SETTINGBINDAPI, "", root, URL_SETTING_DLG_BIND);
+
+	BindShopDlg dlg;
+	dlg.exec();
 
 }
 
@@ -789,111 +813,111 @@ bool MainDlg::isReturnSuccessFromeServer(const Json::Value &pjsonVal)
 	return isReturnSuc;
 }
 
-inline void MainDlg::urlbackOnCommit(const Json::Value &inVal)
-{
-	bool isReturnSuc = isReturnSuccessFromeServer(inVal);
-	bool hasReturnMsg = inVal.isMember("return_msgs");
-	if (isReturnSuc)
-	{
-		setCashInfo(inVal["data"]);
-	}
-	if (!hasReturnMsg)
-	{
-		Json::Value mValData;
-		mValData[PRO_HEAD] = TO_SHOWTIP;
-		mValData[PRO_TIPSTR] = (isReturnSuc ? QString::fromLocal8Bit("提交成功。").toStdString() : QString::fromLocal8Bit("提交失败。").toStdString());
-		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
-		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
-	}
-}
+//inline void MainDlg::urlbackOnCommit(const Json::Value &inVal)
+//{
+//	bool isReturnSuc = isReturnSuccessFromeServer(inVal);
+//	bool hasReturnMsg = inVal.isMember("return_msgs");
+//	if (isReturnSuc)
+//	{
+//		setCashInfo(inVal["data"]);
+//	}
+//	if (!hasReturnMsg)
+//	{
+//		Json::Value mValData;
+//		mValData[PRO_HEAD] = TO_SHOWTIP;
+//		mValData[PRO_TIPSTR] = (isReturnSuc ? QString::fromLocal8Bit("提交成功。").toStdString() : QString::fromLocal8Bit("提交失败。").toStdString());
+//		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+//		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+//	}
+//}
+//
+//inline void MainDlg::urlbackOnBind(const Json::Value &inVal)
+//{
+//	bool isReturnSuc = isReturnSuccessFromeServer(inVal);
+//	std::string dcdev_mac = inVal["dcdev_mac"].asString();
+//	std::string dcdev_no = inVal["dcdev_no"].asString();
+//	if (isReturnSuc)
+//	{
+//		emit showBindTipSig(false);
+//		Json::Value mValData;
+//		mValData[PRO_HEAD] = TO_FLOATWIN_RECONNECT_SOCKET;
+//		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
+//		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
+//	}
+//	else
+//	{
+//		ZHFuncLib::NativeLog("", inVal.toStyledString().c_str(), "a");
+//		return;
+//	}
+//	//CString tmpstr;
+//	//tmpstr.Format(L"dcdev mac: %s     ,dcdev no: %s ", pWnd->CharToWChar(dcdev_mac.c_str()), pWnd->CharToWChar(dcdev_no.c_str()));
+//	//ZHMainDlg::InitInstance(false)->SetStatus(tmpstr);
+//
+//	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+//	const char *tmpChar = inVal["shop_code"].asCString();
+//	memcpy(shopInfo.shopCode, tmpChar, strlen(tmpChar));
+//	shopInfo.shopCode[strlen(tmpChar)] = 0;
+//	tmpChar = inVal["shop_name"].asCString();
+//	memcpy(shopInfo.shopName, tmpChar, strlen(tmpChar));
+//	shopInfo.shopName[strlen(tmpChar)] = 0;
+//	tmpChar = inVal["cashdesk_id"].asCString();
+//	memcpy(shopInfo.cashdeskId, tmpChar, strlen(tmpChar));
+//	shopInfo.cashdeskId[strlen(tmpChar)] = 0;
+//	tmpChar = inVal["cashdesk_name"].asCString();
+//	memcpy(shopInfo.cashdeskName, tmpChar, strlen(tmpChar));
+//	shopInfo.cashdeskName[strlen(tmpChar)] = 0;
+//	tmpChar = inVal["dcdev_no"].asCString();
+//	memcpy(shopInfo.dcdevNo, tmpChar, strlen(tmpChar));
+//	shopInfo.dcdevNo[strlen(tmpChar)] = 0;
+//	tmpChar = inVal["dcdev_mac"].asCString();
+//	memcpy(shopInfo.dcdevMac, tmpChar, strlen(tmpChar));
+//	shopInfo.dcdevMac[strlen(tmpChar)] = 0;
+//	shopInfo.shopid = ui.shopNumTxt->text().toInt();
+//	shopInfo.isBind = isReturnSuc;
+//
+//	ui.cashNoTxt->setText(shopInfo.cashdeskName);
+//}
 
-inline void MainDlg::urlbackOnBind(const Json::Value &inVal)
-{
-	bool isReturnSuc = isReturnSuccessFromeServer(inVal);
-	std::string dcdev_mac = inVal["dcdev_mac"].asString();
-	std::string dcdev_no = inVal["dcdev_no"].asString();
-	if (isReturnSuc)
-	{
-		emit showBindTipSig(false);
-		Json::Value mValData;
-		mValData[PRO_HEAD] = TO_FLOATWIN_RECONNECT_SOCKET;
-		HWND hwnd = ::FindWindowW(NULL, FLOATWINTITLEW);
-		ZHFuncLib::SendProcessMessage((HWND)this->winId(), hwnd, ZHIHUI_CODE_MSG, mValData.toStyledString());
-	}
-	else
-	{
-		ZHFuncLib::NativeLog("", inVal.toStyledString().c_str(), "a");
-		return;
-	}
-	//CString tmpstr;
-	//tmpstr.Format(L"dcdev mac: %s     ,dcdev no: %s ", pWnd->CharToWChar(dcdev_mac.c_str()), pWnd->CharToWChar(dcdev_no.c_str()));
-	//ZHMainDlg::InitInstance(false)->SetStatus(tmpstr);
+//void MainDlg::setCashInfo(const Json::Value &inData)
+//{
+//	mCashNos.clear();
+//	mCashNames.clear();
+//	disconnect(ui.cboCashNo, SIGNAL(currentIndexChanged(int)), this, SLOT(cashNoChanged(int)));
+//	ui.cboCashNo->clear();
+//	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int)), this, SLOT(cashNoChanged(int)));
+//	ui.cashNoTxt->setText("");
+//
+//	const char *shopname = inData["SHOP_NAME"].asCString();
+//	ui.shopNameTxt->setText(shopname);
+//
+//	Json::Value cashObj = inData["CASH_LIST"];
+//	int sz = cashObj.size();
+//	for (unsigned int i = 0; i < sz; i++)
+//	{
+//		Json::Value noInfo = cashObj[i];
+//		int id = noInfo["ID"].asInt();
+//		const char *cashNoName = noInfo["CASH_NAME"].asCString();
+//		mCashNos.push_back(id);
+//		mCashNames.push_back(cashNoName);
+//		char string[255];
+//		sprintf(string, "(%d)%s", id, cashNoName);
+//		ui.cboCashNo->addItem(string);
+//	}
+//	if (sz != 0)
+//	{
+//		ui.cboCashNo->setCurrentIndex(0);
+//		cashNoChanged(0);
+//	}
+//}
 
-	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
-	const char *tmpChar = inVal["shop_code"].asCString();
-	memcpy(shopInfo.shopCode, tmpChar, strlen(tmpChar));
-	shopInfo.shopCode[strlen(tmpChar)] = 0;
-	tmpChar = inVal["shop_name"].asCString();
-	memcpy(shopInfo.shopName, tmpChar, strlen(tmpChar));
-	shopInfo.shopName[strlen(tmpChar)] = 0;
-	tmpChar = inVal["cashdesk_id"].asCString();
-	memcpy(shopInfo.cashdeskId, tmpChar, strlen(tmpChar));
-	shopInfo.cashdeskId[strlen(tmpChar)] = 0;
-	tmpChar = inVal["cashdesk_name"].asCString();
-	memcpy(shopInfo.cashdeskName, tmpChar, strlen(tmpChar));
-	shopInfo.cashdeskName[strlen(tmpChar)] = 0;
-	tmpChar = inVal["dcdev_no"].asCString();
-	memcpy(shopInfo.dcdevNo, tmpChar, strlen(tmpChar));
-	shopInfo.dcdevNo[strlen(tmpChar)] = 0;
-	tmpChar = inVal["dcdev_mac"].asCString();
-	memcpy(shopInfo.dcdevMac, tmpChar, strlen(tmpChar));
-	shopInfo.dcdevMac[strlen(tmpChar)] = 0;
-	shopInfo.shopid = ui.shopNumTxt->text().toInt();
-	shopInfo.isBind = isReturnSuc;
-
-	ui.cashNoTxt->setText(shopInfo.cashdeskName);
-}
-
-void MainDlg::setCashInfo(const Json::Value &inData)
-{
-	mCashNos.clear();
-	mCashNames.clear();
-	disconnect(ui.cboCashNo, SIGNAL(currentIndexChanged(int)), this, SLOT(cashNoChanged(int)));
-	ui.cboCashNo->clear();
-	connect(ui.cboCashNo, SIGNAL(currentIndexChanged(int)), this, SLOT(cashNoChanged(int)));
-	ui.cashNoTxt->setText("");
-
-	const char *shopname = inData["SHOP_NAME"].asCString();
-	ui.shopNameTxt->setText(shopname);
-
-	Json::Value cashObj = inData["CASH_LIST"];
-	int sz = cashObj.size();
-	for (unsigned int i = 0; i < sz; i++)
-	{
-		Json::Value noInfo = cashObj[i];
-		int id = noInfo["ID"].asInt();
-		const char *cashNoName = noInfo["CASH_NAME"].asCString();
-		mCashNos.push_back(id);
-		mCashNames.push_back(cashNoName);
-		char string[255];
-		sprintf(string, "(%d)%s", id, cashNoName);
-		ui.cboCashNo->addItem(string);
-	}
-	if (sz != 0)
-	{
-		ui.cboCashNo->setCurrentIndex(0);
-		cashNoChanged(0);
-	}
-}
-
-void MainDlg::cashNoChanged(int newIndex)
-{
-	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
-	if (newIndex < 0)
-		return;
-	sprintf(shopInfo.cashdeskId, "%d", mCashNos[newIndex]);
-	memcpy(shopInfo.cashdeskName, mCashNames[newIndex].c_str(), mCashNames[newIndex].length());
-}
+//void MainDlg::cashNoChanged(int newIndex)
+//{
+//	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
+//	if (newIndex < 0)
+//		return;
+//	sprintf(shopInfo.cashdeskId, "%d", mCashNos[newIndex]);
+//	memcpy(shopInfo.cashdeskName, mCashNames[newIndex].c_str(), mCashNames[newIndex].length());
+//}
 
 void MainDlg::showTipSlot(bool isShow)
 {

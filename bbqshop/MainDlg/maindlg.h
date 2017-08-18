@@ -20,6 +20,12 @@ public:
 	MainDlg(QApplication *pApp, char *account = NULL, QWidget *parent = 0);
 	~MainDlg();
 
+	void GetDataFromServer(std::string inSecondAddr, std::string inApi, std::string inData, int urlTag);
+	void GetDataFromServer1(std::string inUrl, std::string inSecondAddr, std::string inApi, Json::Value &ioRootVal, int urlTag = -1);
+	codeSetIO::ZHIHUISETTING &GetSetting();
+	int GetMAC(char *mac);
+	bool isReturnSuccessFromeServer(const Json::Value &pjsonVal);
+
 	std::vector<QString > mWinClassNames;
 	std::vector<QString > mWinWindowNames;
 	std::vector<int > mWinProcessIds;
@@ -48,10 +54,9 @@ private:
 	inline void parseProcessJsonData(QString inJson);
 	inline void saveLoginData(const Json::Value &inJson);
 	inline void showPrice(const Json::Value &value);
-	inline void urlbackOnCommit(const Json::Value &value);
-	inline void urlbackOnBind(const Json::Value &value);
-	bool isReturnSuccessFromeServer(const Json::Value &pjsonVal);
-	void setCashInfo(const Json::Value &inData);
+	//inline void urlbackOnCommit(const Json::Value &value);
+	//inline void urlbackOnBind(const Json::Value &value);
+	//void setCashInfo(const Json::Value &inData);
 	void memeryPrintName();
 	void SavePrintFont(int printerType, int printerFont);
 	void SaveAllSetting();
@@ -81,8 +86,8 @@ private slots:
 	void catchScreen();
 	void catchScreen(const QRect &inselect);
 	void checkPrice();
-	void commitSlot();
-	void cashNoChanged(int newIndex);
+	//void commitSlot();
+	//void cashNoChanged(int newIndex);
 	void bindSlot();
 	void showTipSlot(bool isShow);
 	void saveSetting();
@@ -101,6 +106,7 @@ private slots:
 signals:
 	void showBindTipSig(bool );
 	void settingInfoFinished();
+	void urlBack(int, const Json::Value &);
 };
 
 #endif // MAINDLG_H
