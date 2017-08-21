@@ -6,13 +6,14 @@ enum HookChars
 {
 	START_HOOK,
 	HOOK_WXKEY,
-	HOOK_NUM,
+	HOOK_MANINPUT_NUM,
+	HOOK_SCANCODE_NUM,
 	HOOK_ESC,
 	HOOK_RETURN,
 	HOOK_SETPAYKEY,
 };
 
-#define HOOKCHARSNUM 6
+#define HOOKCHARSNUM 7
 
 //#define HOOKAPIDIR "hookapi"
 //#define HOOKWRITEFUNC "writefile.info"

@@ -207,12 +207,19 @@ inline void bbqshop::stopHook()
 #endif
 }
 
-inline void bbqshop::hookNum(bool isEnable)
+inline void bbqshop::hookManInputNum(bool isEnable)
 {
 #ifdef USEKEYHOOK
-	mKeyHook.EnableInterception(HOOK_NUM, isEnable);
+	mKeyHook.EnableInterception(HOOK_MANINPUT_NUM, isEnable);
 	hookESC(isEnable);
 	hookReturn(isEnable);
+#endif
+}
+
+inline void bbqshop::hookScanCodeNum(bool isEnable)
+{
+#ifdef USEKEYHOOK
+	mKeyHook.EnableInterception(HOOK_SCANCODE_NUM, isEnable);
 #endif
 }
 
@@ -347,7 +354,7 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 		hookManInputCodeMsg(msg);
 		return true;
 	case ZHIHUI_CODE_MSG:
-		hookScanCodeMsg(msg);
+		onHookScanCodeMsg(msg);
 		return true;
 	default:
 		break;
@@ -425,7 +432,7 @@ inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 	case '.':
 	case VK_OEM_PERIOD:
 	case VK_BACK:
-		hookManInputNum(p->vkCode);
+		onHookManInputNum(p->vkCode);
 		break;
 	case VK_ESCAPE:
 		emit manInputESC();
@@ -446,7 +453,7 @@ inline void bbqshop::hookManInputCodeMsg(MSG* msg)
 	}
 }
 
-inline void bbqshop::hookScanCodeMsg(MSG* msg)
+inline void bbqshop::onHookScanCodeMsg(MSG* msg)
 {
 #define HOOKNUM 20
 	PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)msg->lParam;
@@ -457,21 +464,64 @@ inline void bbqshop::hookScanCodeMsg(MSG* msg)
 	hookInterception[hookInterceptionIndex++] = *p;
 	if(p->vkCode == VK_RETURN )
 	{
-		PayDialog *dlg = PayDialog::InitInstance(false);
-		if (dlg != NULL)
+		QString scanCode;
+		int charLen = hookInterceptionIndex - 1;
+		for (int i = 0; i < charLen; ++i)
 		{
-			QString scanCode;
-			int charLen = hookInterceptionIndex - 1;
-			for (int i = 0; i < charLen; ++i)
+			scanCode += (TCHAR)hookInterception[i].vkCode;
+		}
+		bool ispaycode = isPayCode(scanCode);
+		if (ispaycode)
+		{
+			showPayDialog();
+			PayDialog *dlg = PayDialog::InitInstance(false);
+			if (dlg != NULL)
 			{
-				scanCode += (TCHAR)hookInterception[i].vkCode;
+				dlg->SetScanCode(scanCode);
 			}
-			dlg->SetScanCode(scanCode);
+		}
+		else
+		{
+			hookScanCodeNum(false);
+			bool isHookingManInputNum = isHooking(HOOK_MANINPUT_NUM);
+			hookManInputNum(false);
+			for (int i = 0; i < hookInterceptionIndex; ++i)
+			{
+				//char tmpbuf[150];
+				//sprintf(tmpbuf, "sendInterceptionNumToTargetWnd keyboard code:[%04d] ,scan code: [%04d], char : %c, flag: %d, time: %d", hookInterception[i].vkCode, 
+				//	hookInterception[i].scanCode, hookInterception[i].vkCode, hookInterception[i].flags, hookInterception[i].time);
+				//LogError(tmpbuf, "a");
+				keybd_event((BYTE)hookInterception[i].vkCode,0,0,0);
+				keybd_event((BYTE)hookInterception[i].vkCode,0,KEYEVENTF_KEYUP,0);
+			}
+			hookManInputNum(isHookingManInputNum);
+			hookScanCodeNum(true);
 		}
 		hookInterceptionIndex = 0;
 	}
 }
 
+inline bool bbqshop::isPayCode(const QString &inCode)
+{
+	if (inCode.length() != 18)
+		return false;
+	bool isPay = false;
+	QString leftTwoStr = inCode.left(2);
+	int leftNum = leftTwoStr.toInt();
+	int setsz = mZHSetting.zhPayCode.size();
+	for (int i = 0; i < setsz; ++i)
+	{
+		codeSetIO::PayCodeNode *codeNode = mZHSetting.zhPayCode.at(i);
+		int sz = codeNode->fixNums.size();
+		for (int j = 0; j < sz; ++j)
+		{
+			isPay = (codeNode->fixNums[j] == leftNum);
+			if (isPay)
+				return true;
+		}
+	}
+	return isPay;
+}
 
 void bbqshop::ShowTipString(QString inTip, QString inTitle)
 {
@@ -492,14 +542,18 @@ void bbqshop::onCloseTipWin()
 
 void bbqshop::setFocusOnCashier()
 {
-	if (isOperatorOtherDlg())
-		return;
 	std::wstring softname = ZHFuncLib::StringToWstring(mZHSetting.carishInfo.windowName);
 	if (softname.empty())
+	{
+		mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,5,5,0,0); 
 		return;
+	}
 	HWND hwnd = ::FindWindow(NULL, softname.c_str());
 	if (hwnd == NULL)
+	{
+		mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,5,5,0,0); 
 		return;
+	}
 	//hookNum(false);
 	BOOL suc = ::SetForegroundWindow(hwnd);//设置后能成功激活进程窗口，但是无法将输入焦点转移到进程窗口
 
@@ -554,6 +608,8 @@ inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 
 	autoInjectDll();
 	emit returnFocusToCashier();
+
+	hookScanCodeNum(true);
 }
 
 inline void bbqshop::processJsonOnMainDlgClose(const Json::Value &value)
@@ -833,7 +889,7 @@ void bbqshop::showPayDialog()
 		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
 		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(saveCurrentTradeNo(QString )));
 		connect(this, SIGNAL(netError(QString, int, int)), dlg, SLOT(onNetError(QString, int, int)));
-		hookNum(true);
+		hookManInputNum(true);
 		//dlg->SetMoney(qaPrice);
 		startGetOCRPrice();
 		if (mZHSetting.shopCashdestInfo.isGetPriceActualTime != 1)
@@ -848,12 +904,12 @@ void bbqshop::showPayDialog()
 void bbqshop::onClosePayDlg(bool haspayed)
 {
 	stopGetOCRPriceTimer();
-	hookNum(false);
+	hookManInputNum(false);
 	emit returnFocusToCashier();
 
 }
 
-inline void bbqshop::hookManInputNum(DWORD vkCode)
+inline void bbqshop::onHookManInputNum(DWORD vkCode)
 {
 	if (isCtrlKeyDown)
 	{
@@ -889,14 +945,14 @@ inline void bbqshop::hookManInputCtrl(PKBDLLHOOKSTRUCT p)
 	if (p->flags < 128)  // 这是按下
 	{
 		isCtrlKeyDown = true;
-		hookNum(true);
+		hookManInputNum(true);
 	}
 	else
 	{
 		isCtrlKeyDown = false;
 		if (isOperatorOtherDlg())
 			return;
-		hookNum(false);
+		hookManInputNum(false);
 	}
 }
 
@@ -1142,6 +1198,9 @@ void bbqshop::showPayResultDlg()
 		return;
 	hookESC(true);
 	isShowingPayResult = true;
+	hookScanCodeNum(false);
+	bool isHookingManInputNum = isHooking(HOOK_MANINPUT_NUM);
+	hookManInputNum(false);
 	PaySuccessShowDlg dlg(this);
 	connect(this, SIGNAL(manInputESC()), &dlg, SLOT(accept()));
 	connect(this, SIGNAL(paySuccesSig(const QString &)), &dlg, SLOT(paySuccess(const QString &)));
@@ -1150,6 +1209,8 @@ void bbqshop::showPayResultDlg()
 	hookESC(false);
 	isShowingPayResult = false;
 	emit returnFocusToCashier();
+	hookManInputNum(isHookingManInputNum);
+	hookScanCodeNum(true);
 }
 
 void bbqshop::tradeNoResult(const Json::Value & inData)

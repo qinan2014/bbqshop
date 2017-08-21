@@ -10,7 +10,7 @@ PaySuccessShowDlg::PaySuccessShowDlg(QWidget *parent)
 {
 	ui.setupUi(this);
 	floatWidget = parent;
-	setWindowFlags(Qt::WindowStaysOnTopHint|Qt::Popup);
+	setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint|Qt::Popup|Qt::Tool);
 	//setWindowTitle(QString::fromLocal8Bit("支付成功"));
 
 	setStyleSheet("QDialog{border: 1px solid #112D4E;border-radius:0px}"); 

@@ -77,12 +77,13 @@ private:
 	inline void stopHook();
 	inline bool isHooking(int hookKey);
 	inline void hookManInputCodeMsg(MSG* msg);
-	inline void hookScanCodeMsg(MSG* msg);
-	inline void hookNum(bool isEnable);
+	inline void onHookScanCodeMsg(MSG* msg);
+	inline void hookManInputNum(bool isEnable);
+	inline void hookScanCodeNum(bool isEnable);
 	inline void hookESC(bool isEnable);
 	inline void hookReturn(bool isEnable);
 	inline void hookAttempToSetPayKey(bool isEnable);
-	inline void hookManInputNum(DWORD vkCode);
+	inline void onHookManInputNum(DWORD vkCode);
 	inline void hookManInputShift(PKBDLLHOOKSTRUCT p);
 	inline void hookManInputCtrl(PKBDLLHOOKSTRUCT p);
 	void hookSettingPayKey(PKBDLLHOOKSTRUCT p);
@@ -90,6 +91,7 @@ private:
 	inline void printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee);
 	void hookApiWriteFileData(void *inData, int dataLen);
 	inline QString comDataToPrice(void *inData, int dataLen);
+	inline bool isPayCode(const QString &inCode);
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);

@@ -23,6 +23,7 @@ HINSTANCE glhInstance = NULL;//DLL实例句柄
 #pragma data_seg()
 
 bool hookChars[HOOKCHARSNUM];
+bool isScanCoding;
 int wxKey, alipayKey;
 
 extern "C" int APIENTRY
@@ -77,9 +78,25 @@ LRESULT keyNumProc(PKBDLLHOOKSTRUCT p, int nCode,WPARAM wparam,LPARAM lparam)
 		{
 			if (p->time - hookCode1.time > 35) 
 			{
-				::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
+				isScanCoding = false;
+				if (hookChars[HOOK_MANINPUT_NUM])
+				{
+					::SendMessage(glhDisplayWnd, ZHIHUI_MANINPUT_MSG, wparam, lparam); 
+				}
+				else
+				{
+					bool isHookManInput = hookChars[HOOK_MANINPUT_NUM];
+					bool isHookScanCode = hookChars[HOOK_SCANCODE_NUM];
+					hookChars[HOOK_MANINPUT_NUM] = false;
+					hookChars[HOOK_SCANCODE_NUM] = false;
+					keybd_event((BYTE)hookCode1.vkCode,0,0,0);
+					hookChars[HOOK_MANINPUT_NUM] = isHookManInput;
+					hookChars[HOOK_SCANCODE_NUM] = isHookScanCode;
+					return CallNextHookEx(glhHook,nCode,wparam,lparam); 
+				}
 			}
 			else{
+				isScanCoding = true;
 				::SendMessage(glhDisplayWnd, ZHIHUI_CODE_MSG, wparam, lparam); 
 			}
 		}
@@ -121,6 +138,13 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 				{
 					return keyNumProc(p,nCode,wparam,lparam);
 				}
+				else if (isScanCoding)
+				{
+					LRESULT tmpres = keyNumProc(p,nCode,wparam,lparam);
+					if (p->vkCode >= 128)
+						isScanCoding = false;
+					return tmpres;
+				}
 				return CallNextHookEx(glhHook,nCode,wparam,lparam);
 			}
 			break;
@@ -147,7 +171,7 @@ LRESULT CALLBACK KeyProc(int nCode,WPARAM wparam,LPARAM lparam)
 		case VK_OEM_PERIOD:
 		case VK_BACK:
 			{
-				if (hookChars[HOOK_NUM])
+				if (hookChars[HOOK_MANINPUT_NUM] || hookChars[HOOK_SCANCODE_NUM]) // 不存在只拦截手动录入数字而不拦截扫码数字的情况
 				{
 					return keyNumProc(p,nCode,wparam,lparam);
 				}
@@ -197,6 +221,7 @@ BOOL CKeyHook::StartHook(HWND hWnd)
 		bReslt = TRUE;
 	}
 	glhDisplayWnd = hWnd;
+	isScanCoding = false;
 	return bReslt;
 }
 
