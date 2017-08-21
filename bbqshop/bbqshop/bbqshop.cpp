@@ -843,8 +843,6 @@ void bbqshop::showPayDialog()
 		}
 		dlg->show();
 	}
-	//ZHFuncLib::NativeLog("", "bbqshop::showPayDialog", "a");
-	//dlg->SetMoney(qaPrice);
 }
 
 void bbqshop::onClosePayDlg(bool haspayed)
@@ -1070,17 +1068,18 @@ void bbqshop::onESCEvent()
 
 bool bbqshop::isOperatorOtherDlg()
 {
+	if (isShowingPayResult)
+		return true;
 	PayDialog *dlg = PayDialog::InitInstance(false);
 	if (dlg != NULL)
+		return true;
+	if (isShowingHandoverDlg)
 		return true;
 	std::vector<int > ids;
 	ZHFuncLib::GetTargetProcessIds(MAINDLGEXE, ids);
 	if (ids.size() > 0)
 		return true;
-	if (isShowingHandoverDlg)
-		return true;
-	if (isShowingPayResult)
-		return true;
+	
 	return false;
 }
 
@@ -1112,6 +1111,7 @@ void bbqshop::saveCurrentTradeNo(QString tradeNo)
 {
 	curTradeNo = tradeNo;
 	QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()) );
+	QTimer::singleShot(300,this, SLOT(showPayResultDlg()) );
 }
 
 void bbqshop::checkPayResultSlot()
@@ -1131,6 +1131,25 @@ void bbqshop::requestTradeInfoByNo()
 		itemVal.replace(rePos, 1, "");
 	}
 	GetDataFromServer("api/app/v1", TRADEINFODETAILAPI, itemVal, URL_TRADEINFODETAIL);
+}
+
+void bbqshop::showPayResultDlg()
+{
+	emit manInputESC();
+	emit returnFocusToCashier();
+	// 显示支付结果对话框
+	if (isOperatorOtherDlg())
+		return;
+	hookESC(true);
+	isShowingPayResult = true;
+	PaySuccessShowDlg dlg(this);
+	connect(this, SIGNAL(manInputESC()), &dlg, SLOT(accept()));
+	connect(this, SIGNAL(paySuccesSig(const QString &)), &dlg, SLOT(paySuccess(const QString &)));
+	connect(this, SIGNAL(payFailedSig()), &dlg, SLOT(payFailed()));
+	dlg.exec();
+	hookESC(false);
+	isShowingPayResult = false;
+	emit returnFocusToCashier();
 }
 
 void bbqshop::tradeNoResult(const Json::Value & inData)
@@ -1156,45 +1175,9 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 	}
 	if (tradeStatus == 1) // 支付成功
 	{
-		isShowingPayResult = true;
-		emit manInputESC(); // 目的是关闭支付对话框
-		QString payTypeIcon;
-		switch (paytype)
-		{
-		case 1:
-			payTypeIcon = "/res/paytool_ali.png";
-			break;
-		case 2:
-		case 9:
-			payTypeIcon = "/res/paytool_wx.png";
-			break;
-		case 4:
-			payTypeIcon = "/res/paytool_jd.png";
-			break;
-		case 5:
-			payTypeIcon = "/res/paytool_msyh.png";
-			break;
-		}
-		// get private account 
-		codeSetIO::ShopCashdeskInfo &carishInfo = GetSetting().shopCashdestInfo;
-		if (carishInfo.isAutoPrint == 1)
-			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
-		PaySuccessShowDlg dlg(payTypeIcon, this);
-		connect(this, SIGNAL(manInputEnter()), &dlg, SLOT(accept()));
-		dlg.SetPaySuccessInfo(tradeNo, pay_fee);
-		hookReturn(true);
-		INT_PTR nResponse = dlg.exec();
-		bool clickPrint = false;
-		if (nResponse == QDialog::Accepted)
-		{
-			if (carishInfo.isAutoPrint != 1)  // if equal 1, it has been printed
-				clickPrint = true;
-		}
-		isShowingPayResult = false; 
-		hookReturn(false);
-		emit returnFocusToCashier();
-		if (clickPrint)
-			printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
+		emit paySuccesSig(pay_fee);
+		printPayResult(paytype, tradeNo, orig_fee, favo_fee, pay_fee);
+
 		QString showStatus = QString::fromLocal8Bit(urlServer->GetPayTool(paytype).c_str());
 		showStatus += QString::fromLocal8Bit("，已收款");
 		showStatus += pay_fee;

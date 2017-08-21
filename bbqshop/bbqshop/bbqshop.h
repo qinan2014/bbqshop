@@ -117,6 +117,8 @@ signals:
 	void checkPayResultSig();
 	void netError(QString, int, int);
 	void tradeResultSig(const Json::Value &);
+	void paySuccesSig(const QString &);
+	void payFailedSig();
 
 private slots:
 	void programQuit();
@@ -130,9 +132,11 @@ private slots:
 	void onESCEvent();
 	void requestTradeInfoByNo();
 	void saveCurrentTradeNo(QString tradeNo);
+	void showPayResultDlg();
 	void checkPayResultSlot();
 	void tradeNoResult(const Json::Value & inData);
 	void autoInjectDll();
+	//void onCreateBillSuccess();
 
 protected:
 	virtual bool nativeEvent(const QByteArray & eventType, void * message, long * result);
