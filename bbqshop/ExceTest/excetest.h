@@ -3,6 +3,7 @@
 
 #include <QtWidgets/QWidget>
 #include "ui_excetest.h"
+#include <QAxObject>
 
 class ExceTest : public QWidget
 {
@@ -14,6 +15,15 @@ public:
 
 private:
 	Ui::ExceTestClass ui;
+	QString targetDir;
+	QAxObject *applicationExcel;
+	QAxObject *workSheets;
+	QAxObject *curSheet;
+
+	bool createExcel(QAxObject *excelAX, QString file);
+
+private slots:
+	void onFileSelect();
 };
 
 #endif // EXCETEST_H

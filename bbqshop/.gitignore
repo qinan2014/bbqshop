@@ -69,6 +69,7 @@ Release/*.bbqinfo
 */Release
 
 
+*/Win32
 */GeneratedFiles
 *.sdf
 *.suo

@@ -33,7 +33,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ApiHook", "ApiHook\ApiHook.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DetourInjection", "DetourInjection\DetourInjection.vcxproj", "{B216E138-0276-4CF8-9DF4-B020732FE0AB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExceTest", "ExceTest\ExceTest.vcxproj", "{CFC03758-496C-4ABD-A938-7DDD2FF4B520}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExceTest", "ExceTest\ExceTest.vcxproj", "{68414316-1970-317A-9F1C-23563E8BAF4C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,10 +105,10 @@ Global
 		{B216E138-0276-4CF8-9DF4-B020732FE0AB}.Debug|Win32.Build.0 = Debug|Win32
 		{B216E138-0276-4CF8-9DF4-B020732FE0AB}.Release|Win32.ActiveCfg = Release|Win32
 		{B216E138-0276-4CF8-9DF4-B020732FE0AB}.Release|Win32.Build.0 = Release|Win32
-		{CFC03758-496C-4ABD-A938-7DDD2FF4B520}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CFC03758-496C-4ABD-A938-7DDD2FF4B520}.Debug|Win32.Build.0 = Debug|Win32
-		{CFC03758-496C-4ABD-A938-7DDD2FF4B520}.Release|Win32.ActiveCfg = Release|Win32
-		{CFC03758-496C-4ABD-A938-7DDD2FF4B520}.Release|Win32.Build.0 = Release|Win32
+		{68414316-1970-317A-9F1C-23563E8BAF4C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{68414316-1970-317A-9F1C-23563E8BAF4C}.Debug|Win32.Build.0 = Debug|Win32
+		{68414316-1970-317A-9F1C-23563E8BAF4C}.Release|Win32.ActiveCfg = Release|Win32
+		{68414316-1970-317A-9F1C-23563E8BAF4C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
