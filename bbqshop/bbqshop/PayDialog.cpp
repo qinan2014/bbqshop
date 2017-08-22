@@ -187,6 +187,7 @@ void PayDialog::EnablePay(bool enablePay)
 	isPaying = !enablePay;
 	ui.pbtPay->setText(statyDes);
 	ui.pbtPay->setEnabled(enablePay);
+	ui.pbtCancel->setEnabled(enablePay);
 }
 
 void PayDialog::CreatePayBillSucess(bool isSuc, const Json::Value &inVal)

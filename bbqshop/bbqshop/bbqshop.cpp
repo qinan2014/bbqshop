@@ -555,13 +555,13 @@ void bbqshop::setFocusOnCashier()
 	std::wstring softname = ZHFuncLib::StringToWstring(mZHSetting.carishInfo.windowName);
 	if (softname.empty())
 	{
-		mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,5,5,0,0); 
+		messageLBtnClick(); 
 		return;
 	}
 	HWND hwnd = ::FindWindow(NULL, softname.c_str());
 	if (hwnd == NULL)
 	{
-		mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,5,5,0,0); 
+		messageLBtnClick(); 
 		return;
 	}
 	//hookNum(false);
@@ -570,7 +570,12 @@ void bbqshop::setFocusOnCashier()
 	::BringWindowToTop(hwnd);
 	::SetFocus(hwnd);
 
-	mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,5,5,0,0); 
+	messageLBtnClick(); 
+}
+
+inline void bbqshop::messageLBtnClick()
+{
+	mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,1,1,0,0); 
 }
 
 inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
