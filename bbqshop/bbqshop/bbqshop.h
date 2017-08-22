@@ -63,7 +63,9 @@ private:
 	QString qaPrice;
 
 	void createTray();
-	
+	inline void stopESCEvent();
+	inline void resumeESCEvent();
+
 	inline void parseProcessJsonData(QString inJson);
 	inline void processJsonSaveLoginInfo(const Json::Value &value);
 	inline void processJsonOnMainDlgClose(const Json::Value &value);

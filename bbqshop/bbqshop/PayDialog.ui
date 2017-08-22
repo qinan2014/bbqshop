@@ -115,7 +115,7 @@ color: rgb(90, 162, 0);</string>
     <rect>
      <x>10</x>
      <y>340</y>
-     <width>241</width>
+     <width>141</width>
      <height>41</height>
     </rect>
    </property>
@@ -123,7 +123,7 @@ color: rgb(90, 162, 0);</string>
     <string notr="true">font: 12pt &quot;Arial&quot;;</string>
    </property>
    <property name="text">
-    <string>已确认金额并支付(Enter)</string>
+    <string>确认支付(Enter)</string>
    </property>
   </widget>
   <widget class="QWidget" name="widgetNum" native="true">
@@ -163,6 +163,22 @@ color: rgb(90, 162, 0);</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pbtCancel">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>340</y>
+     <width>101</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Arial&quot;;</string>
+   </property>
+   <property name="text">
+    <string>取消(ESC)</string>
    </property>
   </widget>
  </widget>

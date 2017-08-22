@@ -31,9 +31,9 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 	
 	setWindowTitle(QString::fromLocal8Bit("支付"));
 
-	QString tmppngPath = ZHFuncLib::GetWorkPath().c_str();
-	tmppngPath += "/res/pc_btn_g.bmp";
-	ui.pbtPay->setStyleSheet("border-image: url(" + tmppngPath + ");color: #FFFFFF;font: 12pt \"Arial\";");
+	//QString tmppngPath = ZHFuncLib::GetWorkPath().c_str();
+	//tmppngPath += "/res/pc_btn_g.bmp";
+	//ui.pbtPay->setStyleSheet("border-image: url(" + tmppngPath + ");color: #FFFFFF;font: 12pt \"Arial\";");
 
 	setStyleSheet("QDialog{background-color: #F0F0F0}");
 
@@ -41,6 +41,7 @@ PayDialog::PayDialog(QString imgPath, QWidget *parent)
 	// 支付按钮
 	connect(ui.pbtPay, SIGNAL(released()), this, SLOT(ClickPay()));
 	connect(this, SIGNAL(enablePaySig(bool )), this, SLOT(EnablePay(bool )));
+	connect(ui.pbtCancel, SIGNAL(released()), this, SLOT(reject()));
 	hasPayed = false;
 
 	// 商铺名称

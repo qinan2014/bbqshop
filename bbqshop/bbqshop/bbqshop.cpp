@@ -48,7 +48,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	qRegisterMetaType<Json::Value>("Json::Value");
 	connect(this, SIGNAL(showTipStringSig(const QString &, const QString &)), this, SLOT(showTipStringSlot(const QString &, const QString &)));
 	connect(this, SIGNAL(returnFocusToCashier()), this, SLOT(setFocusOnCashier()));
-	connect(this, SIGNAL(manInputESC()), this, SLOT(onESCEvent()));
+	resumeESCEvent();
 	connect(this, SIGNAL(checkPayResultSig()), this, SLOT(checkPayResultSlot()));
 	connect(this, SIGNAL(tradeResultSig(const Json::Value &)), this, SLOT(tradeNoResult(const Json::Value &)));
 	timers[startTimer(60000 * 3, Qt::VeryCoarseTimer)] = TIMER_MEMORYRECORD;
@@ -69,6 +69,16 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 bbqshop::~bbqshop()
 {
 	stopHook();
+}
+
+inline void bbqshop::stopESCEvent()
+{
+	disconnect(this, SIGNAL(manInputESC()), this, SLOT(onESCEvent()));
+}
+
+inline void bbqshop::resumeESCEvent()
+{
+	connect(this, SIGNAL(manInputESC()), this, SLOT(onESCEvent()));
 }
 
 void bbqshop::SendToURLRecord(const char *logLevel, const char *logModule, const char *logMessage, int urlTag)
@@ -889,6 +899,7 @@ void bbqshop::showPayDialog()
 		connect(this, SIGNAL(manInputEnter()), dlg, SLOT(ClickPay()));
 		connect(dlg, SIGNAL(micropaySucess(QString )), this, SLOT(saveCurrentTradeNo(QString )));
 		connect(this, SIGNAL(netError(QString, int, int)), dlg, SLOT(onNetError(QString, int, int)));
+		stopESCEvent();
 		hookManInputNum(true);
 		//dlg->SetMoney(qaPrice);
 		startGetOCRPrice();
@@ -906,7 +917,7 @@ void bbqshop::onClosePayDlg(bool haspayed)
 	stopGetOCRPriceTimer();
 	hookManInputNum(false);
 	emit returnFocusToCashier();
-
+	resumeESCEvent();
 }
 
 inline void bbqshop::onHookManInputNum(DWORD vkCode)
@@ -1172,7 +1183,7 @@ void bbqshop::saveCurrentTradeNo(QString tradeNo)
 
 void bbqshop::checkPayResultSlot()
 {
-	QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()) );
+	QTimer::singleShot(3000,this, SLOT(requestTradeInfoByNo()) );
 }
 
 void bbqshop::requestTradeInfoByNo()
@@ -1191,12 +1202,12 @@ void bbqshop::requestTradeInfoByNo()
 
 void bbqshop::showPayResultDlg()
 {
+	stopESCEvent();
 	emit manInputESC();
 	emit returnFocusToCashier();
 	// 显示支付结果对话框
 	if (isOperatorOtherDlg())
 		return;
-	hookESC(true);
 	isShowingPayResult = true;
 	hookScanCodeNum(false);
 	bool isHookingManInputNum = isHooking(HOOK_MANINPUT_NUM);
@@ -1205,12 +1216,14 @@ void bbqshop::showPayResultDlg()
 	connect(this, SIGNAL(manInputESC()), &dlg, SLOT(accept()));
 	connect(this, SIGNAL(paySuccesSig(const QString &)), &dlg, SLOT(paySuccess(const QString &)));
 	connect(this, SIGNAL(payFailedSig()), &dlg, SLOT(payFailed()));
+	hookESC(true);
 	dlg.exec();
 	hookESC(false);
 	isShowingPayResult = false;
 	emit returnFocusToCashier();
 	hookManInputNum(isHookingManInputNum);
 	hookScanCodeNum(true);
+	resumeESCEvent();
 }
 
 void bbqshop::tradeNoResult(const Json::Value & inData)
@@ -1245,8 +1258,10 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 		showStatus += QString::fromLocal8Bit("元");
 
 		SendToURLRecord(LOG_DEBUG, LOG_PUSHPAYRES, inData.toStyledString().c_str(), URL_RECORE_PAYRESULT);
-
-		//ShowTipString(showStatus);
+	}
+	else if (tradeStatus == 5)
+	{
+		emit payFailedSig();
 	}
 }
 

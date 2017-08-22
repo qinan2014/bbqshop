@@ -21,6 +21,7 @@ PaySuccessShowDlg::PaySuccessShowDlg(QWidget *parent)
 	QRect screen = desktop->screenGeometry();
 	this->setGeometry((screen.width() - iWidth) * 0.5, (screen.height() - iHeight) * 0.5, iWidth, iHeight);
 
+
 	payWait();
 }
 
