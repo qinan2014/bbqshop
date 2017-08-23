@@ -126,7 +126,7 @@ bool bbqshop::DealWithJSONFrServer(std::string mRecvJsonStr, int urlTag, std::st
 			SwipCardPayURLBack(value, urlApi);
 			break;
 		case URL_TRADEINFODETAIL:
-			emit tradeResultSig(value["data"]);
+			emit tradeResultSig(value);
 			break;
 		case URL_HANDOVER:
 			ExitFromServer(true);
@@ -1185,27 +1185,27 @@ void bbqshop::SwipCardPayURLBack(const Json::Value &value, std::string urlApi)
 void bbqshop::saveCurrentTradeNo(QString tradeNo)
 {
 	curTradeNo = tradeNo;
-	QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()) );
+	QTimer::singleShot(3000,this, SLOT(requestTradeInfoByNo()) );
 	QTimer::singleShot(300,this, SLOT(showPayResultDlg()) );
 }
 
 void bbqshop::checkPayResultSlot()
 {
-	QTimer::singleShot(3000,this, SLOT(requestTradeInfoByNo()) );
+	QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()) );
 }
 
 void bbqshop::requestTradeInfoByNo()
 {
 	codeSetIO::ShopCashdeskInfo &shopInfo = mZHSetting.shopCashdestInfo;
 	Json::Value mValData;
-	mValData["shopid"] = shopInfo.shopid;
-	mValData["tradeno"] = curTradeNo.toStdString();
-	std::string itemVal = mValData.toStyledString();
-	std::string::size_type rePos;
-	while ((rePos = itemVal.find(" ")) != -1) {
-		itemVal.replace(rePos, 1, "");
-	}
-	GetDataFromServer("api/app/v1", TRADEINFODETAILAPI, itemVal, URL_TRADEINFODETAIL);
+	mValData["out_tradeno"] = curOutTradeno.toStdString();
+	mValData["trade_no"] = curTradeNo.toStdString();
+	//std::string itemVal = mValData.toStyledString();
+	//std::string::size_type rePos;
+	//while ((rePos = itemVal.find(" ")) != -1) {
+	//	itemVal.replace(rePos, 1, "");
+	//}
+	GetDataFromServer1(URLTRADE, TRADEINFODETAILAPI, "", mValData, URL_TRADEINFODETAIL);
 }
 
 void bbqshop::showPayResultDlg()
@@ -1234,27 +1234,35 @@ void bbqshop::showPayResultDlg()
 	resumeESCEvent();
 }
 
-void bbqshop::tradeNoResult(const Json::Value & inData)
+void bbqshop::tradeNoResult(const Json::Value & inVal)
 {
-	const char *tradeNo = inData["TRADE_NO"].asCString();
-	double tradeMoney = inData["ORIG_FEE"].asDouble();
-	char orig_fee[10];
-	sprintf(orig_fee, "%0.2f", tradeMoney);
-	double favoFee = inData["TOTAL_FEE"].asDouble();
-	char favo_fee[10];
-	sprintf(favo_fee, "%0.2f", favoFee);
-	double payFee = inData["PAY_FEE"].asDouble();
-	char pay_fee[10];
-	sprintf(pay_fee, "%0.2f", payFee);
-
-	const char *tradeTm = inData["CTIME"].asCString();
-	int tradeStatus = inData["STATUS"].asInt();
-	int paytype = inData["PAY_TYPE"].asInt();
+	std::string retCode = inVal["return_code"].asString();
+	std::string resCode = inVal["result_code"].asString();
+	bool isReturnSuc = !(retCode == "FAIL" || resCode == "FAIL" || retCode == "fail" || resCode == "fail" );
+	if (!isReturnSuc && inVal.isMember("return_msgs"))
+	{
+		ShowTipString((inVal["return_msgs"].asCString()));
+		return;
+	}
+	Json::Value orderData = inVal["orderinfo"];
+	int tradeStatus = orderData["STATUS"].asInt();
 	if (tradeStatus == 0) // 表示还未到账，要继续查询
 	{
 		emit checkPayResultSig();
 		return;
 	}
+	if (tradeStatus == 5)
+	{
+		emit payFailedSig();
+		return;
+	}
+	const char *tradeNo = orderData["TRADE_NO"].asCString();
+	const char *orig_fee = orderData["ORIG_FEE"].asCString();
+	const char *favo_fee = orderData["FAVO_FEE"].asCString();
+	const char *pay_fee = orderData["PAY_FEE"].asCString();
+	const char *tradeTm = orderData["PAY_TIME"].asCString();
+	const char *cPayType = orderData["PAY_TYPE"].asCString();
+	int paytype = atoi(cPayType);
 	if (tradeStatus == 1) // 支付成功
 	{
 		emit paySuccesSig(pay_fee);
@@ -1265,12 +1273,9 @@ void bbqshop::tradeNoResult(const Json::Value & inData)
 		showStatus += pay_fee;
 		showStatus += QString::fromLocal8Bit("元");
 
-		SendToURLRecord(LOG_DEBUG, LOG_PUSHPAYRES, inData.toStyledString().c_str(), URL_RECORE_PAYRESULT);
+		SendToURLRecord(LOG_DEBUG, LOG_PUSHPAYRES, orderData.toStyledString().c_str(), URL_RECORE_PAYRESULT);
 	}
-	else if (tradeStatus == 5)
-	{
-		emit payFailedSig();
-	}
+	
 }
 
 inline void bbqshop::printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee)

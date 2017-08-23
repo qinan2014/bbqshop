@@ -154,7 +154,7 @@ int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal
 bool BbqUrlServer::PostDataToServer(std::string url, std::string urlParams, int urlTag, std::string inApi)
 {
 	bool sendsuc = false;
-	char szJsonData[1024];  
+	char szJsonData[10240];  
 	memcpy(szJsonData, urlParams.c_str(), urlParams.length());
 	szJsonData[urlParams.length()] = 0;
 	CURL *pCurl = NULL;  

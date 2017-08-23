@@ -58,6 +58,7 @@ private:
 	std::map<int, int> timers;
 	int getOCRPriceTimes;
 	QString curTradeNo;
+	QString curOutTradeno;
 	bool isShowingHandoverDlg;
 	bool isCtrlKeyDown;
 	QString qaPrice;
@@ -139,7 +140,7 @@ private slots:
 	void saveCurrentTradeNo(QString tradeNo);
 	void showPayResultDlg();
 	void checkPayResultSlot();
-	void tradeNoResult(const Json::Value & inData);
+	void tradeNoResult(const Json::Value & inVal);
 	void autoInjectDll();
 	//void onCreateBillSuccess();
 

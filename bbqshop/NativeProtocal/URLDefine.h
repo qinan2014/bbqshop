@@ -67,7 +67,7 @@ enum URL_SOURCE_DLG
 #define SETTINGCOMMITAPI "api/cashdesk/list/v1"  // 提交
 #define TRADEINFOQUESTAPI "api/order/list/v1"     // 交易查询
 #define TRADEINFOSTATICAPI "api/order/statis/v1"   // 交易统计
-#define TRADEINFODETAILAPI "api/order/info/v1"    // 交易详情
+#define TRADEINFODETAILAPI "api/payway/orderquery/v1"    // 交易详情
 #define TRADEREFUNDAPI "api/payway/applyrefund/v1"   // 退款
 #define TRADEREFUNDPWDAPI "api/user/validatempw/v1"  // 交易退款密码验证
 #define TRADINFODETAILPRINT "api/print/order/printpayoffice/v1"  // 打印存根
