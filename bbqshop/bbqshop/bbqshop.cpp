@@ -1185,13 +1185,13 @@ void bbqshop::SwipCardPayURLBack(const Json::Value &value, std::string urlApi)
 void bbqshop::saveCurrentTradeNo(QString tradeNo)
 {
 	curTradeNo = tradeNo;
-	QTimer::singleShot(3000,this, SLOT(requestTradeInfoByNo()) );
+	QTimer::singleShot(1000,this, SLOT(requestTradeInfoByNo()) );
 	QTimer::singleShot(300,this, SLOT(showPayResultDlg()) );
 }
 
 void bbqshop::checkPayResultSlot()
 {
-	QTimer::singleShot(200,this, SLOT(requestTradeInfoByNo()) );
+	QTimer::singleShot(3000,this, SLOT(requestTradeInfoByNo()) );
 }
 
 void bbqshop::requestTradeInfoByNo()
