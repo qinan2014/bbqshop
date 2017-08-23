@@ -49,7 +49,8 @@ RECALL_API_INFO g_arHookAPIs[] =
 };
 
 //bool isOpenPriceCom = false;
-HANDLE pirceHandle = 0;
+HANDLE priceHandle = 0;
+HANDLE otherHandle = 0;
 bool isPriceCom(PVOID lpFileName, int fileLen)
 {
 	char *pChar = (char *)lpFileName;
@@ -206,7 +207,9 @@ HANDLE WINAPI MyCreateFileA(LPCSTR lpFileName,
 		//delete []tmpbuf;
 		bool isOpenPriceCom = isPriceCom((PVOID)lpFileName, strlen(lpFileName));
 		if (isOpenPriceCom)
-			pirceHandle = hFile;
+			priceHandle = hFile;
+		else
+			otherHandle = hFile;
 		//SendMessageToMain((PVOID)lpFileName, strlen(lpFileName), HOOKAPI_CREATEFILEA);
 	}
 	return hFile;
@@ -238,9 +241,9 @@ HANDLE WINAPI MyCreateFileW(LPCWSTR lpFileName,
 		//delete []tmpbuf;
 		bool isOpenPriceCom = isPriceCom((PVOID)lpFileName, wcslen(lpFileName) * 2);
 		if (isOpenPriceCom)
-		{
-			pirceHandle = hFile;
-		}
+			priceHandle = hFile;
+		else
+			otherHandle = hFile;
 		//SendMessageToMain((PVOID)lpFileName, wcslen(lpFileName) * 2, HOOKAPI_CREATEFILEW);
 	}
 	return hFile;
@@ -298,11 +301,11 @@ BOOL WINAPI MyWriteFile(HANDLE hFile,
 	{
 		bRet = ((pfnWriteFile)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
-		if (pirceHandle == 0 ||pirceHandle == hFile)
-		{
-			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILE);
-		}
 
+		if (priceHandle == hFile)
+			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILE);
+		else if (priceHandle == 0 && otherHandle != hFile)
+			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILE);
 		//int fileNameLen = nNumberOfBytesToWrite;
 		//char *tmpbuf = new char[fileNameLen + HANDLELENGTH];
 		//memcpy(tmpbuf, lpBuffer, fileNameLen);
@@ -327,10 +330,10 @@ BOOL WINAPI MyWriteFileEx(HANDLE hFile,
 	{
 		bRet = ((pfnWriteFileEx)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpOverlapped, lpCompletionRoutine);
-		if (pirceHandle == 0 ||pirceHandle == hFile)
-		{
+		if (priceHandle == hFile)
 			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILEEX);
-		}
+		else if (priceHandle == 0 && otherHandle != hFile)
+			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILEEX);
 
 		//int fileNameLen = nNumberOfBytesToWrite;
 		//char *tmpbuf = new char[fileNameLen + HANDLELENGTH];
@@ -350,8 +353,10 @@ BOOL WINAPI MyCloseHandle(HANDLE hObject)
 	if (g_arHookAPIs[nOrderHookApi].pOrgfnMem)
 	{
 		bRet = ((pfnCloseHandle)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(hObject);
-		if (hObject == pirceHandle)
-			pirceHandle = NULL;
+		if (hObject == priceHandle)
+			priceHandle = NULL;
+		else if (hObject == otherHandle)
+			otherHandle = NULL;
 		//char tmpbuf[100];
 		//sprintf_s(tmpbuf, "Handle %d", hObject);
 		//SendMessageToMain(tmpbuf, strlen(tmpbuf), HOOKAPI_CLOSEHANDLE);
