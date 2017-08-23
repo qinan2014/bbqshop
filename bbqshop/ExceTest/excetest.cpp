@@ -53,9 +53,10 @@ void ExceTest::onFileSelect()
 
 
 	// 开始工作
-	//curSheet = workSheets->querySubObject("Item(const QString&)", "服务安排");
-	//QAxObject *curCell = curSheet->querySubObject("Cells(int,int)", 0, 0);
-	//curCell->dynamicCall("SetValue(const QString&)", "时间人员");
+	curSheet = workSheets->querySubObject("Item(const QString&)", "Sheet1");
+	QAxObject *curCell = curSheet->querySubObject("Cells(int,int)", 1, 1);
+	curCell->dynamicCall("SetValue(const QString&)", "test");
+	workBook->dynamicCall("Save()");
 }
 
 bool ExceTest::createExcel(QAxObject *excelAX, QString file)
