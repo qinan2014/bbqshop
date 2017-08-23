@@ -51,9 +51,9 @@ void ExceTest::onFileSelect()
 	QAxObject *workBook = applicationExcel->querySubObject("ActiveWorkBook");
 	workSheets = workBook->querySubObject("WorkSheets");
 
-
 	// 开始工作
 	curSheet = workSheets->querySubObject("Item(const QString&)", "Sheet1");
+	curSheet->setProperty("Name", QString::fromLocal8Bit("服务安排"));
 	QAxObject *curCell = curSheet->querySubObject("Cells(int,int)", 1, 1);
 	curCell->dynamicCall("SetValue(const QString&)", "test");
 	workBook->dynamicCall("Save()");
