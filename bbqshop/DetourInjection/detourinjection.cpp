@@ -44,7 +44,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 	{
 		while (Process32Next(hsnap, &pe32) == TRUE)
 		{
-			if (wcscmp(pe32.szExeFile, L"xyJxcEasy.exe") == 0)
+			if (wcscmp(pe32.szExeFile, L"PosTouch.exe") == 0)
 			//if (wcscmp(pe32.szExeFile, L"PCommTest.exe") == 0)
 			{
 				wchar_t* DirPath = new wchar_t[MAX_PATH];

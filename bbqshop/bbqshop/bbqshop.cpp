@@ -1567,7 +1567,9 @@ void bbqshop::hookApiWriteFileData(void *inData, int dataLen)
 		fclose(fp);
 	}
 
-	qaPrice = comDataToPrice(inData, dataLen);
+	QString tmpPrice = comDataToPrice(inData, dataLen);
+	if (!tmpPrice.isEmpty())
+		qaPrice = tmpPrice;
 }
 
 inline QString bbqshop::comDataToPrice(void *inData, int dataLen)
