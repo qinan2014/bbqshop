@@ -93,7 +93,7 @@ private:
 	void hookSettingPayKey(PKBDLLHOOKSTRUCT p);
 	inline void setHookPayKeyValueFromZHSetting();
 	inline void printPayResult(int pay_type, const char *trade_no, const char *orig_fee, const char *favo_fee, const char *pay_fee);
-	void hookApiWriteFileData(void *inData, int dataLen);
+	void hookApiWriteFileData(void *inData, int dataLen, int dataType);
 	inline QString comDataToPrice(void *inData, int dataLen);
 	inline bool isPayCode(const QString &inCode);
 

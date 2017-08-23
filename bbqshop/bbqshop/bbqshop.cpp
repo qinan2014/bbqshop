@@ -350,7 +350,7 @@ bool bbqshop::nativeEvent(const QByteArray & eventType, void * message, long * r
 			case HOOKAPI_CREATEFILEA:
 			case HOOKAPI_CREATEFILEW:
 				{
-					hookApiWriteFileData(cds->lpData, cds->cbData);
+					hookApiWriteFileData(cds->lpData, cds->cbData, cds->dwData);
 					*result = 1;
 					return true;
 				}
@@ -1549,7 +1549,7 @@ inline void bbqshop::setHookPayKeyValueFromZHSetting()
 #endif
 }
 
-void bbqshop::hookApiWriteFileData(void *inData, int dataLen)
+void bbqshop::hookApiWriteFileData(void *inData, int dataLen, int dataType)
 {
 	if (dataLen > 100)
 		return;
@@ -1561,8 +1561,8 @@ void bbqshop::hookApiWriteFileData(void *inData, int dataLen)
 	FILE * fp = NULL;
 	if((fp = fopen(logbuftxt, "a")) != NULL)
 	{
-		char buf[30];
-		sprintf(buf, "time %d:%d:%d------- \r\n", local->tm_hour, local->tm_min, local->tm_sec);
+		char buf[50];
+		sprintf(buf, "time %d:%d:%d dataType:%d------- \r\n", local->tm_hour, local->tm_min, local->tm_sec, dataType);
 		fwrite(buf, strlen(buf), 1, fp);
 		fwrite(inData, dataLen, 1, fp);
 		fwrite("\r\n\r\n", strlen("\r\n\r\n"), 1, fp);
@@ -1577,6 +1577,7 @@ void bbqshop::hookApiWriteFileData(void *inData, int dataLen)
 inline QString bbqshop::comDataToPrice(void *inData, int dataLen)
 {
 	QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(inData), dataLen);
+	strMessage.remove(QChar(0));
 	int qapos = strMessage.indexOf("QA");
 	if (qapos != -1) // 表示获取到了价格
 	{

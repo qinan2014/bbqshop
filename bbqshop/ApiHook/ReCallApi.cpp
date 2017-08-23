@@ -12,7 +12,7 @@
 #include "AllWindowTitle.h"
 
 extern PCONTENT_FILE_MAPPING pFileMapContent;
-//#define HANDLELENGTH 10
+#define HANDLELENGTH 10
 
 // hook apis infomation
 RECALL_API_INFO g_arHookAPIs[] = 
@@ -298,7 +298,7 @@ BOOL WINAPI MyWriteFile(HANDLE hFile,
 	{
 		bRet = ((pfnWriteFile)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
-		if (pirceHandle == hFile)
+		if (pirceHandle == 0 ||pirceHandle == hFile)
 		{
 			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILE);
 		}
@@ -327,7 +327,7 @@ BOOL WINAPI MyWriteFileEx(HANDLE hFile,
 	{
 		bRet = ((pfnWriteFileEx)(LPVOID)g_arHookAPIs[nOrderHookApi].pOrgfnMem)(
 			hFile, lpBuffer, nNumberOfBytesToWrite, lpOverlapped, lpCompletionRoutine);
-		if (pirceHandle == hFile)
+		if (pirceHandle == 0 ||pirceHandle == hFile)
 		{
 			SendMessageToMain((PVOID)lpBuffer, nNumberOfBytesToWrite, HOOKAPI_WRITEFILEEX);
 		}

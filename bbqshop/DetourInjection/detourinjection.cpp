@@ -44,7 +44,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 	{
 		while (Process32Next(hsnap, &pe32) == TRUE)
 		{
-			if (wcscmp(pe32.szExeFile, L"PosTouch.exe") == 0)
+			if (wcscmp(pe32.szExeFile, L"Qiantai.exe") == 0)
 			//if (wcscmp(pe32.szExeFile, L"PCommTest.exe") == 0)
 			{
 				wchar_t* DirPath = new wchar_t[MAX_PATH];
@@ -154,6 +154,8 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 				FILE * fp = NULL;
 				if((fp = fopen("D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\hookdata.txt", "a")) != NULL)
 				{
+					QString strMessage = QString::fromUtf8(reinterpret_cast<char*>(cds->lpData), cds->cbData);
+
 					fwrite(cds->lpData, cds->cbData, 1, fp);
 					char tmpbuf[100];
 					static int tms = 0;
@@ -173,26 +175,26 @@ bool DetourInjection::nativeEvent(const QByteArray & eventType, void * message, 
 
 bool isPriceTag(PVOID lpContent, int pContentSize)
 {
-	char *priceCMD = "QA";
-	if (pContentSize > COMGETPRICECHARLEN)
-		return false;
-	char *pChar = (char *)lpContent;
-	int priceTagSZ = strlen(priceCMD);
-	// 找到价格标志的初始位置
-	int priceTagBeginPos = -1;
-	for (int i = 0; i < pContentSize; ++i)
-	{
-		if (pChar[i] == priceCMD[0])
-		{
-			priceTagBeginPos = i;
-			break;
-		}
-	}
-	for (int i = 0; i < priceTagSZ; ++i)
-	{
-		if (pChar[priceTagBeginPos++] != priceCMD[i])
-			return false;
-	}
+	//char *priceCMD = "QA";
+	//if (pContentSize > COMGETPRICECHARLEN)
+	//	return false;
+	//char *pChar = (char *)lpContent;
+	//int priceTagSZ = strlen(priceCMD);
+	//// 找到价格标志的初始位置
+	//int priceTagBeginPos = -1;
+	//for (int i = 0; i < pContentSize; ++i)
+	//{
+	//	if (pChar[i] == priceCMD[0])
+	//	{
+	//		priceTagBeginPos = i;
+	//		break;
+	//	}
+	//}
+	//for (int i = 0; i < priceTagSZ; ++i)
+	//{
+	//	if (pChar[priceTagBeginPos++] != priceCMD[i])
+	//		return false;
+	//}
 	return true;
 }
 
