@@ -17,8 +17,6 @@ private:
 	Ui::ExceTestClass ui;
 	QString targetDir;
 	QAxObject *applicationExcel;
-	QAxObject *workSheets;
-	QAxObject *curSheet;
 
 	bool createExcel(QAxObject *excelAX, QString file);
 
