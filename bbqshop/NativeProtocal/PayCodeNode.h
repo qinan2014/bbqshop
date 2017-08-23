@@ -41,6 +41,17 @@ namespace codeSetIO
 		short imageBinaryzation;  // 是否二值化
 	};
 
+	struct PMousePos
+	{
+		int xpos;
+		int ypos;
+		PMousePos()
+		{
+			xpos = 5;
+			ypos = 5;
+		}
+	};
+
 	struct CarishDesk
 	{
 		char exeName[NUMLEN];
@@ -48,6 +59,7 @@ namespace codeSetIO
 		char windowName[NAMELEN];
 		char printerName[NAMELEN];
 		SelectRange selectRange;
+		PMousePos mousePos;
 		int deviceWidth58;
 		int deviceWidth80;
 		int printerType;  // 0表示58打印机，1标识80打印机

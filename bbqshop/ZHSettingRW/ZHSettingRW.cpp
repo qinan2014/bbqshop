@@ -22,6 +22,7 @@
 #define SELECTHEIGHT "Height"
 #define SELECTSCALETAG "ScaleTag"
 #define IMAGEBINARYZATION "ImageBinaryzation"
+#define FOCUSMOUSEPOS "FocusMousePos"
 // 收银台信息
 #define CDSHOPINFO "ShopCashDesk"
 //#define CDSHOPID /*"shopid"*/ NULL
@@ -197,6 +198,14 @@ bool ZHSettingRW::readCarishSetting(TiXmlElement *carishEle, codeSetIO::CarishDe
 	readEleNum(moneyEle->FirstChildElement(SELECTHEIGHT), outSetting.selectRange.heightImage);
 	readEleNum(moneyEle->FirstChildElement(IMAGEBINARYZATION), outSetting.selectRange.imageBinaryzation);
 	readEleNum(moneyEle->FirstChildElement(SELECTSCALETAG), outSetting.selectRange.priceImageScaleTag);
+	
+	TiXmlElement *mouseEle = carishEle->FirstChildElement(FOCUSMOUSEPOS);
+	if (mouseEle != NULL)
+	{
+		readEleNum(mouseEle->FirstChildElement(SELECTX), outSetting.mousePos.xpos);
+		readEleNum(mouseEle->FirstChildElement(SELECTY), outSetting.mousePos.ypos);
+	}
+
 	readEleNum(carishEle->FirstChildElement(PRINTERPAPERWIDTH58), outSetting.deviceWidth58);
 	readEleNum(carishEle->FirstChildElement(PRINTERPAPERWIDTH80), outSetting.deviceWidth80);
 	readEleNum(carishEle->FirstChildElement(PRINTERTYPE), outSetting.printerType);
@@ -366,6 +375,13 @@ TiXmlElement *ZHSettingRW::writeCarishSetting(codeSetIO::CarishDesk &inSetting)
 	createEleText(moneyPosEle, SELECTSCALETAG, numstring);
 	_itoa(inSetting.selectRange.imageBinaryzation, numstring, 10);
 	createEleText(moneyPosEle, IMAGEBINARYZATION, numstring);
+
+	TiXmlElement *mousePosEle = new TiXmlElement(FOCUSMOUSEPOS);
+	carisherEle->LinkEndChild(mousePosEle);
+	_itoa(inSetting.mousePos.xpos, numstring, 10);
+	createEleText(mousePosEle, SELECTX, numstring);
+	_itoa(inSetting.mousePos.ypos, numstring, 10);
+	createEleText(mousePosEle, SELECTY, numstring);
 
 	_itoa(inSetting.deviceWidth58, numstring, 10);
 	createEleText(carisherEle, PRINTERPAPERWIDTH58, numstring);

@@ -578,7 +578,8 @@ inline void bbqshop::messageLBtnClick()
 	static time_t t1 = time(NULL);
 	if (t1 == time(NULL))
 		return;
-	mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,5,5,0,0); 
+	codeSetIO::PMousePos &mousePos = mZHSetting.carishInfo.mousePos;
+	mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,mousePos.xpos,mousePos.ypos,0,0); 
 }
 
 inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
