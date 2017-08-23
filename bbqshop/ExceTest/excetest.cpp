@@ -38,31 +38,18 @@ ExceTest::~ExceTest()
 
 void ExceTest::onFileSelect()
 {
-	//QString filepath=QFileDialog::getSaveFileName(this,tr("Save orbit"),".",tr("Microsoft Office 2007 (*.xlsx)"));//获取保存路径
-	//if(filepath.isEmpty())
-	//{
-	//	return;
-	//}
+	QString filepath=QFileDialog::getSaveFileName(this,tr("Save orbit"),".",tr("Microsoft Office 2007 (*.xls)"));//获取保存路径
+	if(filepath.isEmpty())
+	{
+		return;
+	}
+	filepath.replace(QString("/"), QString("\\"));
 	applicationExcel = new QAxObject("Excel.Application", this);
-	workBooks = applicationExcel->querySubObject("Workbooks");
-	QFile file("D:\\test2.xls");
-	if (file.exists())
-	{
-		workBooks->dynamicCall("Open(const QString&)", "D:\\test2.xls");
-		workBook = applicationExcel->querySubObject("ActiveWorkBook");
-		workSheets = workBook->querySubObject("WorkSheets");
-	}
-	else
-	{
-		if(createExcel(applicationExcel, "D:\\test2.xls"))
-		{
-			workBooks->dynamicCall("Open(const QString&)", "D:\\test2.xls");
-			workBook = applicationExcel->querySubObject("ActiveWorkBook");
-			workSheets = workBook->querySubObject("WorkSheets");
-		}
-	}
-
-
+	QAxObject *workBooks = applicationExcel->querySubObject("Workbooks");
+	createExcel(applicationExcel, filepath);
+	workBooks->dynamicCall("Open(const QString&)", filepath);
+	QAxObject *workBook = applicationExcel->querySubObject("ActiveWorkBook");
+	workSheets = workBook->querySubObject("WorkSheets");
 
 
 	// 开始工作
