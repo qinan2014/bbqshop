@@ -573,11 +573,12 @@ void bbqshop::setFocusOnCashier()
 	messageLBtnClick(); 
 }
 
-inline void bbqshop::messageLBtnClick()
+void bbqshop::messageLBtnClick()
 {
 	static time_t t1 = time(NULL);
-	if (t1 == time(NULL))
+	if (time(NULL) - t1 < 2)
 		return;
+	t1 = time(NULL);
 	codeSetIO::PMousePos &mousePos = mZHSetting.carishInfo.mousePos;
 	mouse_event(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP,mousePos.xpos,mousePos.ypos,0,0); 
 }
