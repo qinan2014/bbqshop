@@ -17,6 +17,8 @@ private:
 	Ui::ExceTestClass ui;
 	QString targetDir;
 	QAxObject *applicationExcel;
+	QAxObject *workBooks;
+	QAxObject *workBook;
 	QAxObject *workSheets;
 	QAxObject *curSheet;
 

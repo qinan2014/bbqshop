@@ -1,4 +1,4 @@
-#include "excetest.h"
+ï»¿#include "excetest.h"
 #include <QFileDialog>
 #include <QAxObject>
 
@@ -6,6 +6,27 @@ ExceTest::ExceTest(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
+
+	//applicationExcel = new QAxObject("Excel.Application", parent);
+	//workBooks = applicationExcel->querySubObject("Workbooks");
+	//QFile file("D:\\test2.xls");
+	//if (file.exists())
+	//{
+	//	workBooks->dynamicCall("Open(const QString&)", "D:\\test2.xls");
+	//	workBook = applicationExcel->querySubObject("ActiveWorkBook");
+	//	workSheets = workBook->querySubObject("WorkSheets");
+	//}
+	//else
+	//{
+	//	if(createExcel(applicationExcel, "D:\\test2.xls"))
+	//	{
+	//		workBooks->dynamicCall("Open(const QString&)", "D:\\test2.xls");
+	//		workBook = applicationExcel->querySubObject("ActiveWorkBook");
+	//		workSheets = workBook->querySubObject("WorkSheets");
+	//	}
+	//}
+
+
 
 	connect(ui.pbtSelect, SIGNAL(released()), this, SLOT(onFileSelect()));
 }
@@ -17,22 +38,37 @@ ExceTest::~ExceTest()
 
 void ExceTest::onFileSelect()
 {
-	//QString filepath=QFileDialog::getSaveFileName(this,tr("Save orbit"),".",tr("Microsoft Office 2007 (*.xlsx)"));//»ñÈ¡±£´æÂ·¾¶
+	//QString filepath=QFileDialog::getSaveFileName(this,tr("Save orbit"),".",tr("Microsoft Office 2007 (*.xlsx)"));//èŽ·å–ä¿å­˜è·¯å¾„
 	//if(filepath.isEmpty())
 	//{
 	//	return;
 	//}
-	QString filepath = "D:\\test2.xls";
 	applicationExcel = new QAxObject("Excel.Application", this);
-	QAxObject *workBooks = applicationExcel->querySubObject("Workbooks");
-	createExcel(applicationExcel, filepath);
-	QAxObject *workBook = applicationExcel->querySubObject("ActiveWorkBook");
-	workSheets = workBook->querySubObject("WorkSheets");
-	
-	// ¿ªÊ¼¹¤×÷
-	curSheet = workSheets->querySubObject("Item(const QString&)", "·þÎñ°²ÅÅ");
-	QAxObject *curCell = curSheet->querySubObject("Cells(int,int)", 0, 0);
-	curCell->dynamicCall("SetValue(const QString&)", "Ê±¼äÈËÔ±");
+	workBooks = applicationExcel->querySubObject("Workbooks");
+	QFile file("D:\\test2.xls");
+	if (file.exists())
+	{
+		workBooks->dynamicCall("Open(const QString&)", "D:\\test2.xls");
+		workBook = applicationExcel->querySubObject("ActiveWorkBook");
+		workSheets = workBook->querySubObject("WorkSheets");
+	}
+	else
+	{
+		if(createExcel(applicationExcel, "D:\\test2.xls"))
+		{
+			workBooks->dynamicCall("Open(const QString&)", "D:\\test2.xls");
+			workBook = applicationExcel->querySubObject("ActiveWorkBook");
+			workSheets = workBook->querySubObject("WorkSheets");
+		}
+	}
+
+
+
+
+	// å¼€å§‹å·¥ä½œ
+	//curSheet = workSheets->querySubObject("Item(const QString&)", "æœåŠ¡å®‰æŽ’");
+	//QAxObject *curCell = curSheet->querySubObject("Cells(int,int)", 0, 0);
+	//curCell->dynamicCall("SetValue(const QString&)", "æ—¶é—´äººå‘˜");
 }
 
 bool ExceTest::createExcel(QAxObject *excelAX, QString file)
