@@ -915,6 +915,10 @@ void bbqshop::showPayDialog()
 		startGetOCRPrice();
 		if (mZHSetting.shopCashdestInfo.isGetPriceActualTime != 1)
 		{
+			if (qaPrice.at(0) == '.')
+			{
+				qaPrice = QString('0') + qaPrice;
+			}
 			// 显示客显数据
 			dlg->SetMoney(qaPrice);	
 		}

@@ -15,10 +15,6 @@ public:
 
 private:
 	Ui::ExceTestClass ui;
-	QString targetDir;
-	QAxObject *applicationExcel;
-
-	bool createExcel(QAxObject *excelAX, QString file);
 
 private slots:
 	void onFileSelect();
