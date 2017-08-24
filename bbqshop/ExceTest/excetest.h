@@ -18,6 +18,7 @@ private:
 
 private slots:
 	void onFileSelect();
+	void onDemo();
 };
 
 #endif // EXCETEST_H

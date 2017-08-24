@@ -160,8 +160,7 @@ bool ZHFuncLib::InjectDllByProcessName(const std::wstring dllPath, const std::ws
 		{
 			if (wcscmp(pe32.szExeFile, inProcessName.c_str()) == 0)
 			{
-				flag = true;
-				InjectDllByProcessID(dllPath, pe32.th32ProcessID);
+				flag = InjectDllByProcessID(dllPath, pe32.th32ProcessID);
 				break;
 			}
 		}

@@ -125,6 +125,7 @@ signals:
 	void tradeResultSig(const Json::Value &);
 	void paySuccesSig(const QString &);
 	void payFailedSig();
+	void timedInjectDllSig();
 
 private slots:
 	void programQuit();
@@ -142,6 +143,7 @@ private slots:
 	void checkPayResultSlot();
 	void tradeNoResult(const Json::Value & inVal);
 	void autoInjectDll();
+	void timedInjectDll();
 	//void onCreateBillSuccess();
 
 protected:

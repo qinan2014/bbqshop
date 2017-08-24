@@ -797,8 +797,10 @@ void MainDlg::saveSetting()
 	{
 		codeSetIO::CarishDesk &carishInfo = mZHSetting.carishInfo;
 		QString pureExeName = QString::fromStdWString(mAllProcessNames[exeIndex - 1]);
-		memcpy(carishInfo.exeName, pureExeName.toStdString().c_str(), pureExeName.length());
-		carishInfo.exeName[pureExeName.length()] = 0;
+		std::string namcchar = ZHFuncLib::WstringToString(pureExeName.toStdWString());
+		int namelen = namcchar.length();
+		memcpy(carishInfo.exeName, namcchar.c_str(), namelen);
+		carishInfo.exeName[namelen] = 0;
 		QString curComStr = ui.cboCOMs->currentText();
 		memcpy(carishInfo.priceCom, curComStr.toStdString().c_str(), curComStr.length());
 		carishInfo.priceCom[curComStr.length()] = 0;
