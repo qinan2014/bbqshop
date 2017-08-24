@@ -1581,7 +1581,18 @@ inline QString bbqshop::comDataToPrice(void *inData, int dataLen)
 	int qapos = strMessage.indexOf("QA");
 	if (qapos != -1) // 表示获取到了价格
 	{
-		return strMessage.mid(qapos + 2).trimmed();
+		QString priceStr = strMessage.mid(qapos + 2).trimmed();
+		QString newStr;
+		int tmpLen = priceStr.length();
+		for (int i = 0; i < tmpLen; ++i)
+		{
+			QChar tmpchar = priceStr.at(i);
+			if ((tmpchar >= '0' && tmpchar <= '9') || tmpchar == '.')
+			{
+				newStr += tmpchar;
+			}
+		}
+		return newStr;
 	}
 	return "";
 }
