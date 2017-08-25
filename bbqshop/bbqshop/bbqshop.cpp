@@ -33,6 +33,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	getOCRPriceTimes = 0;
 	isShowingHandoverDlg = false;
 	isCtrlKeyDown = false;
+	hasInjectDll = false;
 	qaPrice = "0.00";
 	pComFileMappingContent = NULL;
 	// 定时器
@@ -50,7 +51,7 @@ bbqshop::bbqshop(QApplication *pApp, QWidget *parent)
 	connect(this, SIGNAL(returnFocusToCashier()), this, SLOT(setFocusOnCashier()));
 	resumeESCEvent();
 	connect(this, SIGNAL(checkPayResultSig()), this, SLOT(checkPayResultSlot()));
-	connect(this, SIGNAL(timedInjectDllSig()), this, SLOT(timedInjectDll()));
+	//connect(this, SIGNAL(timedInjectDllSig()), this, SLOT(timedInjectDll()));
 	connect(this, SIGNAL(tradeResultSig(const Json::Value &)), this, SLOT(tradeNoResult(const Json::Value &)));
 	timers[startTimer(60000 * 3, Qt::VeryCoarseTimer)] = TIMER_MEMORYRECORD;
 	// 登录
@@ -676,7 +677,7 @@ inline void bbqshop::processJsonRereadSetting()
 	}
 	else
 		ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
-
+	hasInjectDll = false;
 	autoInjectDll();
 
 	if (mZHSetting.shopCashdestInfo.isUsePayGun == 1)
@@ -691,26 +692,26 @@ inline void bbqshop::processJsonRereadSetting()
 	ShowTipString(QString::fromLocal8Bit("保存完成！"));
 }
 
-void bbqshop::timedInjectDll()
-{
-	QTimer::singleShot(5000,this, SLOT(autoInjectDll()) );
-}
+//void bbqshop::timedInjectDll()
+//{
+//	QTimer::singleShot(5000,this, SLOT(autoInjectDll()) );
+//}
 
 void bbqshop::autoInjectDll()
 {
 	ZHFuncLib::NativeLog("", "bbqshop::autoInjectDll", "a");
 	if (strlen(mZHSetting.carishInfo.exeName) == 0)
 		return;
-	static bool injectsuc = false;
-	if (injectsuc)
+	//static bool injectsuc = false;
+	if (hasInjectDll)
 		return;
 	createComFileMapping();
 	std::string dllpath = ZHFuncLib::GetWorkPath();
 	dllpath += "/ApiHook.dll";
-	injectsuc = ZHFuncLib::InjectDllByProcessName(ZHFuncLib::StringToWstring(dllpath), ZHFuncLib::StringToWstring(mZHSetting.carishInfo.exeName));
-	if (!injectsuc)
+	hasInjectDll = ZHFuncLib::InjectDllByProcessName(ZHFuncLib::StringToWstring(dllpath), ZHFuncLib::StringToWstring(mZHSetting.carishInfo.exeName));
+	if (!hasInjectDll)
 	{
-		emit timedInjectDllSig();
+		QTimer::singleShot(5000,this, SLOT(autoInjectDll()) );
 	}
 
 	//PROCESSENTRY32 pe32;

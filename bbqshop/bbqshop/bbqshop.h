@@ -61,6 +61,7 @@ private:
 	QString curOutTradeno;
 	bool isShowingHandoverDlg;
 	bool isCtrlKeyDown;
+	bool hasInjectDll;
 	QString qaPrice;
 
 	void createTray();
@@ -125,7 +126,7 @@ signals:
 	void tradeResultSig(const Json::Value &);
 	void paySuccesSig(const QString &);
 	void payFailedSig();
-	void timedInjectDllSig();
+	//void timedInjectDllSig();
 
 private slots:
 	void programQuit();
@@ -143,7 +144,7 @@ private slots:
 	void checkPayResultSlot();
 	void tradeNoResult(const Json::Value & inVal);
 	void autoInjectDll();
-	void timedInjectDll();
+	//void timedInjectDll();
 	//void onCreateBillSuccess();
 
 protected:
