@@ -97,6 +97,8 @@ private:
 	void hookApiWriteFileData(void *inData, int dataLen, int dataType);
 	inline QString comDataToPrice(void *inData, int dataLen);
 	inline bool isPayCode(const QString &inCode);
+	inline void clearRedundantLog();
+	inline void getTimeByLogtxt(time_t &outTm, QString inLogTxt);
 
 	void showPayDialog();
 	bool isPriceNum(QString &ioPriceStr);

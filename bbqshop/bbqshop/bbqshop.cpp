@@ -19,6 +19,7 @@
 #include "PaySuccessShowDlg.h"
 #include <time.h>
 #include <QSettings>
+#include <QDir>
 
 typedef BOOL (WINAPI *PFN_CHANGEWINDOWMESSAGEFILTER) (UINT, DWORD);
 
@@ -632,6 +633,8 @@ inline void bbqshop::processJsonSaveLoginInfo(const Json::Value &value)
 	emit returnFocusToCashier();
 
 	hookScanCodeNum(true);
+
+	clearRedundantLog();
 }
 
 inline void bbqshop::processJsonOnMainDlgClose(const Json::Value &value)
@@ -713,55 +716,6 @@ void bbqshop::autoInjectDll()
 	{
 		QTimer::singleShot(5000,this, SLOT(autoInjectDll()) );
 	}
-
-	//PROCESSENTRY32 pe32;
-	//pe32.dwSize = sizeof(PROCESSENTRY32);
-	//HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
-	//BOOL bProcess = Process32First(hsnap, &pe32);
-	//bool flag = false;
-	//if (bProcess == TRUE)
-	//{
-	//	while (Process32Next(hsnap, &pe32) == TRUE)
-	//	{
-	//		if (wcscmp(pe32.szExeFile, L"PosTouch.exe") == 0)
-	//			//if (wcscmp(pe32.szExeFile, L"PCommTest.exe") == 0)
-	//		{
-	//			wchar_t* DirPath = new wchar_t[MAX_PATH];
-	//			wchar_t* FullPath = new wchar_t[MAX_PATH];
-	//			flag = true;
-	//			GetCurrentDirectory(MAX_PATH, DirPath);
-	//			swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Release\\ApiHook.dll", DirPath);
-	//			//EnableDebugPrivilege();
-	//			HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
-	//				PROCESS_VM_WRITE, FALSE, pe32.th32ProcessID);
-	//			if (hProcess == NULL)
-	//				break;
-	//			LPVOID LoadLibraryAddr = (LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"),
-	//				"LoadLibraryW");
-	//			if (LoadLibraryAddr == NULL)
-	//			{
-	//				CloseHandle(hProcess);
-	//				break;
-	//			}
-	//			LPVOID LLParam = (LPVOID)VirtualAllocEx(hProcess, NULL, (wcslen(FullPath) + 1) * sizeof(wchar_t),
-	//				MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	//			BOOL SUC = WriteProcessMemory(hProcess, LLParam, FullPath, (wcslen(FullPath) + 1)* sizeof(wchar_t), NULL);
-	//			HANDLE hRemoteThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryAddr,
-	//				LLParam, NULL, NULL);
-
-	//			// 等待远程线程结束    
-	//			::WaitForSingleObject(hRemoteThread, INFINITE);    
-	//			// 清理    
-	//			::VirtualFreeEx(hProcess, LLParam, (wcslen(FullPath) + 1), MEM_DECOMMIT);    
-	//			::CloseHandle(hRemoteThread);    
-	//			::CloseHandle(hProcess);
-
-	//			delete[] DirPath;
-	//			delete[] FullPath;
-	//			break;
-	//		}
-	//	}
-	//}
 }
 
 void bbqshop::createComFileMapping()
@@ -1614,4 +1568,68 @@ inline QString bbqshop::comDataToPrice(void *inData, int dataLen)
 		return newStr;
 	}
 	return "";
+}
+
+inline void bbqshop::clearRedundantLog()
+{
+	QString strDirName = ZHFuncLib::GetWorkPath().c_str();
+	time_t tcur = time(NULL);
+	tcur -= 60 * 60 * 24 * 3;  // 3天以前的时间
+	QDir dir(strDirName);
+	if (!dir.exists())
+		return;
+	dir.setFilter(QDir::Dirs|QDir::Files);
+	dir.setSorting(QDir::DirsFirst);
+	QFileInfoList list = dir.entryInfoList();
+	int i = 0;
+	QStringList fileWillRemove;
+	do{
+		QFileInfo fileInfo = list.at(i);
+		++i;
+		QString fName = fileInfo.fileName();
+		if(fName == "." || fName == ".." || fileInfo.isDir())
+			continue;
+		if (!fName.contains("logdata"))
+			continue;
+		time_t tmtm;
+		getTimeByLogtxt(tmtm, fName);
+		if (tmtm < tcur)
+			fileWillRemove.push_back(fName);
+
+	}while(i < list.size());
+
+	for (int i = 0; i < fileWillRemove.size(); ++i)
+	{
+		dir.remove(fileWillRemove.at(i));
+	}
+}
+
+
+inline void bbqshop::getTimeByLogtxt(time_t &outTm, QString inLogTxt)
+{
+	int pos = inLogTxt.indexOf('-');
+	if (pos == -1)
+		return;
+	// 获得四个数字
+	int tmNum[4];
+	QString tmpStr;
+	for (int i = 0; i < 4; ++i)
+	{
+		inLogTxt = inLogTxt.mid(pos + 1);
+		pos = inLogTxt.indexOf('-');
+		if (pos == -1)
+			pos = inLogTxt.indexOf('.');
+		tmpStr = inLogTxt.left(pos);
+		tmNum[i] = tmpStr.toInt();
+	}
+
+	struct tm strTm;
+	strTm.tm_year = tmNum[0];
+	strTm.tm_mon = tmNum[1] - 1;
+	strTm.tm_mday = tmNum[2];
+	strTm.tm_hour = tmNum[3];
+	strTm.tm_min = 0;
+	strTm.tm_sec = 0;
+
+	outTm = mktime(&strTm);
 }
