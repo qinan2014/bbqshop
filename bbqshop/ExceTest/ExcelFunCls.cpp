@@ -97,8 +97,8 @@ void ExcelFunCls::insertMyData(QAxObject *workSheets)
 	QString yearMonth = "2017-9-";
 	QString fourAclockTime = QString::fromLocal8Bit(" : 4点");
 	QString sixAclockTime = QString::fromLocal8Bit(" : 6点");
-	QString oriService = QString::fromLocal8Bit("  原先安排  ");
-	QString realService = QString::fromLocal8Bit("  实际服务  ");
+	QString oriService = QString::fromLocal8Bit("原先安排");
+	QString realService = QString::fromLocal8Bit("实际服务");
 	int theFirstSundy = 3;
 	int beginX = 2;
 	const int cellWidth = 10;
