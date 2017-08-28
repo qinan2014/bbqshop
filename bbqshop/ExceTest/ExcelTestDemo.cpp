@@ -1,14 +1,14 @@
-#include "ExcelTestDemo.h"
+Ôªø#include "ExcelTestDemo.h"
 #include <QAxObject>
 
 ExcelTestDemo::ExcelTestDemo(QString filePath, QObject *parent)
 	: QObject(parent)
 {
 	QAxObject excel("Excel.Application"); 
-	excel.setProperty("Visible", false); //false≤ªœ‘ æ¥∞ÃÂ
+	excel.setProperty("Visible", false); //false‰∏çÊòæÁ§∫Á™ó‰Ωì
 	QAxObject *work_books = excel.querySubObject("WorkBooks"); 
 	work_books->dynamicCall("Open (const QString&)", filePath);
-	//QVariant title_value = excel.property("Caption");  //ªÒ»°±ÍÃ‚
+	QVariant title_value = excel.property("Caption");  //Ëé∑ÂèñÊ†áÈ¢ò
 }
 
 ExcelTestDemo::~ExcelTestDemo()
