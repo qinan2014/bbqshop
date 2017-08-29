@@ -24,7 +24,8 @@ public:
 	static std::wstring StringToWstring(const std::string str);
 	static std::string WstringToString(const std::wstring str);
 	static bool InjectDllByProcessID(const std::wstring dllPath, unsigned long inProcessID);
-	static bool InjectDllByProcessName(const std::wstring dllPath, const std::wstring inProcessName);
+	static bool UnInjectDll(const std::wstring dllPath, unsigned long inProcessID);
+	//static bool InjectDllByProcessName(const std::wstring dllPath, const std::wstring inProcessName);
 };
 
 #endif // ZHFUNCLIB_H

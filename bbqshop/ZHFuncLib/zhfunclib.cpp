@@ -147,26 +147,95 @@ bool ZHFuncLib::InjectDllByProcessID(const std::wstring dllPath, unsigned long i
 	return true;
 }
 
-bool ZHFuncLib::InjectDllByProcessName(const std::wstring dllPath, const std::wstring inProcessName)
+//bool ZHFuncLib::InjectDllByProcessName(const std::wstring dllPath, const std::wstring inProcessName)
+//{
+//	PROCESSENTRY32 pe32;
+//	pe32.dwSize = sizeof(PROCESSENTRY32);
+//	HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
+//	BOOL bProcess = Process32First(hsnap, &pe32);
+//	bool flag = false;
+//	if (bProcess == TRUE)
+//	{
+//		while (Process32Next(hsnap, &pe32) == TRUE)
+//		{
+//			if (wcscmp(pe32.szExeFile, inProcessName.c_str()) == 0)
+//			{
+//				flag = InjectDllByProcessID(dllPath, pe32.th32ProcessID);
+//				break;
+//			}
+//		}
+//	}
+//	return flag;
+//}
+
+bool ZHFuncLib::UnInjectDll(const std::wstring dllPath, unsigned long inProcessID)   
 {
-	PROCESSENTRY32 pe32;
-	pe32.dwSize = sizeof(PROCESSENTRY32);
-	HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
-	BOOL bProcess = Process32First(hsnap, &pe32);
-	bool flag = false;
-	if (bProcess == TRUE)
+	// 参数无效   
+	if (dllPath.length() < 1)
+		return false;
+	HANDLE hModuleSnap = INVALID_HANDLE_VALUE;   
+	HANDLE hProcess = NULL;   
+	HANDLE hThread = NULL;   
+	// 获取模块快照   
+	hModuleSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, inProcessID);   
+	if (INVALID_HANDLE_VALUE == hModuleSnap)   
+	{   
+		return false;   
+	}   
+	MODULEENTRY32 me32;   
+	memset(&me32, 0, sizeof(MODULEENTRY32));   
+	me32.dwSize = sizeof(MODULEENTRY32);   
+	// 开始遍历   
+	if(FALSE == ::Module32First(hModuleSnap, &me32))   
+	{   
+		::CloseHandle(hModuleSnap);   
+		return false;   
+	}   
+	// 遍历查找指定模块   
+	bool isFound = false;
+	//NativeLog("", WstringToString(dllPath).c_str(), "a");
+	do  
 	{
-		while (Process32Next(hsnap, &pe32) == TRUE)
-		{
-			if (wcscmp(pe32.szExeFile, inProcessName.c_str()) == 0)
-			{
-				flag = InjectDllByProcessID(dllPath, pe32.th32ProcessID);
-				break;
-			}
-		}
-	}
-	return flag;
+		//NativeLog("", WstringToString(me32.szExePath).c_str(), "a");
+		isFound = (0 == wcscmp(me32.szModule, dllPath.c_str()) || 0 == wcscmp(me32.szExePath, dllPath.c_str()));   
+		if (isFound) // 找到指定模块   
+		{   
+			break;   
+		}   
+	} while (TRUE == ::Module32Next(hModuleSnap, &me32));   
+	::CloseHandle(hModuleSnap);   
+	if (false == isFound)   
+	{   
+		return false;   
+	}   
+	// 获取目标进程句柄   
+	hProcess = ::OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION, FALSE, inProcessID);  
+	if (NULL == hProcess)   
+	{   
+		return false;   
+	}   
+	// 从 Kernel32.dll 中获取 FreeLibrary 函数地址   
+	LPTHREAD_START_ROUTINE lpThreadFun = (PTHREAD_START_ROUTINE)::GetProcAddress(::GetModuleHandle(L"Kernel32"), "FreeLibrary");  
+	if (NULL == lpThreadFun)   
+	{   
+		::CloseHandle(hProcess);   
+		return false;   
+	}   
+	// 创建远程线程调用 FreeLibrary   
+	hThread = ::CreateRemoteThread(hProcess, NULL, 0, lpThreadFun, me32.modBaseAddr /* 模块地址 */, 0, NULL);   
+	if (NULL == hThread)   
+	{   
+		::CloseHandle(hProcess);   
+		return false;   
+	}   
+	// 等待远程线程结束   
+	::WaitForSingleObject(hThread, INFINITE);   
+	// 清理   
+	::CloseHandle(hThread);   
+	::CloseHandle(hProcess);   
+	return true;   
 }
+
 
 bool ZHFuncLib::TerminateProcessExceptCurrentOne(std::string inTarget)
 {

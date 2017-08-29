@@ -22,6 +22,7 @@ protected:
 
 private slots:
 	void readHookFile();
+	void unloadDll();
 };
 
 #endif // DETOURINJECTION_H

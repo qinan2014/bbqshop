@@ -292,11 +292,23 @@ inline void bbqshop::createTray()
 
 void bbqshop::programQuit()
 {
+	std::string dllpath = ZHFuncLib::GetWorkPath();
+	dllpath += "/ApiHook.dll";
+	std::string::size_type rePos;
+	while ((rePos = dllpath.find("/")) != -1) {
+		dllpath.replace(rePos, 1, "\\");
+	}
+	//ZHFuncLib::NativeLog("", dllpath.c_str(), "a");
+	std::vector<int > processIds;
+	ZHFuncLib::GetTargetProcessIds(mZHSetting.carishInfo.exeName, processIds);
+	if (processIds.size() > 0)
+	{
+		ZHFuncLib::UnInjectDll(ZHFuncLib::StringToWstring(dllpath), processIds[0]);
+	}
+
 	ZHFuncLib::TerminateProcessExceptCurrentOne(LOGINEXE);
 	ZHFuncLib::TerminateProcessExceptCurrentOne(MAINDLGEXE);
 	ZHFuncLib::TerminateProcessExceptCurrentOne(OCREXE);
-	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADEEXE);
-	ZHFuncLib::TerminateProcessExceptCurrentOne(UPGRADECLIENTICONEXE);
 	mainApp->quit();
 }
 
@@ -711,10 +723,15 @@ void bbqshop::autoInjectDll()
 	createComFileMapping();
 	std::string dllpath = ZHFuncLib::GetWorkPath();
 	dllpath += "/ApiHook.dll";
-	hasInjectDll = ZHFuncLib::InjectDllByProcessName(ZHFuncLib::StringToWstring(dllpath), ZHFuncLib::StringToWstring(mZHSetting.carishInfo.exeName));
-	if (!hasInjectDll)
+	std::vector<int > processIds;
+	ZHFuncLib::GetTargetProcessIds(mZHSetting.carishInfo.exeName, processIds);
+	if (processIds.size() > 0)
 	{
-		QTimer::singleShot(5000,this, SLOT(autoInjectDll()) );
+		hasInjectDll = ZHFuncLib::InjectDllByProcessID(ZHFuncLib::StringToWstring(dllpath), processIds[0]);
+		if (!hasInjectDll)
+		{
+			QTimer::singleShot(5000,this, SLOT(autoInjectDll()) );
+		}
 	}
 }
 

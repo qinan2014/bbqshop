@@ -9,6 +9,9 @@
 #include <Strsafe.h>
 #include "ZhuiHuiMsg.h"
 
+#define EXENAME L"xyJxcEasy.exe"
+#define DLLPATH L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\ApiHook.dll"
+
 LPVOID pContent;
 
 DetourInjection::DetourInjection(QWidget *parent)
@@ -44,14 +47,14 @@ DetourInjection::DetourInjection(QWidget *parent)
 	{
 		while (Process32Next(hsnap, &pe32) == TRUE)
 		{
-			if (wcscmp(pe32.szExeFile, L"Qiantai.exe") == 0)
+			if (wcscmp(pe32.szExeFile, EXENAME) == 0)
 			//if (wcscmp(pe32.szExeFile, L"PCommTest.exe") == 0)
 			{
 				wchar_t* DirPath = new wchar_t[MAX_PATH];
 				wchar_t* FullPath = new wchar_t[MAX_PATH];
 				flag = true;
 				GetCurrentDirectory(MAX_PATH, DirPath);
-				swprintf_s(FullPath, MAX_PATH, L"D:\\QinAn\\CompanyProgram\\GitProj\\bbqshop\\bbqshop\\Debug\\ApiHook.dll", DirPath);
+				swprintf_s(FullPath, MAX_PATH, DLLPATH, DirPath);
 				//EnableDebugPrivilege();
 				HANDLE hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
 					PROCESS_VM_WRITE, FALSE, pe32.th32ProcessID);
@@ -88,6 +91,7 @@ DetourInjection::DetourInjection(QWidget *parent)
 	//while (1);
 
 	connect(ui.pushButton, SIGNAL(pressed()), this, SLOT(readHookFile()));
+	connect(ui.pbtUnload, SIGNAL(pressed()), this, SLOT(unloadDll()));
 }
 
 DetourInjection::~DetourInjection()
@@ -216,4 +220,102 @@ void DetourInjection::readHookFile()
 	//	fclose(fp);
 	//	fp = NULL;
 	//}
+}
+
+bool UnInjectDll(const TCHAR* ptszDllFile, DWORD dwProcessId)   
+{   
+	// 参数无效   
+	if (NULL == ptszDllFile || 0 == wcslen(ptszDllFile))   
+	{   
+		return false;   
+	}   
+	HANDLE hModuleSnap = INVALID_HANDLE_VALUE;   
+	HANDLE hProcess = NULL;   
+	HANDLE hThread = NULL;   
+	// 获取模块快照   
+	hModuleSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, dwProcessId);   
+	if (INVALID_HANDLE_VALUE == hModuleSnap)   
+	{   
+		return false;   
+	}   
+	MODULEENTRY32 me32;   
+	memset(&me32, 0, sizeof(MODULEENTRY32));   
+	me32.dwSize = sizeof(MODULEENTRY32);   
+	// 开始遍历   
+	if(FALSE == ::Module32First(hModuleSnap, &me32))   
+	{   
+		::CloseHandle(hModuleSnap);   
+		return false;   
+	}   
+	// 遍历查找指定模块   
+	bool isFound = false;   
+	do  
+	{   
+		isFound = (0 == wcscmp(me32.szModule, ptszDllFile) || 0 == wcscmp(me32.szExePath, ptszDllFile));   
+		if (isFound) // 找到指定模块   
+		{   
+			break;   
+		}   
+	} while (TRUE == ::Module32Next(hModuleSnap, &me32));   
+	::CloseHandle(hModuleSnap);   
+	if (false == isFound)   
+	{   
+		return false;   
+	}   
+	// 获取目标进程句柄   
+	hProcess = ::OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION, FALSE, dwProcessId);   
+	if (NULL == hProcess)   
+	{   
+		return false;   
+	}   
+	// 从 Kernel32.dll 中获取 FreeLibrary 函数地址   
+	LPTHREAD_START_ROUTINE lpThreadFun = (PTHREAD_START_ROUTINE)::GetProcAddress(::GetModuleHandle(L"Kernel32"), "FreeLibrary");   
+	if (NULL == lpThreadFun)   
+	{   
+		::CloseHandle(hProcess);   
+		return false;   
+	}   
+	// 创建远程线程调用 FreeLibrary   
+	hThread = ::CreateRemoteThread(hProcess, NULL, 0, lpThreadFun, me32.modBaseAddr /* 模块地址 */, 0, NULL);   
+	if (NULL == hThread)   
+	{   
+		::CloseHandle(hProcess);   
+		return false;   
+	}   
+	// 等待远程线程结束   
+	::WaitForSingleObject(hThread, INFINITE);   
+	// 清理   
+	::CloseHandle(hThread);   
+	::CloseHandle(hProcess);   
+	return true;   
+}
+
+void DetourInjection::unloadDll()
+{
+	PROCESSENTRY32 pe32;
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+	HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
+	BOOL bProcess = Process32First(hsnap, &pe32);
+	bool flag = false;
+	if (bProcess == TRUE)
+	{
+		while (Process32Next(hsnap, &pe32) == TRUE)
+		{
+			if (wcscmp(pe32.szExeFile, EXENAME) == 0)
+				//if (wcscmp(pe32.szExeFile, L"PCommTest.exe") == 0)
+			{
+				wchar_t* DirPath = new wchar_t[MAX_PATH];
+				wchar_t* FullPath = new wchar_t[MAX_PATH];
+				flag = true;
+				GetCurrentDirectory(MAX_PATH, DirPath);
+				swprintf_s(FullPath, MAX_PATH, DLLPATH, DirPath);
+				
+				UnInjectDll(FullPath, pe32.th32ProcessID);
+
+				delete[] DirPath;
+				delete[] FullPath;
+				break;
+			}
+		}
+	}
 }
