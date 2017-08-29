@@ -113,6 +113,10 @@ void ExcelFunCls::insertMyData(QAxObject *workSheets)
 		beginX += 4;
 		theFirstSundy += 7;
 	}
+	mergeCells(curSheet, beginX, 1, beginX, 2, QString::fromLocal8Bit("安排服务次数"));
+	mergeCells(curSheet, beginX + 1, 1, beginX + 1, 2, QString::fromLocal8Bit("实际服务次数"));
+	mergeCells(curSheet, beginX + 2, 1, beginX + 2, 2, QString::fromLocal8Bit("安排停车场服务次数"));
+	mergeCells(curSheet, beginX + 3, 1, beginX + 3, 2, QString::fromLocal8Bit("实际停车场服务次数"));
 }
 
 void ExcelFunCls::insertCell(QAxObject *workSheet, int posx, int posy, int inW, int inH, QString inVal)

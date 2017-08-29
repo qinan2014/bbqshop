@@ -28,7 +28,9 @@ void ExceTest::onFileSelect()
 
 void ExceTest::onDemo()
 {
-	QString filepath=QFileDialog::getSaveFileName(this,tr("Save orbit"),".",tr("Microsoft Office 2007 (*.xls)"));//获取保存路径
+	QString filepath=QFileDialog::getOpenFileName(this, tr("Open File"),
+		"/home",
+		tr("xml (*.xls )"));
 	if(filepath.isEmpty())
 		return;
 	ExcelTestDemo(filepath, this);

@@ -2,6 +2,7 @@
 #define EXCELTESTDEMO_H
 
 #include <QObject>
+#include <QAxObject>
 
 class ExcelTestDemo : public QObject
 {
@@ -12,7 +13,7 @@ public:
 	~ExcelTestDemo();
 
 private:
-	
+	QAxObject *applicationExcel;
 };
 
 #endif // EXCELTESTDEMO_H
